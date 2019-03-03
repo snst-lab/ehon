@@ -61,25 +61,10 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 
 >### Patch
 
-<summary><div> 
-
-### Version 0.1.x
-</div></summary><details><div>
-
-1. bugfix - fixed bug of feature A 
-1. improve - improved feature A
-</div></details>
-
-### Version 0.2.x
-</div></summary><details><div>
-
-1. bugfix - fixed bug of feature A 
-1. improve - improved feature A
-</div></details>
-
 ### Version 0.3.x
-</div></summary><details><div>
-
-1. bugfix - fixed bug of feature A 
-1. improve - improved feature A
-</div></details>
+<details>
+<summary>1.  patch-0.3.1</summary>
+refactor:  Replace defineProperty Methods<br>
+bugfix: Fixed the problem that the previously selected element is not
+deactivated
+</details>
