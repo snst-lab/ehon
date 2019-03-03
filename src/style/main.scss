@@ -66,3 +66,16 @@ footer {
 	height: 100%;
 	background: url("../../assets/img/cover.jpg") no-repeat center/cover;
 }
+
+
+// Below is project unique style
+
+.canvas{
+	@include absolute(50px,0,0,0);
+	width:90%;
+	height:800px;
+	z-index:3;
+	background:white;
+	border-radius:20px;
+	margin:0 auto;
+}

@@ -42,7 +42,7 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 >### Minor
 ### Version 0.x
 
-- [ ] 1. drag file to canvas to create elements & set style 
+- [x] 1. drag file to canvas to create elements & set style 
 - [ ] 2. right click elements to switch editable/ noeditable 
 - [ ] 3. drag&drop elements in editable state
 - [ ] 4. save html file as current state

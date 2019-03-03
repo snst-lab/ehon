@@ -4,6 +4,7 @@ export namespace ImageCollection {
 	export const ImageSrcPath: string = 'assets/img/';
 	export const CanvasClassName: string = 'canvas';
 	export let Image: Array<Component> = new Array();
+	export let editable:string|null = null;  
 
 	export function uniqueString(): string {
 		return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
@@ -48,7 +49,7 @@ export namespace ImageCollection {
 			 ondragend="onDragEnd(event);"
 			 src="${ImageSrcPath}${filename}"
 			 class="${className} component-img" 
-			 style="transform: scale(${scale || 1},${scale || 1}) rotate(${rotate || 0}deg)  translate3d(${x}px,${y}px,${z ||
+			 style="width:20%;transform: scale(${scale || 1},${scale || 1}) rotate(${rotate || 0}deg)  translate3d(${x}px,${y}px,${z ||
 				0}px)!important; opacity: ${opacity || 1} !important; filter:blur(${blur || 0}px) !important
 			 ">
 			`);

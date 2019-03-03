@@ -34,7 +34,7 @@ namespace Main {
 				this.fragment.append(`
                     <article>
                         <h1>Hello World!</h1>
-                        <p>����${this.counter}</p>
+                        <p>その${this.counter}</p>
                     </article>
                 `);
 				this.counter += 1;
@@ -50,7 +50,7 @@ namespace Main {
 					this.section.append(`
                         <article class='fadein'>
                             <h1>Hello World!</h1>
-                            <p>����${this.counter}</p>
+                            <p>その${this.counter}</p>
                         </article>
                     `);
 					this.counter += 1;
