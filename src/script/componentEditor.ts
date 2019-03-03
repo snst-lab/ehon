@@ -5,12 +5,17 @@ export namespace ComponentEditor {
 	const ActiveBorderStyle: string = '3px solid #00ffdd;';
 	let keyDown: string | null = null;
 
+	class activeStyle {
+		static color: string = '#00ffdd';
+		static style: string = 'solid';
+		static width: string = '3px';
+	}
 	class params {
 		static translateFine: number = 0.1;
 		static scaleFine: number = 0.001;
 		static rotateFine: number = 0.05;
 		static opacityFine: number = 0.001;
-		static blurFine: number = 0.01;
+		static blurFine: number = 0.005;
 	}
 
 	const keyMap: { [key: number]: string } = {
@@ -97,7 +102,9 @@ export namespace ComponentEditor {
 			if (ImageCollection.Active !== null && ImageCollection.Active.element.className === className) return;
 
 			ImageCollection.Active = image.select(className);
-			ImageCollection.Active.element.border = ActiveBorderStyle;
+			ImageCollection.Active.element.style['outline-color'] = activeStyle.color;
+			ImageCollection.Active.element.style['outline-style'] = activeStyle.style;
+			ImageCollection.Active.element.style['outline-width'] = activeStyle.width;
 
 			ImageCollection.All.forEach((e) => {
 				if (e.className !== className) {
@@ -139,6 +146,14 @@ export namespace ComponentEditor {
 		}
 		z(selector: ImageCollection.Selector, delta: number) {
 			image.translate(selector, 0, 0, delta * params.translateFine);
+			selector.component.blur = Math.abs(selector.component.z + delta * params.translateFine)*params.blurFine;
+			[ '', '-ms-', '-webkit-' ].forEach((prefix) => {
+				selector.element.style.setProperty(
+					prefix + 'filter',
+					`blur(${selector.component.blur}px)`,
+					'important'
+				);
+			});
 		}
 	}
 
@@ -177,7 +192,7 @@ export namespace ComponentEditor {
 	class blur {
 		constructor() {}
 		change(selector: ImageCollection.Selector, delta: number) {
-			selector.component.blur= Math.max(selector.component.blur + delta * params.blurFine, 0);
+			selector.component.blur = Math.max(selector.component.blur + delta * params.blurFine, 0);
 
 			[ '', '-ms-', '-webkit-' ].forEach((prefix) => {
 				selector.element.style.setProperty(
@@ -188,7 +203,7 @@ export namespace ComponentEditor {
 			});
 		}
 	}
-	
+
 	class opacity {
 		constructor() {}
 		change(selector: ImageCollection.Selector, delta: number) {
@@ -197,5 +212,4 @@ export namespace ComponentEditor {
 			selector.element.style.opacity = '' + selector.component.opacity;
 		}
 	}
-
 }

@@ -50,7 +50,7 @@ export namespace ImageCollection {
 			 oncontextmenu="onRightClick(event);"
 			 src="${ImageSrcPath}${filename}"
 			 class="${className} component-img" 
-			 style="position:absolute;width:30%;transform-origin:50% 50%;perspective-origin:50% 50%;
+			 style="position:absolute;width:30%;outline:none;transform-origin:50% 50%;perspective-origin:50% 50%;
 			 left:${x};top:${y};
 			 transform: scale(${scale || 1}) rotate(${rotate || 0}deg)  translate3d(0px,0px,${z || 0}px); opacity: ${opacity ||
 				1} ; filter:blur(${blur || 0}px)

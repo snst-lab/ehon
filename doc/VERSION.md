@@ -45,7 +45,7 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - [x] 1. drag file to canvas to create elements & set style 
 - [x] 2. drag&drop elements to move
 - [x] 3. right click elements to switch editable/ noeditable 
-- [ ] 4. move along X,Y,Z-axis, scale, rotate, change opacity of elements with keydown& wheel
+- [x] 4. move along X,Y,Z-axis, scale, rotate, change opacity of elements with keydown& wheel
 - [ ] 5. save html file as current state
 - [ ] 6. show layer table & select layer to be editable ("self" is prepared alias of layer) 
 - [ ] 7. right click elements to show framebase timeline (circle on bar style)
@@ -68,3 +68,11 @@ refactor:  Replace defineProperty Methods<br>
 bugfix: Fixed the problem that the previously selected element is not
 deactivated
 </details>
+
+### Version 0.4.x
+<details>
+<summary>1</summary>
+improve : At the time of z-axis movement, the blur also changes at the same time
+style : Change outline style of active element
+</details>
+
