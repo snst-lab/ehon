@@ -1,0 +1,41 @@
+{
+  "name": "ehon",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Tanusuke",
+  "license": "Apache-2.0",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snst-lab/ehon.git"
+  },
+  "bugs": {
+    "url": "https://github.com/snst-lab/ehon/issues"
+  },
+  "homepage": "https://github.com/snst-lab/ehon#readme",
+  "devDependencies": {
+    "app-root-path": "^2.1.0",
+    "browser-sync": "^2.26.3",
+    "del": "^3.0.0",
+    "express": "^4.16.4",
+    "gulp": "^4.0.0",
+    "gulp-plumber": "^1.2.1",
+    "gulp-sass": "^4.0.2",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.3333",
+    "webpack-stream": "^5.2.1"
+  },
+  "scripts": {
+    "tslint": "tslint --fix 'src/script/**.ts'",
+    "postinstall": "node-prune",
+    "commit:1": "git config user.name 'snst-lab'",
+    "commit:2": "git remote rm origin",
+    "commit:3": "git remote add origin git@github.com:snst-lab/ehon.git",
+    "commit:4": "git add -A",
+    "commit:5": "git commit",
+    "commit:6": "git push origin master",
+    "pull": "git pull git@github.com:snst-lab/ehon.git master --allow-unrelated-histories"
+  },
+  "dependencies": {},
+  "private": true
+}
