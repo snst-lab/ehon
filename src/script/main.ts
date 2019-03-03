@@ -20,7 +20,6 @@ namespace Main {
 			new DragEventListner.onDragEnd(event);
 		}
 	});
-	
 	class Start {
 		private section = new el<string>('section');
 		private fragment = new el<DocumentFragment>();
@@ -35,7 +34,7 @@ namespace Main {
 				this.fragment.append(`
                     <article>
                         <h1>Hello World!</h1>
-                        <p>‚»‚Ì${this.counter}</p>
+                        <p>ï¿½ï¿½ï¿½ï¿½${this.counter}</p>
                     </article>
                 `);
 				this.counter += 1;
@@ -51,7 +50,7 @@ namespace Main {
 					this.section.append(`
                         <article class='fadein'>
                             <h1>Hello World!</h1>
-                            <p>‚»‚Ì${this.counter}</p>
+                            <p>ï¿½ï¿½ï¿½ï¿½${this.counter}</p>
                         </article>
                     `);
 					this.counter += 1;
