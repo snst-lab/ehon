@@ -1,25 +1,40 @@
 import { DOMController } from './domController';
 import { ImageCollection } from './imageCollection';
 import { DragEventListner } from './dragEventListner';
+import { ComponentEditor } from './componentEditor';
 
 namespace Main {
 	const el = DOMController.Selector;
 
-	Object.defineProperty(window, 'onDrop', {
-		value: function(event) {
-			new DragEventListner.onDrop(event);
+	new ComponentEditor.EventHandler().init();
+
+	class defineProperty{
+		constructor(){
+			Object.defineProperty(window, 'onDrop', {
+				value: function(event) {
+					new DragEventListner.onDrop(event);
+				}
+			});
+			Object.defineProperty(window, 'onDragStart', {
+				value: function(event) {
+					new DragEventListner.onDragStart(event);
+				}
+			});
+			Object.defineProperty(window, 'onDragEnd', {
+				value: function(event) {
+					new DragEventListner.onDragEnd(event);
+				}
+			});
+			Object.defineProperty(window, 'onRightClick', {
+				value: function(event) {
+					new ComponentEditor.onRightClick(event);
+				}
+			});
 		}
-	});
-	Object.defineProperty(window, 'onDragStart', {
-		value: function(event) {
-			new DragEventListner.onDragStart(event);
-		}
-	});
-	Object.defineProperty(window, 'onDragEnd', {
-		value: function(event) {
-			new DragEventListner.onDragEnd(event);
-		}
-	});
+	}
+	new defineProperty();
+
+
 	class Start {
 		private section = new el<string>('section');
 		private fragment = new el<DocumentFragment>();
@@ -40,7 +55,7 @@ namespace Main {
 				this.counter += 1;
 			}
 			this.section.render(this.fragment.dom);
-			this.section.at('click', (e) => {
+			this.section.on('click', (e) => {
 				alert(e.srcElement.textContent);
 			});
 		}

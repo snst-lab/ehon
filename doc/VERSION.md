@@ -43,10 +43,10 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 ### Version 0.x
 
 - [x] 1. drag file to canvas to create elements & set style 
-- [ ] 2. right click elements to switch editable/ noeditable 
-- [ ] 3. drag&drop elements in editable state
-- [ ] 4. save html file as current state
-- [ ] 5. move along X,Y,Z-axis, scale, rotate, change opacity of elements with keydown& wheel
+- [x] 2. drag&drop elements to move
+- [x] 3. right click elements to switch editable/ noeditable 
+- [ ] 4. move along X,Y,Z-axis, scale, rotate, change opacity of elements with keydown& wheel
+- [ ] 5. save html file as current state
 - [ ] 6. show layer table & select layer to be editable ("self" is prepared alias of layer) 
 - [ ] 7. right click elements to show framebase timeline (circle on bar style)
 - [ ] 8. select event & target from layer table

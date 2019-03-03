@@ -6,9 +6,6 @@ export namespace DOMController {
 	type DOM = Element | HTMLElement | DocumentFragment | null;
 	type RenderChild = string | Element | HTMLElement | DocumentFragment | null;
 
-	interface CallbackType {
-		(event: Event | IntersectEntry): void;
-	}
 	interface IntersectEntry extends IntersectionObserverEntry {
 		srcElement: Element;
 	}
@@ -22,9 +19,9 @@ export namespace DOMController {
 		render: (childStr: RenderChild) => DOM;
 		append: (childStr: RenderChild, rewrite?: boolean) => DOM;
 		prepend: (childStr: RenderChild, rewrite?: boolean) => DOM;
-		at: (eventName: string, callback: CallbackType) => void;
-		inview: (callback: CallbackType, options?: IntersectionObserverOption) => void;
-		outview: (callback: CallbackType, options?: IntersectionObserverOption) => void;
+		on: (eventName: string, callback: any) => void;
+		inview: (callback: any, options?: IntersectionObserverOption) => void;
+		outview: (callback: any, options?: IntersectionObserverOption) => void;
 	}
 	/**
 	### DOMController.Selector
@@ -106,8 +103,8 @@ export namespace DOMController {
 		/**
 		 	Wrapper of document.addEventListener(eventName, callback, false)
 		*/
-		at(eventName: string, callback: CallbackType): void {
-			if (this.dom !== null && this.dom instanceof Element)
+		on(eventName: string, callback: any): void {
+			if (this.dom !== null)
 				switch (eventName) {
 					case 'inview':
 						this.inview(callback);
@@ -122,9 +119,18 @@ export namespace DOMController {
 			else document.addEventListener(eventName, callback, false);
 		}
 		/**
+		 	Wrapper of document.removeEventListener(eventName, callback, false)
+		*/
+		off(eventName: string, callback: any): void {
+			if (this.dom !== null){
+				this.dom.removeEventListener(eventName, callback, false);
+			}
+			else document.removeEventListener(eventName, callback, false);
+		}
+		/**
 		 	Use Intersection observer to detect the intersection of an element and a visible region
 		*/
-		inview(callback: CallbackType, options?: IntersectionObserverOption): void {
+		inview(callback: any, options?: IntersectionObserverOption): void {
 			options = options || {
 				root: null,
 				rootMargin: '0%', //If you want to call the callback before the element intersects, set rootMargin to a value more than 0%
@@ -144,7 +150,7 @@ export namespace DOMController {
 		/**
 		 	Use Intersection observer to detect the intersection of an element and a visible region
 		*/
-		outview(callback: CallbackType, options?: IntersectionObserverOption): void {
+		outview(callback: any, options?: IntersectionObserverOption): void {
 			options = options || {
 				root: null,
 				rootMargin: '0%', //If you want to call the callback before the element intersects, set rootMargin to a value more than 0%

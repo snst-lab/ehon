@@ -36,7 +36,7 @@ export namespace DragEventListner {
 
 	export class onDragStart {
 		constructor(event: any) {
-			console.log(event);
+			// console.log(event);
 			// event.preventDefault();
 			this.dragStart(event);
 		}
@@ -54,12 +54,10 @@ export namespace DragEventListner {
 		}
 		private translate(event: any): void {
 
-			console.log(event);
 			const className = event.target.classList.item(0);
 			const selector = image.select(className);
 			const dx: number = event.clientX - dragstart.x;
 			const dy: number = event.clientY - dragstart.y;
-			console.log(selector.component.x, selector.component.y);
 
 			image.translate(selector, dx, dy, 0);
 		}
