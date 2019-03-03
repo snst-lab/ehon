@@ -63,7 +63,7 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 
 ### Version 0.3.x
 <details>
-<summary>1.  patch-0.3.1</summary>
+<summary>1</summary>
 refactor:  Replace defineProperty Methods<br>
 bugfix: Fixed the problem that the previously selected element is not
 deactivated

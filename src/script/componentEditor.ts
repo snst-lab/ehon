@@ -7,7 +7,10 @@ export namespace ComponentEditor {
 
 	class params {
 		static translateFine: number = 0.1;
-		static blurFine: number = 1;
+		static scaleFine: number = 0.001;
+		static rotateFine: number = 0.05;
+		static opacityFine: number = 0.001;
+		static blurFine: number = 0.01;
 	}
 
 	const keyMap: { [key: number]: string } = {
@@ -31,6 +34,7 @@ export namespace ComponentEditor {
 		private listenCanvasWheel(): void {
 			ImageCollection.canvas.on('mousewheel', (event: WheelEvent): void => {
 				event.preventDefault();
+				if (ImageCollection.Active === null) return;
 				switch (keyDown) {
 					case 'x':
 						new translate().x(ImageCollection.Active, event.deltaY);
@@ -40,6 +44,18 @@ export namespace ComponentEditor {
 						break;
 					case 'z':
 						new translate().z(ImageCollection.Active, event.deltaY);
+						break;
+					case 's':
+						new scale().change(ImageCollection.Active, event.deltaY);
+						break;
+					case 'r':
+						new rotate().change(ImageCollection.Active, event.deltaY);
+						break;
+					case 'b':
+						new blur().change(ImageCollection.Active, event.deltaY);
+						break;
+					case 'o':
+						new opacity().change(ImageCollection.Active, event.deltaY);
 						break;
 					default:
 						break;
@@ -125,4 +141,61 @@ export namespace ComponentEditor {
 			image.translate(selector, 0, 0, delta * params.translateFine);
 		}
 	}
+
+	class scale {
+		constructor() {}
+		change(selector: ImageCollection.Selector, delta: number) {
+			selector.component.scale = Math.max(selector.component.scale + delta * params.scaleFine, 0.01);
+
+			[ '', '-ms-', '-webkit-' ].forEach((prefix) => {
+				selector.element.style.setProperty(
+					prefix + 'transform',
+					`scale(${selector.component.scale}) rotate(${selector.component
+						.rotate}deg) perspective(500px) translate3d(0px,0px,${selector.component.z}px)`,
+					'important'
+				);
+			});
+		}
+	}
+
+	class rotate {
+		constructor() {}
+		change(selector: ImageCollection.Selector, delta: number) {
+			selector.component.rotate = (selector.component.rotate + delta * params.rotateFine) % 360;
+
+			[ '', '-ms-', '-webkit-' ].forEach((prefix) => {
+				selector.element.style.setProperty(
+					prefix + 'transform',
+					`scale(${selector.component.scale}) rotate(${selector.component
+						.rotate}deg) perspective(500px) translate3d(0px,0px,${selector.component.z}px)`,
+					'important'
+				);
+			});
+		}
+	}
+
+	class blur {
+		constructor() {}
+		change(selector: ImageCollection.Selector, delta: number) {
+			selector.component.blur= Math.max(selector.component.blur + delta * params.blurFine, 0);
+
+			[ '', '-ms-', '-webkit-' ].forEach((prefix) => {
+				selector.element.style.setProperty(
+					prefix + 'filter',
+					`blur(${selector.component.blur}px)`,
+					'important'
+				);
+			});
+		}
+	}
+	
+	class opacity {
+		constructor() {}
+		change(selector: ImageCollection.Selector, delta: number) {
+			selector.component.opacity = Math.max(selector.component.opacity + delta * params.opacityFine, 0);
+			selector.component.opacity = Math.min(1, selector.component.opacity);
+			selector.element.style.opacity = '' + selector.component.opacity;
+		}
+	}
+
 }

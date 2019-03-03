@@ -6,11 +6,11 @@ export namespace ImageCollection {
 	export const CanvasClassName: string = 'canvas';
 	export const canvas: DOMController.Selector<string> = new el<string>('.' + CanvasClassName);
 	export let All: Array<Component> = new Array();
-	export let Active : Selector | null = null;
+	export let Active: Selector | null = null;
 
 	export function uniqueString(): string {
 		return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
-	} 
+	}
 
 	export interface Component {
 		fileName: string;
@@ -52,8 +52,7 @@ export namespace ImageCollection {
 			 class="${className} component-img" 
 			 style="position:absolute;width:30%;transform-origin:50% 50%;perspective-origin:50% 50%;
 			 left:${x};top:${y};
-			 transform: scale(${scale || 1},${scale ||
-				1}) rotate(${rotate || 0}deg)  translate3d(0px,0px,${z || 0}px); opacity: ${opacity ||
+			 transform: scale(${scale || 1}) rotate(${rotate || 0}deg)  translate3d(0px,0px,${z || 0}px); opacity: ${opacity ||
 				1} ; filter:blur(${blur || 0}px)
 			 ">
 			`);
@@ -80,20 +79,20 @@ export namespace ImageCollection {
 		}
 
 		translate(selector: Selector, dx: number, dy: number, dz: number): void {
-			selector.element.style.left = `${selector.component.x + dx}px`;
-			selector.element.style.top = `${selector.component.y + dy}px`;
+			selector.component.x += dx;
+			selector.component.y += dy;
+			selector.component.z += dz;
 
+			selector.element.style.left = `${selector.component.x}px`;
+			selector.element.style.top = `${selector.component.y}px`;
 			[ '', '-ms-', '-webkit-' ].forEach((prefix) => {
 				selector.element.style.setProperty(
 					prefix + 'transform',
-					`scale(${selector.component.scale},${selector.component.scale}) rotate(${selector.component
-						.rotate}deg) perspective(500px) translate3d(0px,0px,${selector.component.z + dz}px)`,
+					`scale(${selector.component.scale}) rotate(${selector.component
+						.rotate}deg) perspective(500px) translate3d(0px,0px,${selector.component.z}px)`,
 					'important'
 				);
 			});
-			if (typeof dx === 'number') selector.component.x += dx;
-			if (typeof dy === 'number') selector.component.y += dy;
-			if (typeof dz === 'number') selector.component.z += dz;
 		}
 	}
 }
