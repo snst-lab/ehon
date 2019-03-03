@@ -147,13 +147,13 @@ eval("\r\nObject.defineProperty(exports, \"__esModule\", { value: true });\r\nva
 /***/ }),
 
 /***/ 0:
-/*!*********************************************************************************************************************************!*\
-  !*** multi ./src/script/domController.ts ./src/script/dragEventListner.ts ./src/script/imageCollection.ts ./src/script/main.ts ***!
-  \*********************************************************************************************************************************/
+/*!*****************************************************************************************************************************************************************!*\
+  !*** multi ./src/script/componentEditor.ts ./src/script/domController.ts ./src/script/dragEventListner.ts ./src/script/imageCollection.ts ./src/script/main.ts ***!
+  \*****************************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("__webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\domController.ts */\"./src/script/domController.ts\");\n__webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\dragEventListner.ts */\"./src/script/dragEventListner.ts\");\n__webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\imageCollection.ts */\"./src/script/imageCollection.ts\");\nmodule.exports = __webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\main.ts */\"./src/script/main.ts\");\n\n\n//# sourceURL=webpack:///multi_./src/script/domController.ts_./src/script/dragEventListner.ts_./src/script/imageCollection.ts_./src/script/main.ts?");
+eval("__webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\componentEditor.ts */\"./src/script/componentEditor.ts\");\n__webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\domController.ts */\"./src/script/domController.ts\");\n__webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\dragEventListner.ts */\"./src/script/dragEventListner.ts\");\n__webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\imageCollection.ts */\"./src/script/imageCollection.ts\");\nmodule.exports = __webpack_require__(/*! E:\\localhost\\proto\\ehon\\src\\script\\main.ts */\"./src/script/main.ts\");\n\n\n//# sourceURL=webpack:///multi_./src/script/componentEditor.ts_./src/script/domController.ts_./src/script/dragEventListner.ts_./src/script/imageCollection.ts_./src/script/main.ts?");
 
 /***/ })
 
