@@ -2,13 +2,8 @@ import { ImageCollection } from './imageCollection';
 
 export namespace ComponentEditor {
 	const image = new ImageCollection.Controller();
-	const editableBorderStyle: string = '3px solid #00ffdd;';
+	const ActiveBorderStyle: string = '3px solid #00ffdd;';
 	let keyDown: string | null = null;
-
-	interface position {
-		x: number;
-		y: number;
-	}
 
 	class params {
 		static translateFine: number = 0.1;
@@ -26,68 +21,72 @@ export namespace ComponentEditor {
 	};
 
 	export class EventHandler {
-		constructor() {}
-
-		public init() {
-			ImageCollection.canvas.on('click', (event) => {
-				event.preventDefault();
-				this.releaseEditable();
-				// ImageCollection.canvas.removeEventListener('click', () => false,false);
-				// event.target.removeEventListener('click', () => false,false);
-			});
+		constructor() {
 			new detectkeyDown();
+			this.defineProperty();
+			this.listenCanvasWheel();
+			this.listenCanvasClick();
 		}
 
-		protected addEventListener(selector: ImageCollection.Selector): void {
-			window.addEventListener('mousewheel', (event: WheelEvent):void => {
+		private listenCanvasWheel(): void {
+			ImageCollection.canvas.on('mousewheel', (event: WheelEvent): void => {
 				event.preventDefault();
 				switch (keyDown) {
 					case 'x':
-						new translate().x(selector, event.deltaY);
+						new translate().x(ImageCollection.Active, event.deltaY);
 						break;
 					case 'y':
-						new translate().y(selector, event.deltaY);
+						new translate().y(ImageCollection.Active, event.deltaY);
 						break;
 					case 'z':
-						new translate().z(selector, event.deltaY);
+						new translate().z(ImageCollection.Active, event.deltaY);
 						break;
 					default:
 						break;
 				}
-			},false);
+			});
 		}
 
-		protected releaseEditable(): void {
-			if (ImageCollection.editable !== null) {
-				const element: HTMLImageElement = document.querySelector('.' + ImageCollection.editable);
-				element.border = '';
-				ImageCollection.editable = null;
-				// window.removeEventListener('mousewheel', this.callback, true);
+		private listenCanvasClick(): void {
+			ImageCollection.canvas.on('click', (event) => {
+				event.preventDefault();
+				this.releaseActivate();
+			});
+		}
+
+		private releaseActivate(): void {
+			if (ImageCollection.Active !== null) {
+				ImageCollection.Active.element.border = '';
+				ImageCollection.Active = null;
 			}
+		}
+
+		private defineProperty(): void {
+			Object.defineProperty(window, 'onRightClick', {
+				value: function(event) {
+					new onRightClick(event);
+				}
+			});
 		}
 	}
 
-	export class onRightClick extends EventHandler {
+	export class onRightClick {
 		constructor(event: any) {
-			super();
 			event.preventDefault();
-			super.releaseEditable();
-			this.setStateToEditable(event);
+			this.activate(event);
 		}
 
-		private setStateToEditable(event: any): void {
+		private activate(event: any): void {
 			const className = event.target.classList.item(0);
-			if (ImageCollection.editable === className) return;
+			if (ImageCollection.Active !== null && ImageCollection.Active.element.className === className) return;
 
-			ImageCollection.editable = className;
-			ImageCollection.Image.forEach((e) => {
-				const selector = image.select(e.className);
-				if (e.className === className) {
-					selector.element.border = editableBorderStyle;
-					super.addEventListener(selector);
-				} else {
-					// selector.element.removeEventListener('mousewheel', ()=>console.log(123), false);
-					selector.element.border = '';
+			ImageCollection.Active = image.select(className);
+			ImageCollection.Active.element.border = ActiveBorderStyle;
+
+			ImageCollection.All.forEach((e) => {
+				if (e.className !== className) {
+					const deactive: HTMLImageElement = document.querySelector('.' + e.className);
+					deactive.border = '';
 				}
 			});
 		}
@@ -95,14 +94,22 @@ export namespace ComponentEditor {
 
 	class detectkeyDown {
 		constructor() {
-			document.addEventListener('keydown',(event)=>{
-				if (keyDown === null) {
-					keyDown = keyMap[event.keyCode];
-				}
-			},false);
-			document.addEventListener('keyup', (event) => {
-				keyDown = null;
-			},false);
+			document.addEventListener(
+				'keydown',
+				(event) => {
+					if (keyDown === null) {
+						keyDown = keyMap[event.keyCode];
+					}
+				},
+				false
+			);
+			document.addEventListener(
+				'keyup',
+				(event) => {
+					keyDown = null;
+				},
+				false
+			);
 		}
 	}
 

@@ -5,12 +5,12 @@ export namespace ImageCollection {
 	export const ImageSrcPath: string = 'assets/img/';
 	export const CanvasClassName: string = 'canvas';
 	export const canvas: DOMController.Selector<string> = new el<string>('.' + CanvasClassName);
-	export let Image: Array<Component> = new Array();
-	export let editable: string | null = null;
+	export let All: Array<Component> = new Array();
+	export let Active : Selector | null = null;
 
 	export function uniqueString(): string {
 		return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
-	}
+	} 
 
 	export interface Component {
 		fileName: string;
@@ -68,14 +68,14 @@ export namespace ImageCollection {
 				blur: blur,
 				opacity: opacity
 			};
-			Image.push(component);
+			All.push(component);
 			return className;
 		}
 
 		select(className: string): Selector {
 			return {
 				element: <HTMLImageElement>document.getElementsByClassName(className)[0],
-				component: Image.filter((e) => e.className === className)[0]
+				component: All.filter((e) => e.className === className)[0]
 			};
 		}
 

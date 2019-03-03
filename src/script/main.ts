@@ -6,34 +6,8 @@ import { ComponentEditor } from './componentEditor';
 namespace Main {
 	const el = DOMController.Selector;
 
-	new ComponentEditor.EventHandler().init();
-
-	class defineProperty{
-		constructor(){
-			Object.defineProperty(window, 'onDrop', {
-				value: function(event) {
-					new DragEventListner.onDrop(event);
-				}
-			});
-			Object.defineProperty(window, 'onDragStart', {
-				value: function(event) {
-					new DragEventListner.onDragStart(event);
-				}
-			});
-			Object.defineProperty(window, 'onDragEnd', {
-				value: function(event) {
-					new DragEventListner.onDragEnd(event);
-				}
-			});
-			Object.defineProperty(window, 'onRightClick', {
-				value: function(event) {
-					new ComponentEditor.onRightClick(event);
-				}
-			});
-		}
-	}
-	new defineProperty();
-
+	new ComponentEditor.EventHandler();
+	new DragEventListner.EventHandler();
 
 	class Start {
 		private section = new el<string>('section');

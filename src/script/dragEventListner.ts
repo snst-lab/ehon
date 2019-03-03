@@ -10,7 +10,27 @@ export namespace DragEventListner {
 	let dragstart: position = { x: 0, y: 0 };
 	let dragend: position = { x: 0, y: 0 };
 
-	export class onDrop {
+	export class EventHandler{
+		constructor(){
+			Object.defineProperty(window, 'onDrop', {
+				value: function(event) {
+					new onDrop(event);
+				}
+			});
+			Object.defineProperty(window, 'onDragStart', {
+				value: function(event) {
+					new onDragStart(event);
+				}
+			});
+			Object.defineProperty(window, 'onDragEnd', {
+				value: function(event) {
+					new onDragEnd(event);
+				}
+			});
+		}
+	}
+
+	class onDrop {
 		constructor(event: any) {
 			// console.log(event);
 			event.preventDefault();
@@ -34,7 +54,7 @@ export namespace DragEventListner {
 		}
 	}
 
-	export class onDragStart {
+	class onDragStart {
 		constructor(event: any) {
 			// console.log(event);
 			// event.preventDefault();
@@ -46,7 +66,7 @@ export namespace DragEventListner {
 			dragstart.y = event.clientY;
 		}
 	}
-	export class onDragEnd {
+	class onDragEnd {
 		constructor(event: any) {
 			// console.log(event);
 			// event.preventDefault();
