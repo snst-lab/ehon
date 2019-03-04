@@ -165,14 +165,12 @@ footer {
 
 .canvas {
   position: absolute;
-  top: 50px;
+  top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  width: 90%;
-  height: 800px;
-  z-index: 3;
   background: white;
   border-radius: 20px;
   margin: 0 auto;
+  overflow: hidden;
 }

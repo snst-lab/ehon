@@ -1,12 +1,17 @@
-import { DOMController } from './domController';
+import { Canvas } from './canvas';
 
 export namespace ImageCollection {
-	const el = DOMController.Selector;
 	export const ImageSrcPath: string = 'assets/img/';
-	export const CanvasClassName: string = 'canvas';
-	export const canvas: DOMController.Selector<string> = new el<string>('.' + CanvasClassName);
 	export let All: Array<Component> = new Array();
 	export let Active: Selector | null = null;
+
+	export class params {
+		static defaultSize: number = 50; //per canvas size
+		static initialZ: number = 100; // from canvas z
+		static focusZ : number = 100; // from viewer 
+		static depthOfField: number = 100; 
+		static vanishingPoint: number = params.initialZ + params.focusZ
+	}
 
 	export function uniqueString(): string {
 		return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
@@ -18,7 +23,7 @@ export namespace ImageCollection {
 		x: number;
 		y: number;
 		z: number;
-		scale: number;
+		size: number;
 		rotate: number;
 		blur: number;
 		opacity: number;
@@ -32,28 +37,24 @@ export namespace ImageCollection {
 	export class Controller {
 		constructor() {}
 
-		create(
-			filename: string,
-			x: number,
-			y: number,
-			z?: number,
-			scale?: number,
-			rotate?: number,
-			blur?: number,
-			opacity?: number
-		): string {
+		create(filename: string, x: number, y: number): string {
 			const className = 'img-' + uniqueString();
-			canvas.append(`
+			Canvas.DOM.append(`
 			<img draggable="true" 
 			 ondragstart="onDragStart(event);"
 			 ondragend="onDragEnd(event);"
-			 oncontextmenu="onRightClick(event);"
+			 ondblclick="onDoubleClick(event);"
 			 src="${ImageSrcPath}${filename}"
 			 class="${className} component-img" 
-			 style="position:absolute;width:30%;outline:none;transform-origin:50% 50%;perspective-origin:50% 50%;
-			 left:${x};top:${y};
-			 transform: scale(${scale || 1}) rotate(${rotate || 0}deg)  translate3d(0px,0px,${z || 0}px); opacity: ${opacity ||
-				1} ; filter:blur(${blur || 0}px)
+			 style="position:absolute;outline:none;
+			 left:${x}%;top:${y}%;
+			 z-index:${params.initialZ + Canvas.Z};
+			 width:${params.defaultSize}%;
+			 transform-origin:50% 50%;
+			 transform: scale(1);
+			 transform: rotate(0deg);
+			 filter:blur(0px);
+			 opacity:1; 
 			 ">
 			`);
 			let component: Component = {
@@ -61,11 +62,11 @@ export namespace ImageCollection {
 				className: className,
 				x: x,
 				y: y,
-				z: z,
-				scale: scale,
-				rotate: rotate,
-				blur: blur,
-				opacity: opacity
+				z: params.initialZ +  Canvas.Z,
+				size: params.defaultSize,
+				rotate: 0,
+				blur: 0,
+				opacity: 1
 			};
 			All.push(component);
 			return className;
@@ -81,18 +82,8 @@ export namespace ImageCollection {
 		translate(selector: Selector, dx: number, dy: number, dz: number): void {
 			selector.component.x += dx;
 			selector.component.y += dy;
-			selector.component.z += dz;
-
-			selector.element.style.left = `${selector.component.x}px`;
-			selector.element.style.top = `${selector.component.y}px`;
-			[ '', '-ms-', '-webkit-' ].forEach((prefix) => {
-				selector.element.style.setProperty(
-					prefix + 'transform',
-					`scale(${selector.component.scale}) rotate(${selector.component
-						.rotate}deg) perspective(500px) translate3d(0px,0px,${selector.component.z}px)`,
-					'important'
-				);
-			});
+			selector.element.style.setProperty('left', `${selector.component.x}%`,'important');
+			selector.element.style.setProperty('top', `${selector.component.y}%`,'important');
 		}
 	}
 }

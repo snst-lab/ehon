@@ -71,12 +71,9 @@ footer {
 // Below is project unique style
 
 .canvas{
-	@include absolute(50px,0,0,0);
-	width:90%;
-	height:800px;
-	z-index:3;
+	@include absolute(0,0,0,0);
 	background:white;
 	border-radius:20px;
 	margin:0 auto;
-	// overflow:hidden;
+	overflow:hidden;
 }

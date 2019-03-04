@@ -62,17 +62,27 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 >### Patch
 
 ### Version 0.3.x
-<details>
+<details open>
 <summary>1</summary>
-refactor:  Replace defineProperty Methods<br>
-bugfix: Fixed the problem that the previously selected element is not
+
+- refactor:  Replace defineProperty Methods<br>
+- bugfix: Fixed the problem that the previously selected element is not
 deactivated
 </details>
 
 ### Version 0.4.x
-<details>
+<details open>
 <summary>1</summary>
-improve : At the time of z-axis movement, the blur also changes at the same time
-style : Change outline style of active element
-</details>
 
+- improve : At the time of z-axis movement, the blur also changes at the same time
+- style : Change outline style of active element
+</details>
+<details open>
+<summary>2</summary>
+
+- bugfix : Re-define z-axis with z-index instead of transformZ to 
+- bugfix : Fixed bug that outline of deactivated image did not disappear
+- improve : Adopt % scale for position of image instead of px
+- improve : Adjust the movement along the xy axis of the image according to the distance from the vanishing point
+- refactor : Activate component with double click instead of right click
+</details>
