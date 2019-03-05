@@ -1,8 +1,8 @@
 import { Canvas } from './canvas';
-import { ImageCollection } from './imageCollection';
+import { ComponentManager as Component } from './componentManager';
 
 export namespace DragEventListner {
-	const image = new ImageCollection.Controller();
+	const component = new Component.Controll();
 
 	interface position {
 		x: number;
@@ -51,7 +51,7 @@ export namespace DragEventListner {
 		}
 
 		private createElement(event: any, file: File): void {
-			image.create(
+			component.create(
 				file.name,
 				event.offsetX / (Canvas.Element.offsetWidth + Canvas.Element.offsetLeft) *100,
 				event.offsetY /  (Canvas.Element.offsetHeight+ Canvas.Element.offsetTop) *100,
@@ -73,15 +73,21 @@ export namespace DragEventListner {
 	class onDragEnd {
 		constructor(event: any) {
 			event.preventDefault();
-			this.translate(event);
+			this.calcPosition(event);
 		}
-		private translate(event: any): void {
+		private calcPosition(event: any): void {
 			const className = event.target.classList.item(0);
-			const selector = image.select(className);
+			const selector = component.select(className);
 
-			const dx: number = event.clientX - dragstart.x;
-			const dy: number = event.clientY - dragstart.y;
-			image.translate(selector, dx/Canvas.Element.offsetWidth*100, dy/Canvas.Element.offsetWidth*100, 0);
+			const dx: number = (event.clientX - dragstart.x)/Canvas.Element.offsetWidth*100;
+			const dy: number = (event.clientY - dragstart.y)/Canvas.Element.offsetHeight*100;;
+			this.translate(selector, dx, dy, 0);
+		}
+		private translate(selector: Component.Type, dx: number, dy: number, dz: number): void {
+			selector.x += dx;
+			selector.y += dy;
+			selector.element.style.setProperty('left', `${selector.x}%`,'important');
+			selector.element.style.setProperty('top', `${selector.y}%`,'important');
 		}
 	}
 }

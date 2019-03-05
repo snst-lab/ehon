@@ -1,8 +1,8 @@
 import { Canvas } from './canvas';
-import { ImageCollection } from './imageCollection';
+import { ComponentManager as Component } from './componentManager';
 
 export namespace ComponentEditor {
-	const image = new ImageCollection.Controller();
+	const component = new Component.Controll();
 	let keyDown: string | null = null;
 
 	class activeStyle {
@@ -40,28 +40,28 @@ export namespace ComponentEditor {
 		private listenCanvasWheel(): void {
 			Canvas.DOM.on('mousewheel', (event: WheelEvent): void => {
 				event.preventDefault();
-				if (ImageCollection.Active === null) return;
+				if (Component.Active === null) return;
 				switch (keyDown) {
 					case 'x':
-						new translate().x(ImageCollection.Active, event.deltaY * params.translateXYFine);
+						new translate().x(Component.Active, event.deltaY * params.translateXYFine);
 						break;
 					case 'y':
-						new translate().y(ImageCollection.Active, event.deltaY * params.translateXYFine);
+						new translate().y(Component.Active, event.deltaY * params.translateXYFine);
 						break;
 					case 'z':
-						new translate().z(ImageCollection.Active, event.deltaY * params.translateZFine);
+						new translate().z(Component.Active, event.deltaY * params.translateZFine);
 						break;
 					case 's':
-						new size().change(ImageCollection.Active, event.deltaY * params.sizeFine);
+						new size().change(Component.Active, event.deltaY * params.sizeFine);
 						break;
 					case 'r':
-						new rotate().change(ImageCollection.Active, event.deltaY * params.rotateFine);
+						new rotate().change(Component.Active, event.deltaY * params.rotateFine);
 						break;
 					case 'b':
-						new blur().change(ImageCollection.Active, event.deltaY * params.blurFine);
+						new blur().change(Component.Active, event.deltaY * params.blurFine);
 						break;
 					case 'o':
-						new opacity().change(ImageCollection.Active, event.deltaY * params.opacityFine);
+						new opacity().change(Component.Active, event.deltaY * params.opacityFine);
 						break;
 					default:
 						break;
@@ -77,21 +77,41 @@ export namespace ComponentEditor {
 		}
 
 		private releaseActivate(): void {
-			if (ImageCollection.Active !== null) {
-				ImageCollection.Active.element.style['outline-color'] = '';
-				ImageCollection.Active.element.style['outline-style'] = '';
-				ImageCollection.Active.element.style['outline-width'] = '';
-				ImageCollection.Active = null;
+			if (Component.Active !== null) {
+				//penetration
+				Component.All.forEach((e) => {
+					if (e.className === Component.Active.className) {
+						e.element.style.pointerEvents = 'none';
+						e.pointer = false;
+					} else {
+						e.element.style.pointerEvents = 'auto';
+						e.pointer = true;
+					}
+				});
+				//style off
+				Component.Active.element.style.outlineColor = '';
+				Component.Active.element.style.outlineStyle = '';
+				Component.Active.element.style.outlineWidth = '';
+				Component.Active = null;
 			}
 		}
 
 		private defineProperty(): void {
+			Object.defineProperty(window, 'onClick', {
+				value: function(event) {
+					new onClick(event);
+				}
+			});
 			Object.defineProperty(window, 'onDoubleClick', {
 				value: function(event) {
 					new onDoubleClick(event);
 				}
 			});
 		}
+	}
+
+	export class onClick {
+		constructor(event: any) {}
 	}
 
 	export class onDoubleClick {
@@ -101,20 +121,20 @@ export namespace ComponentEditor {
 		}
 
 		private activate(event: any): void {
-			const className = event.target.classList.item(0);
-			if (ImageCollection.Active !== null && ImageCollection.Active.element.className === className) return;
+			const className: string = event.target.classList.item(0);
 
-			ImageCollection.Active = image.select(className);
-			ImageCollection.Active.element.style['outline-color'] = activeStyle.color;
-			ImageCollection.Active.element.style['outline-style'] = activeStyle.style;
-			ImageCollection.Active.element.style['outline-width'] = activeStyle.width;
+			if (Component.Active !== null && Component.Active.className === className) return;
 
-			ImageCollection.All.forEach((e) => {
+			Component.Active = component.select(className);
+			Component.Active.element.style.outlineColor = activeStyle.color;
+			Component.Active.element.style.outlineStyle = activeStyle.style;
+			Component.Active.element.style.outlineWidth = activeStyle.width;
+
+			Component.All.forEach((e) => {
 				if (e.className !== className) {
-					const deactive: HTMLImageElement = document.querySelector('.' + e.className);
-					deactive.style['outline-color'] = '';
-					deactive.style['outline-style'] = '';
-					deactive.style['outline-width'] = '';
+					e.element.style.outlineColor = '';
+					e.element.style.outlineStyle = '';
+					e.element.style.outlineWidth = '';
 				}
 			});
 		}
@@ -143,28 +163,27 @@ export namespace ComponentEditor {
 
 	class translate {
 		constructor() {}
-		x(selector: ImageCollection.Selector, delta: number) {
-			selector.component.x += delta * selector.component.z / ImageCollection.params.vanishingPoint;
-			selector.element.style.setProperty('left', `${selector.component.x}%`, 'important');
+		x(selector: Component.Type, delta: number) {
+			selector.x += delta * selector.z / Component.params.vanishingPoint;
+			selector.element.style.setProperty('left', `${selector.x}%`, 'important');
 		}
-		y(selector: ImageCollection.Selector, delta: number) {
-			selector.component.y += delta * selector.component.z / ImageCollection.params.vanishingPoint;
+		y(selector: Component.Type, delta: number) {
+			selector.y += delta * selector.z / Component.params.vanishingPoint;
 
-			selector.element.style.setProperty('top', `${selector.component.y}%`, 'important');
+			selector.element.style.setProperty('top', `${selector.y}%`, 'important');
 		}
-		z(selector: ImageCollection.Selector, delta: number) {
-			selector.component.z = Math.max(selector.component.z + delta, Canvas.Z);
-			selector.element.style.setProperty('z-index', `${selector.component.z}`, 'important');
+		z(selector: Component.Type, delta: number) {
+			selector.z = Math.max(selector.z + delta, Canvas.Z);
+			selector.element.style.setProperty('z-index', `${selector.z}`, 'important');
 
-			const scaleByZtrans: number =
-				(selector.component.z - Canvas.Z) / (ImageCollection.params.initialZ - Canvas.Z);
+			const scaleByZtrans: number = (selector.z - Canvas.Z) / (Component.params.initialZ - Canvas.Z);
 			const blurByZtrans: number =
-				Math.abs(selector.component.z - ImageCollection.params.initialZ) / ImageCollection.params.depthOfField;
+				Math.abs(selector.z - Component.params.initialZ) / Component.params.depthOfField;
 			[ '', '-webkit-' ].forEach((prefix) => {
 				selector.element.style.setProperty(prefix + 'transform', `scale(${scaleByZtrans})`, 'important');
 				selector.element.style.setProperty(
 					prefix + 'filter',
-					`blur(${selector.component.blur + blurByZtrans}px)`,
+					`blur(${selector.blur + blurByZtrans}px)`,
 					'important'
 				);
 			});
@@ -173,36 +192,32 @@ export namespace ComponentEditor {
 
 	class size {
 		constructor() {}
-		change(selector: ImageCollection.Selector, delta: number) {
-			selector.component.size = Math.max(selector.component.size + delta, 0.01);
-			selector.element.style.setProperty('width', `${selector.component.size}%`, 'important');
+		change(selector: Component.Type, delta: number) {
+			selector.size = Math.max(selector.size + delta, 0.01);
+			selector.element.style.setProperty('width', `${selector.size}%`, 'important');
 		}
 	}
 
 	class rotate {
 		constructor() {}
-		change(selector: ImageCollection.Selector, delta: number) {
-			selector.component.rotate = (selector.component.rotate + delta) % 360;
+		change(selector: Component.Type, delta: number) {
+			selector.rotate = (selector.rotate + delta) % 360;
 			[ '', '-webkit-' ].forEach((prefix) => {
-				selector.element.style.setProperty(
-					prefix + 'transform',
-					`rotate(${selector.component.rotate}deg)`,
-					'important'
-				);
+				selector.element.style.setProperty(prefix + 'transform', `rotate(${selector.rotate}deg)`, 'important');
 			});
 		}
 	}
 
 	class blur {
 		constructor() {}
-		change(selector: ImageCollection.Selector, delta: number) {
-			selector.component.blur = Math.max(selector.component.blur + delta, 0);
+		change(selector: Component.Type, delta: number) {
+			selector.blur = Math.max(selector.blur + delta, 0);
 			const blurByZtrans: number =
-				Math.abs(selector.component.z - ImageCollection.params.initialZ) / ImageCollection.params.depthOfField;
+				Math.abs(selector.z - Component.params.initialZ) / Component.params.depthOfField;
 			[ '', '-webkit-' ].forEach((prefix) => {
 				selector.element.style.setProperty(
 					prefix + 'filter',
-					`blur(${selector.component.blur + blurByZtrans}px)`,
+					`blur(${selector.blur + blurByZtrans}px)`,
 					'important'
 				);
 			});
@@ -211,10 +226,10 @@ export namespace ComponentEditor {
 
 	class opacity {
 		constructor() {}
-		change(selector: ImageCollection.Selector, delta: number) {
-			selector.component.opacity = Math.max(selector.component.opacity + delta, 0);
-			selector.component.opacity = Math.min(1, selector.component.opacity);
-			selector.element.style.setProperty('opacity', `${selector.component.opacity}`, 'important');
+		change(selector: Component.Type, delta: number) {
+			selector.opacity = Math.max(selector.opacity + delta, 0);
+			selector.opacity = Math.min(1, selector.opacity);
+			selector.element.style.setProperty('opacity', `${selector.opacity}`, 'important');
 		}
 	}
 }

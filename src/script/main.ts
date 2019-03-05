@@ -1,26 +1,30 @@
 import { DOMController } from './domController';
-import { ImageCollection } from './imageCollection';
+import { ComponentManager } from './componentManager';
 import { DragEventListner } from './dragEventListner';
 import { ComponentEditor } from './componentEditor';
+import { Canvas } from './canvas';
 
 namespace Main {
-	const el = DOMController.Selector;
+	const el = DOMController.Elem;
 
 	new ComponentEditor.EventHandler();
 	new DragEventListner.EventHandler();
 
 	class Start {
-		private section = new el<string>('section');
-		private fragment = new el<DocumentFragment>();
+		private section = new el('section');
+		private canvas = new el('.canvas');
+		private pse = new el('<div>TEST</div>');
+		private fragment = new el();
 		private counter: number = 1;
 
 		constructor() {
 			this.init();
 			this.inifinityScroll();
+			this.canvas.render(this.pse.dom);
 		}
 		init() {
 			for (let i = 1; i <= 3; i++) {
-				this.fragment.append(`
+				this.fragment.render(`
                     <article>
                         <h1>Hello World!</h1>
                         <p>その${this.counter}</p>
@@ -34,9 +38,9 @@ namespace Main {
 			});
 		}
 		inifinityScroll() {
-			new el<string>('footer').inview(() => {
+			new el('footer').inview(() => {
 				setTimeout(() => {
-					this.section.append(`
+					this.section.render(`
                         <article class='fadein'>
                             <h1>Hello World!</h1>
                             <p>その${this.counter}</p>

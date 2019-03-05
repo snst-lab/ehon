@@ -86,3 +86,9 @@ deactivated
 - improve : Adjust the movement along the xy axis of the image according to the distance from the vanishing point
 - refactor : Activate component with double click instead of right click
 </details>
+<details open>
+<summary>3</summary>
+
+- refactor : domControler.ts to be able to DOM Parsing at the time that create instance.
+- improve : click canvas to activate alternatively overlapping elements.
+</details>

@@ -1,9 +1,13 @@
 import { Canvas } from './canvas';
 
-export namespace ImageCollection {
+export namespace ComponentManager {
 	export const ImageSrcPath: string = 'assets/img/';
-	export let All: Array<Component> = new Array();
-	export let Active: Selector | null = null;
+	export let All: Array<Type> = new Array();
+	export let Active: Type | null = null;
+
+	function uniqueString(): string {
+		return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
+	}
 
 	export class params {
 		static defaultSize: number = 50; //per canvas size
@@ -13,11 +17,8 @@ export namespace ImageCollection {
 		static vanishingPoint: number = params.initialZ + params.focusZ
 	}
 
-	export function uniqueString(): string {
-		return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
-	}
-
-	export interface Component {
+	export interface Type {
+		element: HTMLElement;
 		fileName: string;
 		className: string;
 		x: number;
@@ -27,19 +28,16 @@ export namespace ImageCollection {
 		rotate: number;
 		blur: number;
 		opacity: number;
+		pointer: boolean;
 	}
 
-	export interface Selector {
-		element: HTMLImageElement;
-		component: Component;
-	}
 
-	export class Controller {
+	export class Controll {
 		constructor() {}
 
 		create(filename: string, x: number, y: number): string {
 			const className = 'img-' + uniqueString();
-			Canvas.DOM.append(`
+			Canvas.DOM.render(`
 			<img draggable="true" 
 			 ondragstart="onDragStart(event);"
 			 ondragend="onDragEnd(event);"
@@ -54,10 +52,12 @@ export namespace ImageCollection {
 			 transform: scale(1);
 			 transform: rotate(0deg);
 			 filter:blur(0px);
-			 opacity:1; 
+			 opacity:1;
+			 pointer-events:auto;
 			 ">
 			`);
-			let component: Component = {
+			let component: Type = {
+				element: document.querySelector('.'+className),
 				fileName: filename,
 				className: className,
 				x: x,
@@ -66,24 +66,16 @@ export namespace ImageCollection {
 				size: params.defaultSize,
 				rotate: 0,
 				blur: 0,
-				opacity: 1
+				opacity: 1,
+				pointer:true
 			};
 			All.push(component);
 			return className;
 		}
 
-		select(className: string): Selector {
-			return {
-				element: <HTMLImageElement>document.getElementsByClassName(className)[0],
-				component: All.filter((e) => e.className === className)[0]
-			};
-		}
-
-		translate(selector: Selector, dx: number, dy: number, dz: number): void {
-			selector.component.x += dx;
-			selector.component.y += dy;
-			selector.element.style.setProperty('left', `${selector.component.x}%`,'important');
-			selector.element.style.setProperty('top', `${selector.component.y}%`,'important');
+		select(className: string): Type {
+			return All.filter((e) => e.className === className)[0]
 		}
 	}
+
 }
