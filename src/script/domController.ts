@@ -42,20 +42,33 @@ export namespace DOMController {
 			}
 		}
 		/**
-			Wrapper of append / prepend - childNode:(string | HTMLElement | DocumentFragment)
+			Wrapper of append - childNode:(string | HTMLElement | DocumentFragment)
 		*/
-		render(childNode: ChildNode, prepend?: boolean): Element | DocumentFragment {
-			prepend = prepend || false;
+		append(childNode: ChildNode): Element | DocumentFragment {
 			if (typeof childNode === 'string') {
 				const fragment = document.createDocumentFragment();
 				const collection: NodeList = this.parser.parseFromString(childNode, 'text/html').body.childNodes;
 				const doms: Element[] = [].slice.call(collection);
 				for (let i: number = 0; i < doms.length; i++) fragment.appendChild(doms[i]);
-				if (!prepend) this.dom.appendChild(fragment);
-				else this.dom.insertBefore(fragment, this.dom.firstChild);
+				this.dom.appendChild(fragment);
 			} else if (childNode instanceof Element || childNode instanceof DocumentFragment) {
-				if (!prepend) this.dom.appendChild(childNode);
-				else this.dom.insertBefore(childNode, this.dom.firstChild);
+				this.dom.appendChild(childNode);
+			} else {
+				return this.dom;
+			}
+		}
+		/**
+			Wrapper of prepend - childNode:(string | HTMLElement | DocumentFragment)
+		*/
+		prepend(childNode: ChildNode): Element | DocumentFragment {
+			if (typeof childNode === 'string') {
+				const fragment = document.createDocumentFragment();
+				const collection: NodeList = this.parser.parseFromString(childNode, 'text/html').body.childNodes;
+				const doms: Element[] = [].slice.call(collection);
+				for (let i: number = 0; i < doms.length; i++) fragment.appendChild(doms[i]);
+				this.dom.insertBefore(fragment, this.dom.firstChild);
+			} else if (childNode instanceof Element || childNode instanceof DocumentFragment) {
+				this.dom.insertBefore(childNode, this.dom.firstChild);
 			} else {
 				return this.dom;
 			}

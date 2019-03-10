@@ -35,7 +35,7 @@ main {
 	position: relative;
 	top: $header-height;
 	min-height: 1000px;
-	background: $white;
+	background: $black;
 	@include fontsize(12);
 }
 
@@ -73,7 +73,15 @@ footer {
 .canvas{
 	@include absolute(0,0,0,0);
 	background:white;
-	border-radius:20px;
-	margin:0 auto;
+	margin:0 0;
 	overflow:hidden;
+}
+
+.component-camera{
+	position:fixed;
+	top:6rem;
+	right:3rem;
+	z-index:5;
+	color:$white;
+	transform:scale(2);
 }

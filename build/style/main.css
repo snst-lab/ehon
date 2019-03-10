@@ -126,7 +126,7 @@ main {
   position: relative;
   top: 50px;
   min-height: 1000px;
-  background: #f5f5fa;
+  background: #323246;
   font-size: 12px;
   font-size: 0.75rem;
 }
@@ -170,7 +170,15 @@ footer {
   bottom: 0;
   left: 0;
   background: white;
-  border-radius: 20px;
-  margin: 0 auto;
+  margin: 0 0;
   overflow: hidden;
+}
+
+.component-camera {
+  position: fixed;
+  top: 6rem;
+  right: 3rem;
+  z-index: 5;
+  color: #f5f5fa;
+  transform: scale(2);
 }
