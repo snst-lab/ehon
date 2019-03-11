@@ -82,10 +82,10 @@ export namespace DOMController {
 				const collection: NodeList = this.parser.parseFromString(childNode, 'text/html').body.childNodes;
 				const doms: Element[] = [].slice.call(collection);
 				for (let i: number = 0; i < doms.length; i++) fragment.appendChild(doms[i]);
-				this.dom.removeChild(this.dom.firstChild);
+				while(this.dom.firstChild) this.dom.removeChild(this.dom.firstChild);
 				this.dom.appendChild(fragment);
 			} else if (childNode instanceof Element || childNode instanceof DocumentFragment) {
-				this.dom.removeChild(this.dom.firstChild);
+				while(this.dom.firstChild) 	this.dom.removeChild(this.dom.firstChild);
 				this.dom.appendChild(childNode);
 			} else {
 				return this.dom;

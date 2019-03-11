@@ -27,12 +27,20 @@ export const param: { [key: string]: { [key: string]: number } } = {
 		rotate: 0.05,
 		opacity: 0.001,
 		blur: 0.01
+	},
+	animation:{
+		skipFrame:2,
+		defaultDuration:30
 	}
 };
 export const config: { [key: string]: string } = {
+	mode:'edit',
 	imageSrcPath: 'assets/img/',
 	imageSrcUrl: '../../assets/img/',
 	backgroundFile: 'background.jpg',
+	activeOutlineWidth:  '3px',
+	activeOutlineStyle:  'solid',
+	activeOutlineColor:  '#00ffdd',
 	imageClick: 'imageClick',
 	imageDoubleClick: 'imageDoubleClick',
 	imageDragStart: 'imageDragStart',

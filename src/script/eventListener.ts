@@ -2,10 +2,11 @@ import { param, config } from './parameter';
 import { Canvas } from './canvas';
 import { Component } from './component';
 import { Editor } from './editor';
+import {  Transition } from './transition';
 
 export namespace EventListener {
 	const editor = new Editor.EventHandler();
-	const trans = new Editor.Transition();
+	const trans = new Editor.Transform();
 	let keyDown: string | null = null;
 
 	const keyMap: { [key: number]: string } = {
@@ -27,13 +28,15 @@ export namespace EventListener {
 			this.listenCanvasDrop();
 			this.listenBackgroundClick();
 			this.listenBackgroundDoubleClick();
+			this.listenPushStateClick();
+			this.listenPlayClick();
 			this.listenImageEvent();
 		}
 
 		private detectKeyDown() {
 			document.addEventListener(
 				'keydown',
-				(event) => {
+				(event:any) => {
 					if (keyDown === null) {
 						keyDown = keyMap[event.keyCode];
 					}
@@ -81,31 +84,31 @@ export namespace EventListener {
 			});
 		}
 		private listenCameraClick(): void {
-			Component.Camera.element.addEventListener('click', (event) => {
+			Component.Camera.element.addEventListener('click', (event:any) => {
 				event.preventDefault();
 				editor.CameraClick(event);
 			},false);
 		}
 		private listenCanvasClick(): void {
-			Canvas.DOM.on('click', (event) => {
+			Canvas.DOM.on('click', (event:any) => {
 				event.preventDefault();
 				editor.CanvasClick(event);
 			});
 		}
 		private listenBackgroundClick(): void {
-			Component.Background.element.addEventListener('click', (event) => {
+			Component.Background.element.addEventListener('click', (event:any) => {
 				event.preventDefault();
 				editor.BackgroundClick(event);
 			},false);
 		}
 		private listenBackgroundDoubleClick(): void {
-			Component.Background.element.addEventListener('dblclick', (event) => {
+			Component.Background.element.addEventListener('dblclick', (event:any) => {
 				event.preventDefault();
 				editor.BackgroundDoubleClick(event);
 			},false);
 		}
 		private listenCanvasDrop(): void {
-			Canvas.DOM.on('drop', (event) => {
+			Canvas.DOM.on('drop', (event:any) => {
 				event.preventDefault();
 				if (event.dataTransfer.items) {
 					// Use DataTransferItemList interface to access the file(s)
@@ -118,28 +121,45 @@ export namespace EventListener {
 				}
 			});
 		}
+		private listenPushStateClick(): void {
+			document.querySelector('.state-push').addEventListener('click',(event:any)=>{
+				event.preventDefault();
+				editor.PushStateClick(event);
+			},false);
+		}
+		private listenPlayClick(): void {
+			document.querySelector('.state-play').addEventListener(
+				'click',
+				(event: any) => {
+					event.preventDefault();
+					new Transition.Animation().play(Editor.Active);
+				},
+				false
+			);
+		}
+
 
 		private listenImageEvent(): void {
 			Object.defineProperty(window, config.imageClick, {
-				value: function(event) {
+				value: function(event:any) {
 					event.preventDefault();
 					editor.ImageClick(event);
 				}
 			});
 			Object.defineProperty(window, config.imageDoubleClick, {
-				value: function(event) {
+				value: function(event:any) {
 					event.preventDefault();
 					editor.ImageDoubleClick(event);
 				}
 			});
 			Object.defineProperty(window, config.imageDragStart, {
-				value: function(event) {
+				value: function(event:any) {
 					// event.preventDefault();
 					editor.ImageDragStart(event);
 				}
 			});
 			Object.defineProperty(window, config.imageDragEnd, {
-				value: function(event) {
+				value: function(event:any) {
 					event.preventDefault();
 					editor.ImageDragEnd(event);
 				}

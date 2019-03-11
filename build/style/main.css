@@ -30,6 +30,53 @@ p {
   text-indent: 1em;
 }
 
+input[type="checkbox"] {
+  display: none;
+}
+
+input[type="checkbox"] + label {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 20px;
+  font: 14px/20px 'Open Sans', Arial, sans-serif;
+  color: #ddd;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+input[type="checkbox"] + label:last-child {
+  margin-bottom: 0;
+}
+
+input[type="checkbox"] + label:before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #00c8b4;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: .6;
+  -webkit-transition: all .12s, border-color .08s;
+  transition: all .12s, border-color .08s;
+}
+
+input[type="checkbox"]:checked + label:before {
+  width: 10px;
+  top: -5px;
+  left: 5px;
+  border-radius: 0;
+  opacity: 1;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
 @-webkit-keyframes fadein {
   0% {
     opacity: 0;
@@ -112,8 +159,8 @@ header {
   z-index: 5;
   background: white;
   width: 100%;
-  line-height: 50px;
-  height: 50px;
+  line-height: 5vh;
+  height: 5vh;
   vertical-align: middle;
   text-indent: 1em;
   font-size: 18px;
@@ -124,9 +171,9 @@ header {
 
 main {
   position: relative;
-  top: 50px;
-  min-height: 1000px;
-  background: #323246;
+  top: 5vh;
+  min-height: 95vh;
+  background: #141428;
   font-size: 12px;
   font-size: 0.75rem;
 }
@@ -138,9 +185,9 @@ footer {
   vertical-align: middle;
   width: 100%;
   color: white;
-  height: 50px;
-  line-height: 50px;
-  background-color: #323246;
+  height: 5vh;
+  line-height: 5vh;
+  background-color: #141428;
   font-size: 12px;
   font-size: 0.75rem;
 }
@@ -169,16 +216,130 @@ footer {
   right: 0;
   bottom: 0;
   left: 0;
+  width: 85%;
+  height: 750px;
+  z-index: 3;
   background: white;
   margin: 0 0;
   overflow: hidden;
 }
 
-.component-camera {
-  position: fixed;
-  top: 6rem;
-  right: 3rem;
+.tool-pallet {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  left: 85%;
+  width: 15%;
+  height: 750px;
+  z-index: 3;
+}
+
+.material-icons {
+  color: #7d7d91;
+  transition: .2s;
+}
+
+.material-icons:hover {
+  color: #00c8b4;
+}
+
+.camera {
   z-index: 5;
-  color: #f5f5fa;
+  margin: 2.5rem;
   transform: scale(2);
+}
+
+.push-state {
+  z-index: 5;
+  margin: 2.5rem;
+  transform: scale(2);
+}
+
+.state-list {
+  width: 100%;
+  height: 650px;
+  color: #c8c8dc;
+  font-size: 1.1em;
+  background: #141428;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.state-list-header {
+  border-top: solid 1px #323246;
+  box-sizing: border-box;
+  padding: 1em;
+}
+
+.state-classname {
+  font-weight: bold;
+  margin: 0 0 0 1em;
+}
+
+.state-list-menu, .state-list-header {
+  width: 100%;
+  height: 3rem;
+  color: #c8c8dc;
+  background: #141428;
+  display: flex;
+}
+
+.state-icon, .state-push, .state-play, .state-remove, .state-update {
+  height: 100%;
+  width: 20%;
+}
+
+.state-clickable {
+  height: 100%;
+  width: 50%;
+  box-sizing: border-box;
+  padding: 5%;
+}
+
+.state-push {
+  margin: 0.5rem 0.5rem;
+}
+
+.state-play {
+  margin: 0.5rem 0.5rem;
+}
+
+.state {
+  width: 100%;
+  height: 5rem;
+  color: #c8c8dc;
+  background: #323246;
+  transition: .2s;
+  display: flex;
+}
+
+.state:hover {
+  background: #646478;
+}
+
+.state-text {
+  width: 60%;
+  height: 100%;
+}
+
+.state-btn {
+  width: 40%;
+  height: 100%;
+}
+
+.state-number, .state-src {
+  height: 50%;
+  width: 90%;
+  box-sizing: border-box;
+  padding: 7%;
+}
+
+.state-remove {
+  margin: 1.5rem 0.5rem;
+}
+
+.state-update {
+  margin: 1.5rem 0.5rem;
 }

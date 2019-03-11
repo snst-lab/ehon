@@ -47,15 +47,16 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - [x] 3. right click elements to switch editable/ noeditable 
 - [x] 4. move along X,Y,Z-axis, scale, rotate, change opacity of elements with keydown& wheel
 - [x] 5. add camera component
-- [ ] 6. save html file as current state
-- [ ] 7. show layer table & select layer to be editable ("self" is prepared alias of layer) 
-- [ ] 8. right click elements to show framebase timeline (circle on bar style)
-- [ ] 9. select event & target from layer table
-- [ ] 10. double left click on timeline to registar state & double right click to delete
-- [ ] 11. double left click on circle on timeline to change src file.
-- [ ] 12. right click circle on timeline to edit new state of elements / right click again to cancel
-- [ ] 13. save history of html
-- [ ] 14. undo/redo
+- [x] 6. registering & playing animation
+- [ ] 7. save html file as current state
+- [ ] 8. show layer table & select layer to be editable ("self" is prepared alias of layer) 
+- [ ] 9. right click elements to show framebase timeline (circle on bar style)
+- [ ] 10. select event & target from layer table
+- [ ] 11. double left click on timeline to registar state & double right click to delete
+- [ ] 12. double left click on circle on timeline to change src file.
+- [ ] 13. right click circle on timeline to edit new state of elements / right click again to cancel
+- [ ] 14. save history of html
+- [ ] 15. undo/redo
 
 
 

@@ -6,5 +6,4 @@ export namespace Canvas {
 	export const DOM: DOMController.Elem= new el('.' + ClassName);
 	export const Element: HTMLElement = <HTMLElement>DOM.dom;
 	export const Z: number = Number(Element.style.zIndex);
-	export const Background: DOMController.Elem = new el('.canvas-background');
 }
