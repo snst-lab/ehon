@@ -10,6 +10,7 @@ body {
 	padding: 0;
 	border: 0;
 	margin: 0;
+	overflow: hidden;
 }
 
 body {
@@ -75,23 +76,36 @@ footer {
 	@include absolute(0, 0, 0, 0);
 	width: 85%;
 	height: 750px;
-	z-index: 3;
 	background: white;
 	margin: 0 0;
 	overflow: hidden;
+}
+
+.scene {
+	@include absolute(0, 0, 0, 0);
+	width: 100%;
+	height: 100%;
+}
+
+.base-layer {
+	@include absolute(0, 0, 0, 0);
+	width: 100%;
+	height: 100%;
 }
 
 .tool-pallet {
 	@include absolute(0, 0, 0, 0);
 	left: 85%;
 	width: 15%;
-	height: 750px;
+	min-width: 15rem;
+	height: 100%;
 	z-index: 3;
 }
 
 .material-icons {
 	color: $gray2;
 	transition: .2s;
+	transform: scale(1.2);
 
 	&:hover {
 		color: $green;
@@ -104,104 +118,125 @@ footer {
 	transform: scale(2);
 }
 
-.push-state {
-	z-index: 5;
-	margin: 2.5rem;
-	transform: scale(2);
+.active {
+	&-header {
+		width: 100%;
+		height: 5rem;
+		color: $gray5;
+		background: $black;
+		border-top: solid 1px $gray0;
+		box-sizing: border-box;
+		padding: 1em;
+		font-size: 1.1em;
+	}
+	&-title{
+		height:60%;
+		display:flex;
+	}
+	&-title-index{
+		width:20%;
+	}
+	&-title-value {
+		width:80%;
+		font-weight: bold;
+		margin: 0 0 0 1em;
+		
+	}
+	&-clickable {
+		position:relative;
+		height: 40%;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 1em;
+	}
 }
 
-.state-list {
-	width: 100%;
-	height: 650px;
-	color: $gray5;
-	font-size: 1.1em;
-	background: $black;
-	overflow-x: hidden;
-	overflow-y: auto;
-}
+.keyframe {
+	&-state-list {
+		width: 100%;
+		height: 650px;
+		color: $gray5;
+		font-size: 1.1em;
+		background: $black;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+	&-menu {
+		width: 100%;
+		height: 3rem;
+		color: $gray5;
+		background: $black;
+		display: flex;
+		margin: 1rem 0 0 0;
+		border-top: solid 1px $gray0;
+	}
+	&-play {
+		position:absolute;
+		left:20%;
+		transform:scale(1.5);
+		margin-top:0.6rem;
+	}
+	&-push-state {
+		position:absolute;
+		left:60%;
+		transform:scale(1.2);
+		margin-top:0.7rem;
+	}
+	&-state {
+		width: 100%;
+		height: 5rem;
+		color: $gray5;
+		background: $gray0;
+		transition: .2s;
+		display: flex;
 
-.state-list-header {
-	@extend .state-list-menu;
-	border-top: solid 1px $gray0;
-	box-sizing: border-box;
-	padding: 1em;
-}
+		&:hover {
+			background: $gray1;
+		}
 
-.state-classname {
-	font-weight: bold;
-	margin: 0 0 0 1em;
-}
+		&-current {
+			background: $pink;
 
-.state-list-menu {
-	width: 100%;
-	height:3rem;
-	color: $gray5;
-	background: $black;
-	display: flex;
-}
-
-.state-icon{
-	height: 100%;
-	width: 20%;
-}
-
-.state-clickable{
-	height: 100%;
-	width: 50%;
-	box-sizing: border-box;
-	padding: 5%;
-}
-
-.state-push {
-	@extend .state-icon;
-	margin: 0.5rem 0.5rem;
-}
-
-.state-play {
-	@extend .state-icon;
-	margin: 0.5rem 0.5rem;
-}
-
-.state {
-	width: 100%;
-	height: 5rem;
-	color: $gray5;
-	background: $gray0;
-	transition: .2s;
-
-	&:hover {
-		background: $gray1;
+			&:hover {
+				background: $pink;
+			}
+		}
+	}
+	&-state-text {
+		width: 60%;
+		height: 100%;
+	}
+	&-state-btn {
+		width: 40%;
+		height: 100%;
 	}
 
-	display:flex;
-}
+	&-state-number {
+		height: 33%;
+		width: 90%;
+		box-sizing: border-box;
+		padding: 3% 7%;
+	}
+	&-state-duration {
+		@extend .keyframe-state-number;
+		display:flex;
+		height:38%;
+		&-index{
+			width:70%;
+		}
+		&-value{
+		outline-color:$green;
+			width:30%;
+		}
+	}
+	&-state-src {
+		@extend .keyframe-state-number;
+	}
+	&-state-update {
+		margin: 1.5rem 7%;
+	}
 
-.state-text {
-	width: 60%;
-	height: 100%;
-}
-.state-btn {
-	width: 40%;
-	height: 100%;
-}
-
-.state-number {
-	height: 50%;
-	width: 90%;
-	box-sizing: border-box;
-	padding: 7%;
-}
-
-.state-src {
-	@extend .state-number;
-}
-
-.state-remove {
-	@extend .state-icon;
-	margin: 1.5rem 0.5rem;
-}
-
-.state-update {
-	@extend .state-icon;
-	margin: 1.5rem 0.5rem;
+	&-state-remove {
+		margin: 1.5rem 7%;
+	}
 }

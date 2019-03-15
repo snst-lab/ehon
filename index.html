@@ -21,40 +21,26 @@
 <body>
     <header>ehon</header>
     <main>
-        <div class='canvas' ondragover="event.preventDefault();">
-            <div class='background'></div>
-        </div>
+        <div class='canvas' style='z-index:3;' ondragover="event.preventDefault();"></div>
         <div class='tool-pallet'>
             <i class="camera material-icons">
                 videocam
             </i>
-            <i class="push-state material-icons">
-                queue
-            </i>
-            <div class='state-list-header'>
-                <div>Active:</div>
-                <div class='state-classname'>i1239424</div>
-            </div>
-            <div class='state-list-menu'>
-                <div class='state-clickable'>
+            <div class='active-header'>
+                <div class='active-title'>
+                    <div class='active-title-index'>Active:</div>
+                    <div class='active-title-value'>i1239424</div>
+                </div>
+                <div class='active-clickable'>
                     <input type="checkbox" id="clickable">
-                    <label for="clickable">Clickable</label>
-                </div>
-                <i class='state-play material-icons'>play_arrow</i>
-                <i class='state-push material-icons'>queue</i>
-            </div>
-            <div class='state-list'>
-                <div class='state'>
-                    <div class='state-text'>
-                        <div class='state-number'>State: 0</div>
-                        <div class='state-src'>kitusuke1.png</div>
-                    </div>
-                    <div class='state-btn'>
-                        <i class='state-update material-icons'>refresh</i>
-                        <i class='state-remove material-icons'>delete</i>
-                    </div>
+                    <label for="clickable">Touchable</label>
                 </div>
             </div>
+            <div class='keyframe-menu'>
+                <i class='keyframe-play material-icons'>play_arrow</i>
+                <i class='keyframe-push-state material-icons'>queue</i>
+            </div>
+            <div class='keyframe-state-list'></div>
         </div>
     </main>
     <footer>Copyright &copy; 2019 TANUSUKE</footer>

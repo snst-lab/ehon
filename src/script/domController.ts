@@ -2,9 +2,8 @@
 ### DOMController
 	Wrapper of querySelector, appendChild, prependChild, addEventListener...,etc.
 */
-export namespace DOMController {
-	type ChildNode = string | Element | DocumentFragment | null;
-
+namespace DOMController {
+	export type NodeType = Element | HTMLElement | DocumentFragment | null;
 	interface IntersectEntry extends IntersectionObserverEntry {
 		srcElement: Element;
 	}
@@ -14,108 +13,108 @@ export namespace DOMController {
 		threshold: number[];
 	}
 	/**
-	### DOMController.Elem
-		Wrapper of querySelector, appendChild, innerHTML,addEventListener...,etc.
+	### DOMController.Main
+		Wrapper of querySelector, appendChild,addEventListener...,etc.
 	#### Usage
-		const p = new DOMController.Elem('p');
-		const fragment = new DOMController.Elem();
+		const p = new DOM('p');
+		const fragment = new DOM();
 		for(let i=0;i<10;i++) fragment.render(i); 
 		p.render(fragment.dom);
 		p.at('click',alert('OK'));
 	*/
-	export class Elem {
+	export class Main {
 		private parser: DOMParser = new DOMParser();
-		dom: Element | DocumentFragment | null = null;
+		el: NodeType = null;
 
-		constructor(node?: string | Element | DocumentFragment | undefined) {
-			if (typeof node === 'string' && !node.match(/[<>]/)) {
-				this.dom = document.querySelector(node);
-			} else if (typeof node === 'string' && node.match(/[<>]/)) {
-				this.dom = document.createDocumentFragment();
+		constructor(node?: NodeType | string) {
+			if (typeof node === 'string' && !/[<>]/.test(node)) {
+				this.el = document.querySelector(node);
+			} else if (typeof node === 'string' && /[<>]/.test(node)) {
 				const collection: NodeList = this.parser.parseFromString(node, 'text/html').body.childNodes;
 				const doms: Element[] = [].slice.call(collection);
-				for (let i: number = 0; i < doms.length; i++) this.dom.appendChild(doms[i]);
+				if (doms.filter((e) => !(e instanceof Text)).length === 1) {
+					this.el = doms[0];
+				} else {
+					this.el = document.createElement('div');
+					const fragment: DocumentFragment = document.createDocumentFragment();
+					for (let [ i, l ]: Array<number> = [ 0, doms.length ]; i < l; i++) fragment.appendChild(doms[i]);
+					this.el.appendChild(fragment);
+				}
 			} else if (node instanceof Element || node instanceof DocumentFragment) {
-				this.dom = node;
+				this.el = node;
 			} else {
-				this.dom = document.createDocumentFragment();
+				this.el = document.createDocumentFragment();
 			}
 		}
 		/**
-			Wrapper of append - childNode:(string | HTMLElement | DocumentFragment)
+			Wrapper of append - childNode:(string | Element | HTMLElement | DocumentFragment)
 		*/
-		append(childNode: ChildNode): Element | DocumentFragment {
+		append(childNode: NodeType | string): Element | DocumentFragment {
+			if (typeof childNode === 'string' && this.el) {
+				const fragment = document.createDocumentFragment();
+				const collection: NodeList = this.parser.parseFromString(childNode, 'text/html').body.childNodes;
+				const doms: Element[] = [].slice.call(collection);
+				for (let [ i, l ]: Array<number> = [ 0, doms.length ]; i < l; i++) fragment.appendChild(doms[i]);
+				this.el.appendChild(fragment);
+			} else if (childNode instanceof Element || childNode instanceof DocumentFragment) {
+				this.el.appendChild(childNode);
+			} else {
+				return this.el;
+			}
+		}
+		/**
+			Wrapper of prepend - childNode:(string | Element | HTMLElement | DocumentFragment)
+		*/
+		prepend(childNode: NodeType | string): Element | DocumentFragment {
 			if (typeof childNode === 'string') {
 				const fragment = document.createDocumentFragment();
 				const collection: NodeList = this.parser.parseFromString(childNode, 'text/html').body.childNodes;
 				const doms: Element[] = [].slice.call(collection);
-				for (let i: number = 0; i < doms.length; i++) fragment.appendChild(doms[i]);
-				this.dom.appendChild(fragment);
+				for (let [ i, l ]: Array<number> = [ 0, doms.length ]; i < l; i++) fragment.appendChild(doms[i]);
+				this.el.insertBefore(fragment, this.el.firstChild);
 			} else if (childNode instanceof Element || childNode instanceof DocumentFragment) {
-				this.dom.appendChild(childNode);
+				this.el.insertBefore(childNode, this.el.firstChild);
 			} else {
-				return this.dom;
+				return this.el;
 			}
 		}
 		/**
-			Wrapper of prepend - childNode:(string | HTMLElement | DocumentFragment)
+			innerHTML like method - childNode: (string | Element | HTMLElement | DocumentFragment)
 		*/
-		prepend(childNode: ChildNode): Element | DocumentFragment {
+		rewrite(childNode: NodeType | string): Element | DocumentFragment {
 			if (typeof childNode === 'string') {
 				const fragment = document.createDocumentFragment();
 				const collection: NodeList = this.parser.parseFromString(childNode, 'text/html').body.childNodes;
 				const doms: Element[] = [].slice.call(collection);
-				for (let i: number = 0; i < doms.length; i++) fragment.appendChild(doms[i]);
-				this.dom.insertBefore(fragment, this.dom.firstChild);
+				for (let [ i, l ]: Array<number> = [ 0, doms.length ]; i < l; i++) fragment.appendChild(doms[i]);
+				while (this.el.firstChild) this.el.removeChild(this.el.firstChild);
+				this.el.appendChild(fragment);
 			} else if (childNode instanceof Element || childNode instanceof DocumentFragment) {
-				this.dom.insertBefore(childNode, this.dom.firstChild);
+				while (this.el.firstChild) this.el.removeChild(this.el.firstChild);
+				this.el.appendChild(childNode);
 			} else {
-				return this.dom;
-			}
-		}
-		/**
-			innerHTML like method - childNode: (string | HTMLElement | DocumentFragment)
-		*/
-		rewrite(childNode: ChildNode): Element | DocumentFragment {
-			if (typeof childNode === 'string') {
-				const fragment = document.createDocumentFragment();
-				const collection: NodeList = this.parser.parseFromString(childNode, 'text/html').body.childNodes;
-				const doms: Element[] = [].slice.call(collection);
-				for (let i: number = 0; i < doms.length; i++) fragment.appendChild(doms[i]);
-				while(this.dom.firstChild) this.dom.removeChild(this.dom.firstChild);
-				this.dom.appendChild(fragment);
-			} else if (childNode instanceof Element || childNode instanceof DocumentFragment) {
-				while(this.dom.firstChild) 	this.dom.removeChild(this.dom.firstChild);
-				this.dom.appendChild(childNode);
-			} else {
-				return this.dom;
+				return this.el;
 			}
 		}
 		/**
 		 	Wrapper of document.addEventListener(eventName, callback, false)
 		*/
 		on(eventName: string, callback: any): void {
-			if (this.dom !== null)
-				switch (eventName) {
-					case 'inview':
-						this.inview(callback);
-						break;
-					case 'outview':
-						this.outview(callback);
-						break;
-					default:
-						this.dom.addEventListener(eventName, callback, false);
-						break;
-				}
+			if (this.el !== null) this.el.addEventListener(eventName, callback, false);
 			else document.addEventListener(eventName, callback, false);
 		}
 		/**
 		 	Wrapper of document.removeEventListener(eventName, callback, false)
 		*/
 		off(eventName: string, callback: any): void {
-			if (this.dom !== null) {
-				this.dom.removeEventListener(eventName, callback, false);
-			} else document.removeEventListener(eventName, callback, false);
+			if (this.el !== null) this.el.removeEventListener(eventName, callback, false);
+			else document.removeEventListener(eventName, callback, false);
+		}
+	}
+
+	export class Extention extends Main {
+		constructor(node?: NodeType | string) {
+			super(node);
 		}
 		/**
 		 	Use Intersection observer to detect the intersection of an element and a visible region
@@ -135,7 +134,7 @@ export namespace DOMController {
 					}
 				}
 			}, options);
-			observer.observe(<Element>(<unknown>this.dom));
+			observer.observe(<Element>(<unknown>this.el));
 		}
 		/**
 		 	Use Intersection observer to detect the intersection of an element and a visible region
@@ -155,7 +154,10 @@ export namespace DOMController {
 					}
 				}
 			}, options);
-			observer.observe(<Element>(<unknown>this.dom));
+			observer.observe(<Element>(<unknown>this.el));
 		}
 	}
 }
+export type NodeType = DOMController.NodeType;
+export const DOM = DOMController.Main;
+export const DOMX = DOMController.Extention;

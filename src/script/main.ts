@@ -1,10 +1,9 @@
-import { DOMController } from './domController';
-import { EventListener } from './eventListener';
+import { EventListenerStart } from './eventListener';
+import { RendererStart } from './renderer';
 
 namespace Main {
-	const el = DOMController.Elem;
-
-	new EventListener.Start();
+	new RendererStart();
+	new EventListenerStart();
 
 	class Start {
 		constructor() {	}

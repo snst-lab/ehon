@@ -1,222 +1,231 @@
 import { param, config } from './parameter';
-import { Canvas } from './canvas';
-import { ToolPallet as Tool } from './toolPallet';
-import { Component } from './component';
-import { Transition } from './transition';
+import { Canvas, Scenes as scene, Now as now } from './canvas';
+import { PalletKeyframe as Keyframe } from './pallet';
+import {
+	ComponentType as Component,
+	ComponentStructure as Struct,
+	ComponentState as State,
+	ComponentImage as Image
+} from './component';
+import { AnimationPlay } from './animation';
+
+export let Active: Component = null;
 
 export namespace Editor {
-	export let Active: Component.Type = null;
-    const outlineStyle: string = `outline:${config.activeOutlineWidth} ${config.activeOutlineStyle} ${config.activeOutlineColor};`;
+	const outlineStyle: string = `outline:${config.activeOutlineWidth} ${config.activeOutlineStyle} ${config.activeOutlineColor};`;
 
-	interface position {
-		x: number;
-		y: number;
-	}
-
-	export class EventHandler {
-		private dragstart: position = { x: 0, y: 0 };
-		constructor() {}
-		ImageClick(event: any): void {
-			new Selector('image').activate(event);
-		}
-		ImageDoubleClick(event: any): void {}
-		CameraClick(event: any): void {
-			new Selector(null).release();
-			new Selector(null).recover();
-			new Selector('camera').activate(event);
-		}
-		BackgroundClick(event: any): void {
-			new Selector('background').activate(event);
-		}
-		BackgroundDoubleClick(event: any): void {}
-
-		ImageDragStart(event: any): void {
-			if (Editor.Active === null) return;
-			const className: string = event.target.classList.item(0);
-			if (Editor.Active.className !== className) return;
-			this.dragstart.x = event.clientX;
-			this.dragstart.y = event.clientY;
-		}
-		ImageDragEnd(event: any): void {
-			if (Editor.Active === null) return;
-			const className: string = event.target.classList.item(0);
-			if (Editor.Active.className !== className) return;
-			const correctXY = (Component.Camera.now.z - Active.now.z) / Active.now.z;
-			const dx: number = (event.clientX - this.dragstart.x) * 100 / Canvas.Element.offsetWidth * correctXY;
-			const dy: number = (event.clientY - this.dragstart.y) * 100 / Canvas.Element.offsetHeight * correctXY;
-			new Transform().translate(Editor.Active, dx, dy, 0);
-		}
-		CanvasClick(event: any): void {
-			// new Selector(null).release();
-		}
-		CanvasDrop(event: any, file: File): void {
-			Component.Images.push(
-				new Component.Image(
-					file.name,
-					event.clientX / (Canvas.Element.offsetWidth + Canvas.Element.offsetLeft) * 100,
-					event.clientY / (Canvas.Element.offsetHeight + Canvas.Element.offsetTop) * 100
-				)
-			);
-		}
-		PushStateClick(event: any): void {
-			if (Editor.Active === null) return;
-			if (Active.state.length === 1) {
-				new Transition.Animation().register(Active,Active, 'contextmenu');
-			}
-			Active.state.push(Active.now);
-			Tool.stateList.render(Active);
-		}
-	}
-
-	class Selector {
+	export class Selector {
 		private type: string | null;
 
-		constructor(type: string) {
-			this.type = type;
-		}
-		activate(event: any): void {
-			const className: string = event.target.classList.item(0);
-			if (Editor.Active !== null && Editor.Active.className === className) {
+		activate(className: string, type: string): void {
+			if (Active !== null && Active.className === className) {
 				this.release();
 				return;
 			}
-
-			Editor.Active = this.select(className);
-			Editor.Active.element.style.outlineWidth = config.activeOutlineWidth;
-			Editor.Active.element.style.outlineStyle = config.activeOutlineStyle;
-			Editor.Active.element.style.outlineColor = config.activeOutlineColor;
-			Tool.stateList.render(Active);
-			[ ...Component.Images, Component.Camera, Component.Background ].forEach((e) => {
+			this.type = type;
+			[ ...scene[now].Images, scene[now].Camera ].forEach((e) => {
 				if (e.className !== className) {
 					e.element.style.outlineWidth = '';
 					e.element.style.outlineStyle = '';
 					e.element.style.outlineColor = '';
 				}
 			});
+			Active = this.select(className);
+			Active.element.style.outlineWidth = config.activeOutlineWidth;
+			Active.element.style.outlineStyle = config.activeOutlineStyle;
+			Active.element.style.outlineColor = config.activeOutlineColor;
+			Keyframe.render(Active);
 		}
 		release(): void {
-			if (Editor.Active !== null) {
-				//penetration
-				if (Editor.Active.type === 'image') Editor.Active.element.style.pointerEvents = 'none';
-				else if (Editor.Active.type === 'background') this.recover();
+			if (Active !== null) {
 				//style off
-				Editor.Active.element.style.outlineWidth = '';
-				Editor.Active.element.style.outlineStyle = '';
-				Editor.Active.element.style.outlineColor = '';
-				Editor.Active = null;
-				Tool.stateList.clear();
+				Active.element.style.outlineWidth = '';
+				Active.element.style.outlineStyle = '';
+				Active.element.style.outlineColor = '';
+				//penetration
+				if (Active.type === 'image') {
+					Active.element.style.pointerEvents = 'none';
+					Active.pointer = 'none';
+				}
+				Active = null;
+				Keyframe.clear();
 			}
 		}
 		recover(): void {
-			[ ...Component.Images, Component.Camera, Component.Background ].forEach((e) => {
-				if (e.pointer) {
+			[ ...scene[now].Images, scene[now].Camera ].forEach((e) => {
+				if (e.touchable) {
 					e.element.style.pointerEvents = 'auto';
+					e.pointer = 'auto';
 				}
 			});
 		}
-		select(className: string): Component.Type {
+		select(className: string): Component {
 			switch (this.type) {
 				case 'image':
-					return Component.Images.filter((e) => e.className === className)[0];
+					return scene[now].Images.filter((e) => e.className === className)[0];
 				case 'camera':
-					return Component.Camera;
-				case 'background':
-					return Component.Background;
+					return scene[now].Camera;
 			}
 		}
 	}
 
 	export class Transform {
-
-		translate(Active: Component.Type, dx: number, dy: number, dz: number): void {
-			Active.change(
-				{
-					src: Active.now.src,
-					x: Active.now.x + dx,
-					y: Active.now.y + dy,
-					z: Active.now.z + dz,
-					rotate: Active.now.rotate,
-					scale: Active.now.scale,
-					blur: Active.now.blur,
-					opacity: Active.now.opacity,
-					duration: param.animation.defaultDuration
-				},
-				outlineStyle
-			);
+		translate(Active: Component, dx: number, dy: number, dz: number): void {
+			const state: State = {
+				src: Active.now.src,
+				x: Active.now.x + dx,
+				y: Active.now.y + dy,
+				z: Active.now.z + ~~dz,
+				rotate: Active.now.rotate,
+				scale: Active.now.scale,
+				blur: Active.now.blur,
+				opacity: Active.now.opacity,
+				duration: param.animation.defaultDuration
+			};
+			Active.transition(state, outlineStyle);
 		}
 
-		rotate(Active: Component.Type, delta: number): void {
-			Active.change(
-				{
+		rotate(Active: Component, delta: number): void {
+			const state: State = {
+				src: Active.now.src,
+				x: Active.now.x,
+				y: Active.now.y,
+				z: Active.now.z,
+				rotate: Active.now.rotate + ~~delta,
+				scale: Active.now.scale,
+				blur: Active.now.blur,
+				opacity: Active.now.opacity,
+				duration: param.animation.defaultDuration
+			};
+			Active.transition(state, outlineStyle);
+		}
+
+		scale(Active: Component, delta: number): void {
+			if (Active.type !== 'camera') {
+				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
 					y: Active.now.y,
 					z: Active.now.z,
-					rotate: Active.now.rotate + delta,
-					scale: Active.now.scale,
+					rotate: Active.now.rotate,
+					scale: Active.now.scale + delta,
 					blur: Active.now.blur,
 					opacity: Active.now.opacity,
 					duration: param.animation.defaultDuration
-				},
-				outlineStyle
-			);
-		}
-
-		scale(Active: Component.Type, delta: number): void {
-			if (Active.type !== 'camera') {
-				Active.change(
-					{
-						src: Active.now.src,
-						x: Active.now.x,
-						y: Active.now.y,
-						z: Active.now.z,
-						rotate: Active.now.rotate,
-						scale: Active.now.scale + delta,
-						blur: Active.now.blur,
-						opacity: Active.now.opacity,
-						duration: param.animation.defaultDuration
-					},
-					outlineStyle
-				);
+				};
+				Active.transition(state, outlineStyle);
 			}
 		}
 
-		blur(Active: Component.Type, delta: number): void {
+		blur(Active: Component, delta: number): void {
 			if (Active.type !== 'camera') {
-				Active.change(
-					{
-						src: Active.now.src,
-						x: Active.now.x,
-						y: Active.now.y,
-						z: Active.now.z,
-						rotate: Active.now.rotate,
-						scale: Active.now.scale,
-						blur: Active.now.blur + delta,
-						opacity: Active.now.opacity,
-						duration: param.animation.defaultDuration
-					},
-					outlineStyle
-				);
+				const state: State = {
+					src: Active.now.src,
+					x: Active.now.x,
+					y: Active.now.y,
+					z: Active.now.z,
+					rotate: Active.now.rotate,
+					scale: Active.now.scale,
+					blur: Active.now.blur + delta,
+					opacity: Active.now.opacity,
+					duration: param.animation.defaultDuration
+				};
+				Active.transition(state, outlineStyle);
 			}
 		}
 
-		opacity(Active: Component.Type, delta: number): void {
+		opacity(Active: Component, delta: number): void {
 			if (Active.type !== 'camera') {
-				Active.change(
-					{
-						src: Active.now.src,
-						x: Active.now.x,
-						y: Active.now.y,
-						z: Active.now.z,
-						rotate: Active.now.rotate,
-						scale: Active.now.scale,
-						blur: Active.now.blur,
-						opacity: Active.now.opacity + delta,
-						duration: param.animation.defaultDuration
-					},
-					outlineStyle
-				);
+				const state: State = {
+					src: Active.now.src,
+					x: Active.now.x,
+					y: Active.now.y,
+					z: Active.now.z,
+					rotate: Active.now.rotate,
+					scale: Active.now.scale,
+					blur: Active.now.blur,
+					opacity: Active.now.opacity + delta,
+					duration: param.animation.defaultDuration
+				};
+				Active.transition(state, outlineStyle);
 			}
 		}
 	}
+
+	export class EventHandler {
+		CanvasDrop(X: number, Y: number, file: File): void {
+			const x: number = X / (Canvas.element.offsetWidth + Canvas.element.offsetLeft) * 100;
+			const y: number = Y / (Canvas.element.offsetHeight + Canvas.element.offsetTop) * 100;
+			const state0: State = {
+				src: file.name,
+				x:
+					(scene[now].Camera.now.z / param.image.initialZ - 1) * (x - param.image.defaultSize * 0.5) +
+					scene[now].Camera.now.x +
+					(2 - scene[now].Camera.now.z / param.image.initialZ) * param.camera.vanishingX,
+				y:
+					(scene[now].Camera.now.z / param.image.initialZ - 1) *
+						(y - param.image.defaultSize * param.image.aspectRatio * 0.5) +
+					scene[now].Camera.now.y +
+					(2 - scene[now].Camera.now.z / param.image.initialZ) * param.camera.vanishingY,
+				z: param.image.initialZ,
+				rotate: 0,
+				scale: 1,
+				blur: 0,
+				opacity: 1,
+				duration: param.animation.defaultDuration
+			};
+			const struct: Struct = {
+				type: 'image',
+				element: null,
+				className: null,
+				touchable: true,
+				state: null,
+				now: state0
+			};
+			const image = new Image(now, struct);
+			scene[now].Images.push(image);
+			scene[now].dom.append(image.element);
+
+			selector.activate(image.className, 'image');
+			Active.state.push(Active.now);
+			Keyframe.render(Active);
+		}
+		CanvasResize(): void {
+			new Canvas.Resize(() => {
+				Canvas.aspectRatio = Canvas.element.offsetHeight / Canvas.element.offsetWidth;
+				scene[now].Images.forEach((e) => {
+					e.transition(e.now, e.className === Active.className ? outlineStyle : '');
+				});
+			});
+		}
+		ImageClick(className: string): void {
+			selector.activate(className, 'image');
+		}
+		CameraClick(className: string): void {
+			selector.release();
+			selector.recover();
+			selector.activate(className, 'camera');
+		}
+		PushStateClick(): void {
+			if (Active === null) return;
+			if (Active.state.length === 1) {
+				animation.register(Active, Active, 'contextmenu');
+			}
+			Active.transition(Active.now, outlineStyle);
+			Active.state.push(Active.now);
+			Keyframe.render(Active);
+		}
+		PlayClick(): void {
+			animation.play(Active);
+		}
+		BaseLayerClick(): void {
+			console.log()
+			selector.recover();
+		}
+	}
+	const animation = new AnimationPlay();
+	const selector = new Editor.Selector();
 }
+export const EditorSelector = Editor.Selector;
+export const EditorTransform = Editor.Transform;
+export const EditorEventHandler = Editor.EventHandler;

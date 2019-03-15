@@ -1,51 +1,80 @@
+import { DOM } from './domController';
 import { param, config } from './parameter';
-import { Canvas } from './canvas';
-import { Style } from './style';
+import { Scenes as scene } from './canvas';
+import { PalletCamera as Cam } from './pallet';
+import { CalcCSS } from './calculation';
 
-export namespace Component {
-	export type Type = Image | BackgroundClass | CameraClass | null;
+namespace Component {
+	export type Type = Image | Camera | null;
+	const calcCSS = new CalcCSS();
 
-	export class Base {
-		type: string;
-		element: HTMLElement;
-		className: string;
-		pointer: boolean;
-		state: Array<Style>;
-		now: Style;
-		pushState(): void {
-			this.state.push(this.now);
-		}
-		editState(state: number): void {
-			this.state[state] = this.now;
-		}
+	export interface State {
+		src: string | null;
+		x: number | null;
+		y: number | null;
+		z: number | null;
+		rotate: number | null;
+		scale: number | null;
+		blur: number | null;
+		opacity: number | null;
+		duration: number | null;
 	}
 
-	export class CameraClass extends Component.Base {
-		constructor() {
+	export class Structure {
+		type: string;
+		className: string;
+		touchable: boolean;
+		state: Array<State>;
+		now: State;
+		element: HTMLElement;
+	}
+
+	export class Camera extends Component.Structure {
+		private scene: number;
+		public pointer: string;
+
+		constructor(SceneNum: number, camera: Structure) {
 			super();
+			this.scene = SceneNum;
 			this.type = 'camera';
-			const style: Style = {
-				src: '',
-				x: param.camera.initialX,
-				y: param.camera.initialY,
-				z: param.camera.initialZ,
-				rotate: 0,
-				scale: null,
-				blur: null,
-				opacity: null,
-				duration: param.animation.defaultDuration
-			};
-			this.className = 'camera';
-			this.element = document.querySelector('.' + this.className);
-			this.pointer = true;
-			this.state = new Array<Style>();
-			this.now = style;
+			this.className = Cam.className;
+			this.touchable = true;
+			if (camera !== null && camera.state) {
+				const state0: State = {
+					src: '',
+					x: camera.state[0].x || param.camera.initialX,
+					y: camera.state[0].y || param.camera.initialY,
+					z: camera.state[0].z || param.camera.initialZ,
+					rotate: camera.state[0].rotate || 0,
+					scale: null,
+					blur: null,
+					opacity: null,
+					duration: param.animation.defaultDuration
+				};
+				this.state = camera.state;
+				this.now = state0;
+			} else {
+				const state0: State = {
+					src: '',
+					x: param.camera.initialX,
+					y: param.camera.initialY,
+					z: param.camera.initialZ,
+					rotate: 0,
+					scale: null,
+					blur: null,
+					opacity: null,
+					duration: param.animation.defaultDuration
+				};
+				this.state = [];
+				this.now = state0;
+			}
+			this.element = <HTMLElement>Cam.dom.el;
 		}
-		change({ src, x, y, z, rotate, scale, blur, opacity, duration }: Style, option: string): void {
+		transition({ src, x, y, z, rotate, scale, blur, opacity, duration }: State, option: string): void {
 			this.now = { src, x, y, z, rotate, scale, blur, opacity, duration };
 
-			[ ...Images, Background ].forEach((e) => {
-				e.change(
+			scene[this.scene].Images.forEach((e) => {
+				e.transition(
 					{
 						src: e.now.src,
 						x: e.now.x,
@@ -62,125 +91,67 @@ export namespace Component {
 			});
 		}
 	}
-	export let Camera: CameraClass = new CameraClass();
 
-	export class Image extends Component.Base {
-		private styleFix: string = `position:absolute;transform-origin:50% 50%;background-size:contain;background-position:center;background-repeat:no-repeat;`;
+	export class Image extends Component.Structure {
+		private scene: number;
+		public pointer: string;
 
-		constructor(src: string, x: number, y: number) {
+		constructor(SceneNum: number, image: Structure) {
 			super();
+			this.scene = SceneNum;
 			this.type = 'image';
-			const style: Style = {
-				src: src,
-				x:
-					(Camera.now.z / param.image.initialZ - 1) * x +
-					Camera.now.x +
-					(2 - Camera.now.z / param.image.initialZ) * param.camera.vanishingX,
-				y:
-					(Camera.now.z / param.image.initialZ - 1) * y +
-					Camera.now.y +
-					(2 - Camera.now.z / param.image.initialZ) * param.camera.vanishingY,
-				z: param.image.initialZ,
-				rotate: 0,
-				scale: 1,
-				blur: 0,
-				opacity: 1,
-				duration: param.animation.defaultDuration
-			};
-			const className: string = 'img-' + Component.uniqueString();
-			this.createElement(className, style);
+			this.className = `scene${this.scene}-img${uniqueString()}`;
+			this.touchable = image.touchable || true;
+			this.pointer = this.touchable ? 'auto' : 'none';
+			if (image.state) {
+				this.state = image.state;
+				const state0: State = {
+					src: image.state[0].src,
+					x: image.state[0].x || 50,
+					y: image.state[0].y || 50,
+					z: image.state[0].z || param.image.initialZ,
+					rotate: image.state[0].rotate || 0,
+					scale: image.state[0].scale || 1,
+					blur: image.state[0].blur || 0,
+					opacity: image.state[0].opacity || 1,
+					duration: param.animation.defaultDuration
+				};
+				this.now = state0;
+				this.createElement(this.className, state0);
+			} else {
+				this.state = [];
+				this.now = image.now;
+				this.createElement(this.className, image.now);
+			}
 		}
-		createElement(className: string, style: Style) {
-			Canvas.DOM.append(`
+		createElement(className: string, state: State): void {
+			this.element = <HTMLElement>new DOM(`
 			<div draggable="true" 
 			 ondragstart="${config.imageDragStart}(event);"
 			 ondragend="${config.imageDragEnd}(event);"
 			 onclick="${config.imageClick}(event);"
 			 ondblclick="${config.imageDoubleClick}(event);"
 			 class="${className} component-img" 
-			 style="${this.cssText(style, '')}
+			 style="${calcCSS.image(state, scene[this.scene].Camera.now, this.pointer, '')}
 			 "></div>
-			`);
-			this.element = document.querySelector('.' + className);
-			this.className = className;
-			this.pointer = true;
-			this.state = new Array<Style>();
-			this.now = style;
+			`).el;
 		}
-		cssText({ src, x, y, z, rotate, scale, blur, opacity }: Style, option: string): string {
-			const distanceInv: number = 1 / Math.max(Camera.now.z - z, 1);
-			const size: number = (param.camera.initialZ - param.background.initialZ) * distanceInv;
-			return `${this.styleFix}${option}
-				background-image:url(${config.imageSrcUrl}${src});
-				left:${(x - Camera.now.x - param.camera.vanishingX) * z * distanceInv + param.camera.vanishingX}%;
-				top:${(y - Camera.now.y - param.camera.vanishingY) * z * distanceInv + param.camera.vanishingY}%;
-				z-index:${~~z + param.canvas.Z};
-				width:${param.image.defaultSize * size}%;
-				height:${Canvas.Element.offsetWidth * param.image.defaultSize * 0.01 * param.image.aspectRatio * size}px;
-				transform: rotate(${~~(rotate - Camera.now.rotate)}deg) scale(${scale});
-				filter:blur(${~~(blur +
-					Math.abs(Camera.now.z - z - param.camera.initialZ + param.image.initialZ) /
-						param.camera.depthOfField)}px);
-				opacity:${Camera.now.z < z ? 0 : ~~opacity || 1};
-				pointer-events:${this.pointer || 'auto'};
-			`;
-		}
-		change({ src, x, y, z, rotate, scale, blur, opacity, duration }: Style, option: string): void {
+		transition({ src, x, y, z, rotate, scale, blur, opacity, duration }: State, option: string): void {
 			this.now = { src, x, y, z, rotate, scale, blur, opacity, duration };
-			this.element.style.cssText = this.cssText(this.now, option);
+			this.element.style.cssText = calcCSS.image(
+				this.now,
+				scene[this.scene].Camera.now,
+				this.pointer,
+				option
+			);
 		}
 	}
-	export let Images: Array<Image> = new Array<Image>();
 
-	export class BackgroundClass extends Component.Base {
-		private styleFix: string = `position:absolute;transform-origin:50% 50%;background-size:contain;background-position:center;background-repeat:no-repeat;`;
-
-		constructor() {
-			super();
-			this.type = 'background';
-			const style: Style = {
-				src: config.backgroundFile,
-				x: Camera.now.x + (2 - Camera.now.z / param.background.initialZ) * param.camera.vanishingX,
-				y: Camera.now.y + (2 - Camera.now.z / param.background.initialZ) * param.camera.vanishingY,
-				z: param.background.initialZ,
-				rotate: 0,
-				scale: param.background.defaultSize * 0.01,
-				blur: 0,
-				opacity: 1,
-				duration: param.animation.defaultDuration
-			};
-			this.className = 'background';
-			this.element = document.querySelector('.' + this.className);
-			this.pointer = true;
-			this.state = new Array<Style>();
-			this.now = style;
-			this.element.style.cssText = this.cssText(style, '');
-		}
-		cssText({ src, x, y, z, rotate, scale, blur, opacity }: Style, option: string): string {
-			const distanceInv: number = 1 / Math.max(Camera.now.z - z, 1);
-			const size: number = (param.camera.initialZ - param.background.initialZ) * distanceInv;
-			return `${this.styleFix}${option}
-				background-image:url(${config.imageSrcUrl}${src});
-				left:${(x - Camera.now.x - param.camera.vanishingX) * z * distanceInv + param.camera.vanishingX}%;
-				top:${(y - Camera.now.y - param.camera.vanishingY) * z * distanceInv + param.camera.vanishingY}%;
-				z-index:${~~z + param.canvas.Z};
-				width:${100 * size}%;
-				height:${Canvas.Element.offsetWidth * param.background.aspectRatio * size}px;
-				transform:rotate(${~~(rotate - Camera.now.rotate)}deg) scale(${scale});
-				filter:blur(${~~(blur +
-					Math.abs(Camera.now.z - z - param.camera.initialZ + param.background.initialZ) /
-						param.camera.depthOfField)}px);
-				opacity:${opacity}||1;
-				pointer-events:${this.pointer || 'auto'};
-			`;
-		}
-		change({ src, x, y, z, rotate, scale, blur, opacity, duration }: Style, option: string): void {
-			this.now = { src, x, y, z, rotate, scale, blur, opacity, duration };
-			this.element.style.cssText = this.cssText(this.now, option);
-		}
-	}
-	export let Background: Component.BackgroundClass = new Component.BackgroundClass();
-
-	export const uniqueString = (): string =>
+	const uniqueString = (): string =>
 		new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
 }
+export type ComponentType = Component.Type;
+export type ComponentState = Component.State;
+export type ComponentStructure = Component.Structure;
+export const ComponentCamera = Component.Camera;
+export const ComponentImage = Component.Image;

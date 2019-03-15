@@ -146,6 +146,7 @@ body {
   padding: 0;
   border: 0;
   margin: 0;
+  overflow: hidden;
 }
 
 body {
@@ -218,10 +219,29 @@ footer {
   left: 0;
   width: 85%;
   height: 750px;
-  z-index: 3;
   background: white;
   margin: 0 0;
   overflow: hidden;
+}
+
+.scene {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.base-layer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .tool-pallet {
@@ -232,13 +252,15 @@ footer {
   left: 0;
   left: 85%;
   width: 15%;
-  height: 750px;
+  min-width: 15rem;
+  height: 100%;
   z-index: 3;
 }
 
 .material-icons {
   color: #7d7d91;
   transition: .2s;
+  transform: scale(1.2);
 }
 
 .material-icons:hover {
@@ -251,13 +273,41 @@ footer {
   transform: scale(2);
 }
 
-.push-state {
-  z-index: 5;
-  margin: 2.5rem;
-  transform: scale(2);
+.active-header {
+  width: 100%;
+  height: 5rem;
+  color: #c8c8dc;
+  background: #141428;
+  border-top: solid 1px #323246;
+  box-sizing: border-box;
+  padding: 1em;
+  font-size: 1.1em;
 }
 
-.state-list {
+.active-title {
+  height: 60%;
+  display: flex;
+}
+
+.active-title-index {
+  width: 20%;
+}
+
+.active-title-value {
+  width: 80%;
+  font-weight: bold;
+  margin: 0 0 0 1em;
+}
+
+.active-clickable {
+  position: relative;
+  height: 40%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1em;
+}
+
+.keyframe-state-list {
   width: 100%;
   height: 650px;
   color: #c8c8dc;
@@ -267,46 +317,31 @@ footer {
   overflow-y: auto;
 }
 
-.state-list-header {
-  border-top: solid 1px #323246;
-  box-sizing: border-box;
-  padding: 1em;
-}
-
-.state-classname {
-  font-weight: bold;
-  margin: 0 0 0 1em;
-}
-
-.state-list-menu, .state-list-header {
+.keyframe-menu {
   width: 100%;
   height: 3rem;
   color: #c8c8dc;
   background: #141428;
   display: flex;
+  margin: 1rem 0 0 0;
+  border-top: solid 1px #323246;
 }
 
-.state-icon, .state-push, .state-play, .state-remove, .state-update {
-  height: 100%;
-  width: 20%;
+.keyframe-play {
+  position: absolute;
+  left: 20%;
+  transform: scale(1.5);
+  margin-top: 0.6rem;
 }
 
-.state-clickable {
-  height: 100%;
-  width: 50%;
-  box-sizing: border-box;
-  padding: 5%;
+.keyframe-push-state {
+  position: absolute;
+  left: 60%;
+  transform: scale(1.2);
+  margin-top: 0.7rem;
 }
 
-.state-push {
-  margin: 0.5rem 0.5rem;
-}
-
-.state-play {
-  margin: 0.5rem 0.5rem;
-}
-
-.state {
+.keyframe-state {
   width: 100%;
   height: 5rem;
   color: #c8c8dc;
@@ -315,31 +350,53 @@ footer {
   display: flex;
 }
 
-.state:hover {
+.keyframe-state:hover {
   background: #646478;
 }
 
-.state-text {
+.keyframe-state-current {
+  background: #fa64e6;
+}
+
+.keyframe-state-current:hover {
+  background: #fa64e6;
+}
+
+.keyframe-state-text {
   width: 60%;
   height: 100%;
 }
 
-.state-btn {
+.keyframe-state-btn {
   width: 40%;
   height: 100%;
 }
 
-.state-number, .state-src {
-  height: 50%;
+.keyframe-state-number, .keyframe-state-duration, .keyframe-state-src {
+  height: 33%;
   width: 90%;
   box-sizing: border-box;
-  padding: 7%;
+  padding: 3% 7%;
 }
 
-.state-remove {
-  margin: 1.5rem 0.5rem;
+.keyframe-state-duration {
+  display: flex;
+  height: 38%;
 }
 
-.state-update {
-  margin: 1.5rem 0.5rem;
+.keyframe-state-duration-index {
+  width: 70%;
+}
+
+.keyframe-state-duration-value {
+  outline-color: #00c8b4;
+  width: 30%;
+}
+
+.keyframe-state-update {
+  margin: 1.5rem 7%;
+}
+
+.keyframe-state-remove {
+  margin: 1.5rem 7%;
 }

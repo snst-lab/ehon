@@ -1,15 +1,18 @@
 import { param, config } from './parameter';
-import { Canvas } from './canvas';
-import { Component } from './component';
-import { Editor } from './editor';
-import {  Transition } from './transition';
+import { Canvas, Scenes as scene, Now as now } from './canvas';
+import { PalletKeyframe as Keyframe, PalletCamera as Cam } from './pallet';
+import { Active, EditorTransform, EditorEventHandler } from './editor';
 
-export namespace EventListener {
-	const editor = new Editor.EventHandler();
-	const trans = new Editor.Transform();
-	let keyDown: string | null = null;
+export let keyDown: string | null = null;
+
+namespace EventListener {
+	const transform = new EditorTransform();
+	const editor = new EditorEventHandler();
+
+	let dragstart: pointerPosition = { x: 0, y: 0 };
 
 	const keyMap: { [key: number]: string } = {
+		13: 'enter',
 		88: 'x',
 		89: 'y',
 		90: 'z',
@@ -19,24 +22,29 @@ export namespace EventListener {
 		79: 'o'
 	};
 
+	interface pointerPosition {
+		x: number;
+		y: number;
+	}
+
 	export class Start {
 		constructor() {
 			this.detectKeyDown();
-			this.listenCanvasWheel();
-			this.listenCanvasClick();
-			this.listenCameraClick();
-			this.listenCanvasDrop();
-			this.listenBackgroundClick();
-			this.listenBackgroundDoubleClick();
-			this.listenPushStateClick();
-			this.listenPlayClick();
-			this.listenImageEvent();
+			this.CanvasWheel();
+			this.CanvasClick();
+			this.CanvasResize();
+			this.CameraClick();
+			this.CanvasDrop();
+			this.BaseLayerClick();
+			this.PushStateClick();
+			this.PlayClick();
+			this.ImageEvent();
 		}
 
-		private detectKeyDown() {
+		private detectKeyDown(): void {
 			document.addEventListener(
 				'keydown',
-				(event:any) => {
+				(event: KeyboardEvent) => {
 					if (keyDown === null) {
 						keyDown = keyMap[event.keyCode];
 					}
@@ -52,118 +60,122 @@ export namespace EventListener {
 			);
 		}
 
-		private listenCanvasWheel(): void {
-			Canvas.DOM.on('mousewheel', (event: WheelEvent): void => {
+		private CanvasWheel(): void {
+			Canvas.dom.on('mousewheel', (event: WheelEvent): void => {
 				event.preventDefault();
-				if (Editor.Active === null) return;
+				if (Active === null) return;
 				switch (keyDown) {
 					case 'x':
-						trans.translate(Editor.Active, event.deltaY * param.wheelResponse.XY, 0, 0);
+						transform.translate(Active, event.deltaY * param.wheelResponse.XY, 0, 0);
 						break;
 					case 'y':
-						trans.translate(Editor.Active, 0, event.deltaY * param.wheelResponse.XY, 0);
+						transform.translate(Active, 0, event.deltaY * param.wheelResponse.XY, 0);
 						break;
 					case 'z':
-						trans.translate(Editor.Active, 0, 0, event.deltaY * param.wheelResponse.Z);
+						transform.translate(Active, 0, 0, event.deltaY * param.wheelResponse.Z);
 						break;
 					case 'r':
-						trans.rotate(Editor.Active, event.deltaY * param.wheelResponse.rotate);
+						transform.rotate(Active, event.deltaY * param.wheelResponse.rotate);
 						break;
 					case 's':
-						trans.scale(Editor.Active, event.deltaY * param.wheelResponse.scale);
+						transform.scale(Active, event.deltaY * param.wheelResponse.scale);
 						break;
 					case 'b':
-						trans.blur(Editor.Active, event.deltaY * param.wheelResponse.blur);
+						transform.blur(Active, event.deltaY * param.wheelResponse.blur);
 						break;
 					case 'o':
-						trans.opacity(Editor.Active, event.deltaY * param.wheelResponse.opacity);
+						transform.opacity(Active, event.deltaY * param.wheelResponse.opacity);
 						break;
 					default:
 						break;
 				}
 			});
 		}
-		private listenCameraClick(): void {
-			Component.Camera.element.addEventListener('click', (event:any) => {
+		private CameraClick(): void {
+			Cam.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
-				editor.CameraClick(event);
-			},false);
-		}
-		private listenCanvasClick(): void {
-			Canvas.DOM.on('click', (event:any) => {
-				event.preventDefault();
-				editor.CanvasClick(event);
+				editor.CameraClick(Cam.className);
 			});
 		}
-		private listenBackgroundClick(): void {
-			Component.Background.element.addEventListener('click', (event:any) => {
+		private CanvasClick(): void {
+			Canvas.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
-				editor.BackgroundClick(event);
+			});
+		}
+		private BaseLayerClick(): void {
+			scene[now].dom.el.firstChild.addEventListener('click', (event: PointerEvent) => {
+				event.preventDefault();
+				editor.BaseLayerClick();
 			},false);
 		}
-		private listenBackgroundDoubleClick(): void {
-			Component.Background.element.addEventListener('dblclick', (event:any) => {
-				event.preventDefault();
-				editor.BackgroundDoubleClick(event);
-			},false);
+		private CanvasResize():void{
+			window.addEventListener('resize'||'orientationchange', editor.CanvasResize);
 		}
-		private listenCanvasDrop(): void {
-			Canvas.DOM.on('drop', (event:any) => {
+		private CanvasDrop(): void {
+			Canvas.dom.on('drop', (event: DragEvent) => {
 				event.preventDefault();
 				if (event.dataTransfer.items) {
 					// Use DataTransferItemList interface to access the file(s)
 					for (let i: number = 0; i < event.dataTransfer.items.length; i++) {
 						// If dropped items aren't files, reject them
 						if (event.dataTransfer.items[i].kind === 'file') {
-							editor.CanvasDrop(event, event.dataTransfer.items[i].getAsFile());
+							editor.CanvasDrop(event.clientX, event.clientY, event.dataTransfer.items[i].getAsFile());
 						}
 					}
 				}
 			});
 		}
-		private listenPushStateClick(): void {
-			document.querySelector('.state-push').addEventListener('click',(event:any)=>{
+		private PushStateClick(): void {
+			Keyframe.pushState.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
-				editor.PushStateClick(event);
-			},false);
+				editor.PushStateClick();
+			});
 		}
-		private listenPlayClick(): void {
-			document.querySelector('.state-play').addEventListener(
-				'click',
-				(event: any) => {
-					event.preventDefault();
-					new Transition.Animation().play(Editor.Active);
-				},
-				false
-			);
+
+		private PlayClick(): void {
+			Keyframe.play.dom.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				editor.PlayClick();
+			});
 		}
 
 
-		private listenImageEvent(): void {
+		private ImageEvent(): void {
 			Object.defineProperty(window, config.imageClick, {
-				value: function(event:any) {
+				value: function(event: PointerEvent): void {
 					event.preventDefault();
-					editor.ImageClick(event);
+					const className: string = (<Element>event.target).classList.item(0);
+					editor.ImageClick(className);
 				}
 			});
 			Object.defineProperty(window, config.imageDoubleClick, {
-				value: function(event:any) {
+				value: function(event: PointerEvent): void {
 					event.preventDefault();
-					editor.ImageDoubleClick(event);
 				}
 			});
 			Object.defineProperty(window, config.imageDragStart, {
-				value: function(event:any) {
+				value: function(event: DragEvent): void {
 					// event.preventDefault();
-					editor.ImageDragStart(event);
+					if (Active === null) return;
+					const className: string = (<Element>event.target).classList.item(0);
+					if (Active.className !== className) return;
+					dragstart.x = event.clientX;
+					dragstart.y = event.clientY;
 				}
 			});
 			Object.defineProperty(window, config.imageDragEnd, {
-				value: function(event:any) {
+				value: function(event: DragEvent): void {
 					event.preventDefault();
-					editor.ImageDragEnd(event);
+					if (Active === null) return;
+					const className: string = (<Element>event.target).classList.item(0);
+					if (Active.className !== className) return;
+					const correctXY: number = (scene[now].Camera.now.z - Active.now.z) / Active.now.z;
+					const dx: number = (event.clientX - dragstart.x) * 100 / Canvas.element.offsetWidth * correctXY;
+					const dy: number = (event.clientY - dragstart.y) * 100 / Canvas.element.offsetHeight * correctXY;
+					transform.translate(Active, dx, dy, 0);
 				}
 			});
 		}
 	}
 }
+export const EventListenerStart = EventListener.Start;

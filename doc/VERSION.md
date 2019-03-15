@@ -48,16 +48,12 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - [x] 4. move along X,Y,Z-axis, scale, rotate, change opacity of elements with keydown& wheel
 - [x] 5. add camera component
 - [x] 6. registering & playing animation
-- [ ] 7. save html file as current state
-- [ ] 8. show layer table & select layer to be editable ("self" is prepared alias of layer) 
-- [ ] 9. right click elements to show framebase timeline (circle on bar style)
-- [ ] 10. select event & target from layer table
-- [ ] 11. double left click on timeline to registar state & double right click to delete
-- [ ] 12. double left click on circle on timeline to change src file.
-- [ ] 13. right click circle on timeline to edit new state of elements / right click again to cancel
-- [ ] 14. save history of html
-- [ ] 15. undo/redo
-
+- [x] 7. change image src & duration
+- [ ] 8. add text component  
+- [ ] 9. show layer table & select layer to be editable ("self" is prepared alias of layer) 
+- [ ] 10. select animation trigger element  
+- [ ] 11. save story as json file
+- [ ] 12. undo/redo
 
 
 >### Patch
