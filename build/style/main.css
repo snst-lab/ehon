@@ -244,7 +244,7 @@ footer {
   height: 100%;
 }
 
-.tool-pallet {
+.pallet {
   position: absolute;
   top: 0;
   right: 0;
@@ -267,21 +267,22 @@ footer {
   color: #00c8b4;
 }
 
-.camera {
+.component-camera {
   z-index: 5;
   margin: 2.5rem;
   transform: scale(2);
 }
 
-.active-header {
+.active-header, .keyframe-menu {
   width: 100%;
-  height: 5rem;
   color: #c8c8dc;
   background: #141428;
   border-top: solid 1px #323246;
   box-sizing: border-box;
-  padding: 1em;
+  padding: 0.8rem 1rem;
   font-size: 1.1em;
+  height: 5rem;
+  margin: 0 0 1rem 0;
 }
 
 .active-title {
@@ -294,7 +295,8 @@ footer {
 }
 
 .active-title-value {
-  width: 80%;
+  width: 70%;
+  height: 2.5rem;
   font-weight: bold;
   margin: 0 0 0 1em;
 }
@@ -307,24 +309,25 @@ footer {
   padding: 1em;
 }
 
-.keyframe-state-list {
-  width: 100%;
-  height: 650px;
-  color: #c8c8dc;
-  font-size: 1.1em;
-  background: #141428;
-  overflow-x: hidden;
-  overflow-y: auto;
+.keyframe-menu {
+  height: 6.5rem;
 }
 
-.keyframe-menu {
+.keyframe-delay, .keyframe-iteration {
+  height: 35%;
   width: 100%;
-  height: 3rem;
-  color: #c8c8dc;
-  background: #141428;
   display: flex;
-  margin: 1rem 0 0 0;
-  border-top: solid 1px #323246;
+}
+
+.keyframe-delay-index, .keyframe-iteration-index {
+  width: 25%;
+}
+
+.keyframe-delay-value, .keyframe-iteration-value {
+  width: 20%;
+  height: 1.2rem;
+  font-weight: bold;
+  margin: 0 0 0 1em;
 }
 
 .keyframe-play {
@@ -339,6 +342,16 @@ footer {
   left: 60%;
   transform: scale(1.2);
   margin-top: 0.7rem;
+}
+
+.keyframe-state-list {
+  width: 100%;
+  height: 650px;
+  color: #c8c8dc;
+  font-size: 1.1em;
+  background: #141428;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .keyframe-state {
@@ -385,18 +398,22 @@ footer {
 }
 
 .keyframe-state-duration-index {
-  width: 70%;
+  width: 60%;
 }
 
 .keyframe-state-duration-value {
-  outline-color: #00c8b4;
-  width: 30%;
+  width: 35%;
+  height: 1.2rem;
 }
 
 .keyframe-state-update {
-  margin: 1.5rem 7%;
+  position: absolute;
+  margin: 1.0rem 0;
+  left: 60%;
 }
 
 .keyframe-state-remove {
-  margin: 1.5rem 7%;
+  position: absolute;
+  margin: 1.0rem 0;
+  left: 75%;
 }

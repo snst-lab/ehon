@@ -23,7 +23,12 @@ namespace Component {
 	export class Structure {
 		type: string;
 		className: string;
+		title: string;
 		touchable: boolean;
+		trigger:Array<string>;
+		delay:number;
+		iteration:number;
+		running:boolean;
 		state: Array<State>;
 		now: State;
 		element: HTMLElement;
@@ -33,27 +38,36 @@ namespace Component {
 		private scene: number;
 		public pointer: string;
 
-		constructor(SceneNum: number, camera: Structure) {
+		constructor(SceneNum: number, given: Structure) {
 			super();
 			this.scene = SceneNum;
 			this.type = 'camera';
 			this.className = Cam.className;
+			this.title = 'Camera';
 			this.touchable = true;
-			if (camera !== null && camera.state) {
+			this.pointer = 'auto';
+			this.running = false;
+			if (given !== null && given.state && given.trigger && given.iteration && given.delay) {
+				this.trigger = given.trigger || [];
+				this.iteration = given.iteration || 1;
+				this.delay = given.delay || 0;
 				const state0: State = {
 					src: '',
-					x: camera.state[0].x || param.camera.initialX,
-					y: camera.state[0].y || param.camera.initialY,
-					z: camera.state[0].z || param.camera.initialZ,
-					rotate: camera.state[0].rotate || 0,
+					x: given.state[0].x || param.given.initialX,
+					y: given.state[0].y || param.given.initialY,
+					z: given.state[0].z || param.given.initialZ,
+					rotate: given.state[0].rotate || 0,
 					scale: null,
 					blur: null,
 					opacity: null,
 					duration: param.animation.defaultDuration
 				};
-				this.state = camera.state;
+				this.state = given.state;
 				this.now = state0;
 			} else {
+				this.trigger = [];
+				this.iteration = 1;
+				this.delay = 0;
 				const state0: State = {
 					src: '',
 					x: param.camera.initialX,
@@ -96,32 +110,38 @@ namespace Component {
 		private scene: number;
 		public pointer: string;
 
-		constructor(SceneNum: number, image: Structure) {
+		constructor(SceneNum: number, given: Structure) {
 			super();
 			this.scene = SceneNum;
 			this.type = 'image';
-			this.className = `scene${this.scene}-img${uniqueString()}`;
-			this.touchable = image.touchable || true;
+			this.className = given.className || `scene${this.scene}-img${uniqueString()}`;
+			this.title = given.title || this.className;
+			this.touchable = given.touchable || true;
 			this.pointer = this.touchable ? 'auto' : 'none';
-			if (image.state) {
-				this.state = image.state;
+			this.trigger = given.trigger || [];
+			this.iteration = given.iteration || 1;
+			this.delay = given.delay || 0;
+			this.running = false;
+
+			if (given.state) {
+				this.state = given.state;
 				const state0: State = {
-					src: image.state[0].src,
-					x: image.state[0].x || 50,
-					y: image.state[0].y || 50,
-					z: image.state[0].z || param.image.initialZ,
-					rotate: image.state[0].rotate || 0,
-					scale: image.state[0].scale || 1,
-					blur: image.state[0].blur || 0,
-					opacity: image.state[0].opacity || 1,
+					src: given.state[0].src,
+					x: given.state[0].x || 50,
+					y: given.state[0].y || 50,
+					z: given.state[0].z || param.given.initialZ,
+					rotate: given.state[0].rotate || 0,
+					scale: given.state[0].scale || 1,
+					blur: given.state[0].blur || 0,
+					opacity: given.state[0].opacity || 1,
 					duration: param.animation.defaultDuration
 				};
 				this.now = state0;
 				this.createElement(this.className, state0);
 			} else {
 				this.state = [];
-				this.now = image.now;
-				this.createElement(this.className, image.now);
+				this.now = given.now;
+				this.createElement(this.className, given.now);
 			}
 		}
 		createElement(className: string, state: State): void {

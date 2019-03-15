@@ -2,7 +2,6 @@ import { param } from './parameter';
 import { ComponentType as Component, ComponentState as State } from './component';
 
 namespace Animation {
-	let playing: boolean = false;
 	class Operation {
 		add(state1: State, state2: State): State {
 			return {
@@ -33,48 +32,85 @@ namespace Animation {
 		}
 	}
 
-	export class Play {
-		private op = new Operation();
-		register(origin: Component, target: Component, eventName: string): void {
+	export class Register {
+		constructor(origin: Component, target: Component, eventName: string) {
 			if (target.state.length !== 1) return;
 			origin.element.addEventListener(
 				eventName,
 				(event: any) => {
 					event.preventDefault();
-					this.play(target);
+					new Animation.Play(target);
 				},
 				false
 			);
 		}
+	}
 
-		play(target: Component): void {
-			// if (target.running) return;
-			// target.running = true;
-			if (target.state.length < 2) return;
-			target.transition(target.state[0], '');
-			const stateDiff: State = this.op.diff(target.state[0], target.state[1]);
-			window.requestAnimationFrame(() => this.update(target, 0, 1, stateDiff));
+	export class Play {
+		private op = new Operation();
+		private diff: Array<State>;
+		private stateLength: number;
+		private iteration: number = 0;
+
+		constructor(target: Component) {
+			if (target.running) return;
+			this.stateLength = target.state.length;
+			if (this.stateLength < 2) return;
+			target.running = true;
+			this.calcDiff(target);
+			this.delayStart(target, 0);
 		}
-
-		update(target: Component, frame: number, endState: number, stateDiff: State): void {
+		calcDiff(target: Component): void {
+			this.diff = [];
+			for (let [ i, l ]: Array<number> = [ 0, this.stateLength - 1 ]; i < l; i++) {
+				this.diff.push(this.op.diff(target.state[i], target.state[i + 1]));
+			}
+		}
+		delayStart(target: Component, frame: number): void {
+			if (frame < target.delay) {
+				window.requestAnimationFrame(() => this.delayStart(target, frame + 1));
+			} else {
+				this.iterate(target);
+			}
+		}
+		iterate(target: Component): void {
+			if (this.iteration < target.iteration) {
+				this.iteration += 1;
+				target.transition(target.state[0], '');
+				this.shift(target, 1);
+			} else {
+				this.iteration = 0;
+				target.running = false;
+			}
+		}
+		shift(target: Component, endState: number): void {
+			if (endState < this.stateLength) {
+				window.requestAnimationFrame(() => this.move(target, 0, endState));
+			} else {
+				this.wait(target, 0);
+			}
+		}
+		wait(target: Component, frame: number): void {
+			if (frame < target.state[0].duration) {
+				window.requestAnimationFrame(() => this.wait(target, frame + 1));
+			} else {
+				this.iterate(target);
+			}
+		}
+		move(target: Component, frame: number, endState: number): void {
 			if (frame % param.animation.skipFrame === 0) {
 				if (frame < target.state[endState].duration) {
-					target.transition(this.op.add(target.now, stateDiff), '');
-					window.requestAnimationFrame(() => this.update(target, frame + 1, endState, stateDiff));
+					target.transition(this.op.add(target.now, this.diff[endState - 1]), '');
+					window.requestAnimationFrame(() => this.move(target, frame + 1, endState));
 				} else {
-					if (endState < target.state.length - 1) {
-						target.transition(target.state[endState], '');
-						const stateDiff: State = this.op.diff(target.state[endState], target.state[endState + 1]);
-						window.requestAnimationFrame(() => this.update(target, 0, endState + 1, stateDiff));
-					} else {
-						target.transition(target.state[endState], '');
-						// target.running.false = false;
-					}
+					target.transition(target.state[endState], '');
+					this.shift(target, endState + 1);
 				}
 			} else {
-				window.requestAnimationFrame(() => this.update(target, frame + 1, endState, stateDiff));
+				window.requestAnimationFrame(() => this.move(target, frame + 1, endState));
 			}
 		}
 	}
 }
+export const AnimationRegister = Animation.Register;
 export const AnimationPlay = Animation.Play;

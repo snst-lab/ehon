@@ -22,21 +22,29 @@
     <header>ehon</header>
     <main>
         <div class='canvas' style='z-index:3;' ondragover="event.preventDefault();"></div>
-        <div class='tool-pallet'>
-            <i class="camera material-icons">
+        <div class='pallet'>
+            <i class="component-camera material-icons">
                 videocam
             </i>
             <div class='active-header'>
                 <div class='active-title'>
                     <div class='active-title-index'>Active:</div>
-                    <div class='active-title-value'>i1239424</div>
+                    <div class='active-title-value' contenteditable="true"></div>
                 </div>
                 <div class='active-clickable'>
-                    <input type="checkbox" id="clickable">
+                    <input type="checkbox" id="clickable" checked>
                     <label for="clickable">Touchable</label>
                 </div>
             </div>
             <div class='keyframe-menu'>
+                <div class='keyframe-delay'>
+                    <div class='keyframe-delay-index'>Delay:</div>
+                    <div class='keyframe-delay-value' contenteditable="true"></div>
+                </div>
+                <div class='keyframe-iteration'>
+                    <div class='keyframe-iteration-index'>Iteration:</div>
+                    <div class='keyframe-iteration-value' contenteditable="true"></div>
+                </div>
                 <i class='keyframe-play material-icons'>play_arrow</i>
                 <i class='keyframe-push-state material-icons'>queue</i>
             </div>

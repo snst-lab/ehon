@@ -1,6 +1,6 @@
 import { param, config } from './parameter';
 import { Canvas, Scenes as scene, Now as now } from './canvas';
-import { PalletKeyframe as Keyframe, PalletCamera as Cam } from './pallet';
+import { PalletActive, PalletKeyframe as Keyframe, PalletCamera as Cam } from './pallet';
 import { Active, EditorTransform, EditorEventHandler } from './editor';
 
 export let keyDown: string | null = null;
@@ -36,6 +36,9 @@ namespace EventListener {
 			this.CameraClick();
 			this.CanvasDrop();
 			this.BaseLayerClick();
+			this.TitleChange();
+			this.DelayChange();
+			this.IterationChange();
 			this.PushStateClick();
 			this.PlayClick();
 			this.ImageEvent();
@@ -125,13 +128,30 @@ namespace EventListener {
 				}
 			});
 		}
+		private TitleChange(): void {
+			PalletActive.title.dom.on('blur', (event: Event) => {
+				event.preventDefault();
+				Active.title = PalletActive.title.dom.el.textContent;
+			});
+		}
+		private DelayChange(): void {
+			Keyframe.delay.dom.on('blur', (event: Event) => {
+				event.preventDefault();
+				Active.delay = Number(Keyframe.delay.dom.el.textContent);
+			});
+		}
+		private IterationChange(): void {
+			Keyframe.iteration.dom.on('blur', (event: Event) => {
+				event.preventDefault();
+				Active.iteration = Number(Keyframe.iteration.dom.el.textContent);
+			});
+		}
 		private PushStateClick(): void {
 			Keyframe.pushState.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
 				editor.PushStateClick();
 			});
 		}
-
 		private PlayClick(): void {
 			Keyframe.play.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();

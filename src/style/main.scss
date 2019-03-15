@@ -69,7 +69,6 @@ footer {
 	background: url("../../assets/img/cover.jpg") no-repeat center/cover;
 }
 
-
 // Below is project unique style
 
 .canvas {
@@ -93,7 +92,7 @@ footer {
 	height: 100%;
 }
 
-.tool-pallet {
+.pallet {
 	@include absolute(0, 0, 0, 0);
 	left: 85%;
 	width: 15%;
@@ -112,7 +111,7 @@ footer {
 	}
 }
 
-.camera {
+.component-camera {
 	z-index: 5;
 	margin: 2.5rem;
 	transform: scale(2);
@@ -121,29 +120,30 @@ footer {
 .active {
 	&-header {
 		width: 100%;
-		height: 5rem;
 		color: $gray5;
 		background: $black;
 		border-top: solid 1px $gray0;
 		box-sizing: border-box;
-		padding: 1em;
+		padding: 0.8rem 1rem;
 		font-size: 1.1em;
+		height: 5rem;
+		margin: 0 0 1rem 0;
 	}
-	&-title{
-		height:60%;
-		display:flex;
-	}
-	&-title-index{
-		width:20%;
-	}
-	&-title-value {
-		width:80%;
-		font-weight: bold;
-		margin: 0 0 0 1em;
-		
+	&-title {
+		height: 60%;
+		display: flex;
+		&-index {
+			width: 20%;
+		}
+		&-value {
+			width: 70%;
+			height: 2.5rem;
+			font-weight: bold;
+			margin: 0 0 0 1em;
+		}
 	}
 	&-clickable {
-		position:relative;
+		position: relative;
 		height: 40%;
 		width: 100%;
 		box-sizing: border-box;
@@ -152,6 +152,45 @@ footer {
 }
 
 .keyframe {
+	&-menu {
+		@extend .active-header;
+		height:6.5rem;
+	}
+	&-delay {
+		height: 35%;
+		width:100%;
+		display: flex;
+		&-index {
+			width: 25%;
+		}
+		&-value {
+			width: 20%;
+			height:1.2rem;
+			font-weight: bold;
+			margin: 0 0 0 1em;
+		}
+	}
+	&-iteration{
+		@extend .keyframe-delay;
+		&-index {
+			@extend .keyframe-delay-index;
+		}
+		&-value {
+			@extend .keyframe-delay-value;
+		}
+	}
+	&-play {
+		position: absolute;
+		left: 20%;
+		transform: scale(1.5);
+		margin-top: 0.6rem;
+	}
+	&-push-state {
+		position: absolute;
+		left: 60%;
+		transform: scale(1.2);
+		margin-top: 0.7rem;
+	}
 	&-state-list {
 		width: 100%;
 		height: 650px;
@@ -160,27 +199,6 @@ footer {
 		background: $black;
 		overflow-x: hidden;
 		overflow-y: auto;
-	}
-	&-menu {
-		width: 100%;
-		height: 3rem;
-		color: $gray5;
-		background: $black;
-		display: flex;
-		margin: 1rem 0 0 0;
-		border-top: solid 1px $gray0;
-	}
-	&-play {
-		position:absolute;
-		left:20%;
-		transform:scale(1.5);
-		margin-top:0.6rem;
-	}
-	&-push-state {
-		position:absolute;
-		left:60%;
-		transform:scale(1.2);
-		margin-top:0.7rem;
 	}
 	&-state {
 		width: 100%;
@@ -193,7 +211,6 @@ footer {
 		&:hover {
 			background: $gray1;
 		}
-
 		&-current {
 			background: $pink;
 
@@ -201,42 +218,45 @@ footer {
 				background: $pink;
 			}
 		}
-	}
-	&-state-text {
-		width: 60%;
-		height: 100%;
-	}
-	&-state-btn {
-		width: 40%;
-		height: 100%;
-	}
-
-	&-state-number {
-		height: 33%;
-		width: 90%;
-		box-sizing: border-box;
-		padding: 3% 7%;
-	}
-	&-state-duration {
-		@extend .keyframe-state-number;
-		display:flex;
-		height:38%;
-		&-index{
-			width:70%;
+		&-text {
+			width: 60%;
+			height: 100%;
 		}
-		&-value{
-		outline-color:$green;
-			width:30%;
+		&-btn {
+			width: 40%;
+			height: 100%;
 		}
-	}
-	&-state-src {
-		@extend .keyframe-state-number;
-	}
-	&-state-update {
-		margin: 1.5rem 7%;
-	}
-
-	&-state-remove {
-		margin: 1.5rem 7%;
+		&-number {
+			height: 33%;
+			width: 90%;
+			box-sizing: border-box;
+			padding: 3% 7%;
+		}
+		&-duration {
+			@extend .keyframe-state-number;
+			display: flex;
+			height: 38%;
+	
+			&-index {
+				width: 60%;
+			}
+			&-value {
+				width: 35%;
+				height:1.2rem;
+			}
+		}
+		&-src {
+			@extend .keyframe-state-number;
+		}
+		&-update {
+			position:absolute;
+			margin: 1.0rem 0;
+			left:60%;
+		}
+		&-remove {
+			position:absolute;
+			margin: 1.0rem 0;
+			left:75%;
+		}
 	}
 }

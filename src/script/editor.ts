@@ -1,13 +1,13 @@
 import { param, config } from './parameter';
 import { Canvas, Scenes as scene, Now as now } from './canvas';
-import { PalletKeyframe as Keyframe } from './pallet';
+import { PalletActive,PalletKeyframe as Keyframe } from './pallet';
 import {
 	ComponentType as Component,
 	ComponentStructure as Struct,
 	ComponentState as State,
 	ComponentImage as Image
 } from './component';
-import { AnimationPlay } from './animation';
+import { AnimationRegister, AnimationPlay } from './animation';
 
 export let Active: Component = null;
 
@@ -42,6 +42,9 @@ export namespace Editor {
 				Active.element.style.outlineWidth = '';
 				Active.element.style.outlineStyle = '';
 				Active.element.style.outlineColor = '';
+				PalletActive.title.dom.el.textContent = '';
+				Keyframe.delay.dom.el.textContent = '';
+				Keyframe.iteration.dom.el.textContent = '';
 				//penetration
 				if (Active.type === 'image') {
 					Active.element.style.pointerEvents = 'none';
@@ -175,10 +178,15 @@ export namespace Editor {
 				duration: param.animation.defaultDuration
 			};
 			const struct: Struct = {
-				type: 'image',
+				type: null,
 				element: null,
 				className: null,
-				touchable: true,
+				title:null,
+				touchable: null,
+				trigger:null,
+				iteration:null,
+				delay:null,
+				running:null,
 				state: null,
 				now: state0
 			};
@@ -209,21 +217,20 @@ export namespace Editor {
 		PushStateClick(): void {
 			if (Active === null) return;
 			if (Active.state.length === 1) {
-				animation.register(Active, Active, 'contextmenu');
+				new AnimationRegister(Active, Active, 'contextmenu');
 			}
 			Active.transition(Active.now, outlineStyle);
 			Active.state.push(Active.now);
 			Keyframe.render(Active);
 		}
 		PlayClick(): void {
-			animation.play(Active);
+			new AnimationPlay(Active);
 		}
 		BaseLayerClick(): void {
 			console.log()
 			selector.recover();
 		}
 	}
-	const animation = new AnimationPlay();
 	const selector = new Editor.Selector();
 }
 export const EditorSelector = Editor.Selector;

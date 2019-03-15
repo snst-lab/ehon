@@ -58,14 +58,15 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 
 >### Patch
 
-### Version 0.3.x
+### Version 0.7.x
 <details open>
 <summary>1</summary>
 
-- refactor:  Replace defineProperty Methods<br>
-- bugfix: Fixed the problem that the previously selected element is not
-deactivated
+- improve:  Set animation delay and iteration<br>
+- style:  Change pallet ui<br>
+- bugfix: Generate animation instance for each component
 </details>
+
 
 ### Version 0.4.x
 <details open>
@@ -88,4 +89,14 @@ deactivated
 
 - refactor : domControler.ts to be able to DOM Parsing at the time that create instance.
 - improve : click canvas to activate alternatively overlapping elements.
+</details>
+
+
+### Version 0.3.x
+<details open>
+<summary>1</summary>
+
+- refactor:  Replace defineProperty Methods<br>
+- bugfix: Fixed the problem that the previously selected element is not
+deactivated
 </details>
