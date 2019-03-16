@@ -1,7 +1,8 @@
 import { param } from './parameter';
 import { ComponentType as Component, ComponentState as State } from './component';
+import { Canvas, Scenes as scene, Now as now } from './canvas';
 
-namespace Animation {
+export namespace Animation {
 	class Operation {
 		add(state1: State, state2: State): State {
 			return {
@@ -33,13 +34,29 @@ namespace Animation {
 	}
 
 	export class Register {
-		constructor(origin: Component, target: Component, eventName: string) {
+		constructor(target: Component, eventName: string) {
 			if (target.state.length !== 1) return;
-			origin.element.addEventListener(
+			scene[now].dom.el.addEventListener(
 				eventName,
-				(event: any) => {
+				(event: PointerEvent) => {
 					event.preventDefault();
-					new Animation.Play(target);
+					if (
+						[].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1 ||
+						[].indexOf.call(target.trigger, 'scene' + now) > -1
+					) {
+						new Animation.Play(target);
+					}
+				},
+				false
+			);
+			document.addEventListener(
+				'sceneChange',
+				(event: Event) => {
+					if (
+						[].indexOf.call(target.trigger, event.srcElement.classList.item(0) || 'scenechange' + now) > -1
+					) {
+						new Animation.Play(target);
+					}
 				},
 				false
 			);
@@ -53,7 +70,7 @@ namespace Animation {
 		private iteration: number = 0;
 
 		constructor(target: Component) {
-			if (target.running) return;
+			if (target === null || target.running) return;
 			this.stateLength = target.state.length;
 			if (this.stateLength < 2) return;
 			target.running = true;

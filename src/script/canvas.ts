@@ -9,12 +9,12 @@ export namespace Canvas {
 
 	export class Resize {
 		private running: boolean | number = false;
-		constructor(callback) {
+		constructor(callback: Function) {
 			this.resizeEventSaver(callback);
 		}
 		resizeEventSaver(callback: Function): void {
 			if (this.running) return;
-			this.running = setTimeout(function() {
+			this.running = setTimeout(()=>{
 				this.running = false;
 				callback();
 			}, 500);
@@ -32,8 +32,12 @@ namespace Scene {
 	export const className: string = 'scene';
 	export let now: number = 0;
 	export let Scenes: Array<Scene> = [];
+
 	export function change(num: number): void {
 		Scene.now = num;
+		const event = document.createEvent('HTMLEvents');
+		event.initEvent('sceneChange', true, false);
+		document.dispatchEvent(event);
 	}
 }
 export type Scene = Scene.Scene;

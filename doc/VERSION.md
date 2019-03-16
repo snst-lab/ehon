@@ -49,11 +49,12 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - [x] 5. add camera component
 - [x] 6. registering & playing animation
 - [x] 7. change image src & duration
-- [ ] 8. add text component  
-- [ ] 9. show layer table & select layer to be editable ("self" is prepared alias of layer) 
-- [ ] 10. select animation trigger element  
-- [ ] 11. save story as json file
-- [ ] 12. undo/redo
+- [x] 8. attach components as animation trigger 
+- [ ] 9. add text component  
+- [ ] 10. show layer table & select layer to be editable ("self" is prepared alias of layer) 
+- [ ] 11. select animation trigger element  
+- [ ] 12. save story as json file
+- [ ] 13. undo/redo
 
 
 >### Patch

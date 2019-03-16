@@ -146,6 +146,7 @@ body {
   padding: 0;
   border: 0;
   margin: 0;
+  position: relative;
   overflow: hidden;
 }
 
@@ -173,55 +174,23 @@ header {
 main {
   position: relative;
   top: 5vh;
-  min-height: 95vh;
   background: #141428;
+  overflow: hidden;
   font-size: 12px;
   font-size: 0.75rem;
-}
-
-footer {
-  position: relative;
-  bottom: 0;
-  text-align: center;
-  vertical-align: middle;
-  width: 100%;
-  color: white;
-  height: 5vh;
-  line-height: 5vh;
-  background-color: #141428;
-  font-size: 12px;
-  font-size: 0.75rem;
-}
-
-.cover-container {
-  position: relative;
-  top: 0;
-  width: 100%;
-  height: 540px;
-  background: black;
-  display: flex;
-  -webkit-justify-content: space-around;
-  justify-content: space-around;
-}
-
-.cover {
-  max-width: 960px;
-  width: 100%;
-  height: 100%;
-  background: url("../../assets/img/cover.jpg") no-repeat center/cover;
 }
 
 .canvas {
-  position: absolute;
-  top: 0;
+  position: fixed;
+  top: 5vh;
   right: 0;
   bottom: 0;
   left: 0;
-  width: 85%;
-  height: 750px;
+  width: 85vw;
+  height: 47.8125vw;
   background: white;
-  margin: 0 0;
-  overflow: hidden;
+  margin: 0;
+  backface-visibility: hidden;
 }
 
 .scene {
@@ -244,17 +213,35 @@ footer {
   height: 100%;
 }
 
-.pallet {
-  position: absolute;
-  top: 0;
+footer {
+  position: fixed;
+  top: calc(5vh + 47.8125vw);
   right: 0;
   bottom: 0;
   left: 0;
-  left: 85%;
-  width: 15%;
-  min-width: 15rem;
+  width: 100%;
   height: 100%;
-  z-index: 3;
+  overflow: hidden;
+  text-align: center;
+  vertical-align: middle;
+  color: white;
+  line-height: 5vh;
+  background-color: #141428;
+  font-size: 12px;
+  font-size: 0.75rem;
+  z-index: 9999;
+}
+
+.pallet {
+  position: fixed;
+  top: 5vh;
+  right: 0;
+  bottom: 0;
+  left: 85vw;
+  width: 15vw;
+  height: 47.8125vw;
+  background-color: #141428;
+  z-index: 9999;
 }
 
 .material-icons {
@@ -301,7 +288,7 @@ footer {
   margin: 0 0 0 1em;
 }
 
-.active-clickable {
+.active-touchable {
   position: relative;
   height: 40%;
   width: 100%;
@@ -330,28 +317,34 @@ footer {
   margin: 0 0 0 1em;
 }
 
+.keyframe-showtrigger {
+  position: absolute;
+  left: 12%;
+  transform: scale(1.2);
+  margin-top: 0.6rem;
+}
+
 .keyframe-play {
   position: absolute;
-  left: 20%;
+  left: 42%;
   transform: scale(1.5);
   margin-top: 0.6rem;
 }
 
 .keyframe-push-state {
   position: absolute;
-  left: 60%;
+  left: 72%;
   transform: scale(1.2);
   margin-top: 0.7rem;
 }
 
 .keyframe-state-list {
   width: 100%;
-  height: 650px;
-  color: #c8c8dc;
-  font-size: 1.1em;
-  background: #141428;
   overflow-x: hidden;
   overflow-y: auto;
+  background: #141428;
+  color: #c8c8dc;
+  font-size: 1.1em;
 }
 
 .keyframe-state {
@@ -360,7 +353,6 @@ footer {
   color: #c8c8dc;
   background: #323246;
   transition: .2s;
-  display: flex;
 }
 
 .keyframe-state:hover {
@@ -368,52 +360,90 @@ footer {
 }
 
 .keyframe-state-current {
-  background: #fa64e6;
+  background: #dc50d2;
 }
 
 .keyframe-state-current:hover {
-  background: #fa64e6;
+  background: #dc50d2;
 }
 
-.keyframe-state-text {
-  width: 60%;
-  height: 100%;
-}
-
-.keyframe-state-btn {
-  width: 40%;
-  height: 100%;
-}
-
-.keyframe-state-number, .keyframe-state-duration, .keyframe-state-src {
+.keyframe-state-number, .keyframe-state-src, .keyframe-state-duration {
+  position: absolute;
+  margin: 3% 0 0 5%;
   height: 33%;
-  width: 90%;
-  box-sizing: border-box;
-  padding: 3% 7%;
+  width: 60%;
+}
+
+.keyframe-state-src {
+  margin: 13% 0 0 5%;
 }
 
 .keyframe-state-duration {
+  margin: 22% 0 0 5%;
   display: flex;
   height: 38%;
 }
 
 .keyframe-state-duration-index {
-  width: 60%;
+  width: 55%;
 }
 
 .keyframe-state-duration-value {
-  width: 35%;
+  width: 30%;
   height: 1.2rem;
 }
 
 .keyframe-state-update {
   position: absolute;
-  margin: 1.0rem 0;
-  left: 60%;
+  margin: 8% 0 0 60%;
 }
 
 .keyframe-state-remove {
   position: absolute;
-  margin: 1.0rem 0;
-  left: 75%;
+  margin: 8% 0 0 80%;
+}
+
+.trigger {
+  position: fixed;
+  top: 5vh;
+  right: 0;
+  bottom: 0;
+  left: 85vw;
+  width: 15vw;
+  height: 47.8125vw;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 9998;
+  background: rgba(20, 20, 40, 0.7);
+  color: #c8c8dc;
+  font-size: 1.1em;
+  transition: 0.4s;
+}
+
+.trigger-index {
+  background: rgba(50, 50, 70, 0.5);
+  height: 3rem;
+  line-height: 3rem;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 1.1em;
+}
+
+.trigger-component {
+  width: 100%;
+  height: 4rem;
+  color: #c8c8dc;
+  transition: .2s;
+}
+
+.trigger-component:hover {
+  background: rgba(0, 180, 180, 0.7);
+}
+
+.trigger-component-label {
+  position: absolute;
+  top: 35%;
+  right: 0;
+  bottom: 0;
+  left: 10%;
 }

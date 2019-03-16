@@ -1,13 +1,13 @@
 import { param, config } from './parameter';
 import { Canvas, Scenes as scene, Now as now } from './canvas';
-import { PalletActive,PalletKeyframe as Keyframe } from './pallet';
+import { PalletActive, PalletKeyframe as Keyframe, PalletTrigger as Trigger, PalletTrigger } from './pallet';
 import {
 	ComponentType as Component,
 	ComponentStructure as Struct,
 	ComponentState as State,
 	ComponentImage as Image
 } from './component';
-import { AnimationRegister, AnimationPlay } from './animation';
+import { Animation } from './animation';
 
 export let Active: Component = null;
 
@@ -35,6 +35,7 @@ export namespace Editor {
 			Active.element.style.outlineStyle = config.activeOutlineStyle;
 			Active.element.style.outlineColor = config.activeOutlineColor;
 			Keyframe.render(Active);
+			Trigger.render(now, Active, scene[now].Images);
 		}
 		release(): void {
 			if (Active !== null) {
@@ -52,6 +53,8 @@ export namespace Editor {
 				}
 				Active = null;
 				Keyframe.clear();
+				Trigger.clear();
+
 			}
 		}
 		recover(): void {
@@ -181,12 +184,12 @@ export namespace Editor {
 				type: null,
 				element: null,
 				className: null,
-				title:null,
+				title: null,
 				touchable: null,
-				trigger:null,
-				iteration:null,
-				delay:null,
-				running:null,
+				trigger: null,
+				iteration: null,
+				delay: null,
+				running: null,
 				state: null,
 				now: state0
 			};
@@ -197,6 +200,7 @@ export namespace Editor {
 			selector.activate(image.className, 'image');
 			Active.state.push(Active.now);
 			Keyframe.render(Active);
+			Trigger.render(now, Active, scene[now].Images);
 		}
 		CanvasResize(): void {
 			new Canvas.Resize(() => {
@@ -217,17 +221,27 @@ export namespace Editor {
 		PushStateClick(): void {
 			if (Active === null) return;
 			if (Active.state.length === 1) {
-				new AnimationRegister(Active, Active, 'contextmenu');
+				new Animation.Register(Active, 'contextmenu');
 			}
 			Active.transition(Active.now, outlineStyle);
 			Active.state.push(Active.now);
 			Keyframe.render(Active);
 		}
+		ShowTriggerClick(): void {
+			if(!Trigger.show){
+				(<HTMLElement>Trigger.dom.el).style.left='70vw';
+				(<HTMLElement>Trigger.button.el).style.color='rgb(0,200,180)';
+				Trigger.show=true;
+			}else{
+				(<HTMLElement>Trigger.dom.el).style.left='85vw';
+				(<HTMLElement>Trigger.button.el).style.color='';
+				Trigger.show=false;
+			}
+		}
 		PlayClick(): void {
-			new AnimationPlay(Active);
+			new Animation.Play(Active);
 		}
 		BaseLayerClick(): void {
-			console.log()
 			selector.recover();
 		}
 	}

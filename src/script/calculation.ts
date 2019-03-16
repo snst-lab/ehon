@@ -4,7 +4,7 @@ import { ComponentState as State } from './component';
 
 namespace Calculation {
 	export class CSS {
-		private styleFix: string = `position:absolute;transform-origin:50% 50%;background-size:contain;background-position:center;background-repeat:no-repeat;`;
+		private styleFix: string = `position:absolute;transform-origin:center;backface-visibility:hidden;background-size:contain;background-position:center;background-repeat:no-repeat;`;
 
 		image(Image: State, Camera: State, pointer: string, option: string): string {
 			const distanceInv: number = 1 / Math.max(Camera.z - Image.z, 1);

@@ -10,6 +10,7 @@ body {
 	padding: 0;
 	border: 0;
 	margin: 0;
+	position: relative;
 	overflow: hidden;
 }
 
@@ -35,49 +36,22 @@ header {
 main {
 	position: relative;
 	top: $header-height;
-	min-height: $main-height;
+	// min-height: $main-height;
 	background: $black;
+	overflow: hidden;
 	@include fontsize(12);
 }
 
-footer {
-	position: relative;
-	bottom: 0;
-	text-align: center;
-	vertical-align: middle;
-	width: 100%;
-	color: white;
-	height: $footer-height;
-	line-height: $footer-height;
-	background-color: $black;
-	@include fontsize(12);
-}
-
-.cover-container {
-	position: relative;
-	top: 0;
-	width: 100%;
-	height: 540px;
-	background: black;
-	@include center;
-}
-
-.cover {
-	max-width: 960px;
-	width: 100%;
-	height: 100%;
-	background: url("../../assets/img/cover.jpg") no-repeat center/cover;
-}
 
 // Below is project unique style
 
 .canvas {
-	@include absolute(0, 0, 0, 0);
-	width: 85%;
-	height: 750px;
+	@include fixed($header-height, 0, 0, 0);
+	width: $canvas-width;
+	height: $canvas-height;
 	background: white;
-	margin: 0 0;
-	overflow: hidden;
+	margin: 0;
+	backface-visibility: hidden;
 }
 
 .scene {
@@ -92,13 +66,31 @@ footer {
 	height: 100%;
 }
 
-.pallet {
-	@include absolute(0, 0, 0, 0);
-	left: 85%;
-	width: 15%;
-	min-width: 15rem;
+
+// Below is edit mode unique style
+
+footer {
+	@include fixed($canvas-bottom, 0, 0, 0);
+	width: 100%;
 	height: 100%;
-	z-index: 3;
+	overflow: hidden;
+	text-align: center;
+	vertical-align: middle;
+	color: white;
+	line-height: $footer-height;
+	background-color: $black;
+	@include fontsize(12);
+	z-index: 9999;
+}
+
+
+.pallet {
+	@include fixed($header-height, 0, 0, 85vw);
+	width: 15vw;
+	height: $canvas-height;
+	// min-width: 15rem;
+	background-color: $black;
+	z-index: 9999;
 }
 
 .material-icons {
@@ -107,7 +99,7 @@ footer {
 	transform: scale(1.2);
 
 	&:hover {
-		color: $green;
+		color: $green1;
 	}
 }
 
@@ -129,12 +121,15 @@ footer {
 		height: 5rem;
 		margin: 0 0 1rem 0;
 	}
+
 	&-title {
 		height: 60%;
 		display: flex;
+
 		&-index {
 			width: 20%;
 		}
+
 		&-value {
 			width: 70%;
 			height: 2.5rem;
@@ -142,7 +137,8 @@ footer {
 			margin: 0 0 0 1em;
 		}
 	}
-	&-clickable {
+
+	&-touchable {
 		position: relative;
 		height: 40%;
 		width: 100%;
@@ -154,109 +150,161 @@ footer {
 .keyframe {
 	&-menu {
 		@extend .active-header;
-		height:6.5rem;
+		height: 6.5rem;
 	}
+
 	&-delay {
 		height: 35%;
-		width:100%;
+		width: 100%;
 		display: flex;
+
 		&-index {
 			width: 25%;
 		}
+
 		&-value {
 			width: 20%;
-			height:1.2rem;
+			height: 1.2rem;
 			font-weight: bold;
 			margin: 0 0 0 1em;
 		}
 	}
-	&-iteration{
+
+	&-iteration {
 		@extend .keyframe-delay;
+
 		&-index {
 			@extend .keyframe-delay-index;
 		}
+
 		&-value {
 			@extend .keyframe-delay-value;
 		}
 	}
+
+	&-showtrigger {
+		position: absolute;
+		left: 12%;
+		transform: scale(1.2);
+		margin-top: 0.6rem;
+	}
+
 	&-play {
 		position: absolute;
-		left: 20%;
+		left: 42%;
 		transform: scale(1.5);
 		margin-top: 0.6rem;
 	}
+
 	&-push-state {
 		position: absolute;
-		left: 60%;
+		left: 72%;
 		transform: scale(1.2);
 		margin-top: 0.7rem;
 	}
+
 	&-state-list {
 		width: 100%;
-		height: 650px;
-		color: $gray5;
-		font-size: 1.1em;
-		background: $black;
 		overflow-x: hidden;
 		overflow-y: auto;
+		background: $black;
+		color: $gray5;
+		font-size: 1.1em;
 	}
+
 	&-state {
 		width: 100%;
 		height: 5rem;
 		color: $gray5;
 		background: $gray0;
 		transition: .2s;
-		display: flex;
 
 		&:hover {
 			background: $gray1;
 		}
+
 		&-current {
-			background: $pink;
+			background: $pink0;
 
 			&:hover {
-				background: $pink;
+				background: $pink0;
 			}
 		}
-		&-text {
-			width: 60%;
-			height: 100%;
-		}
-		&-btn {
-			width: 40%;
-			height: 100%;
-		}
+
 		&-number {
+			position: absolute;
+			margin: 3% 0 0 5%;
 			height: 33%;
-			width: 90%;
-			box-sizing: border-box;
-			padding: 3% 7%;
+			width: 60%;
 		}
-		&-duration {
-			@extend .keyframe-state-number;
-			display: flex;
-			height: 38%;
-	
-			&-index {
-				width: 60%;
-			}
-			&-value {
-				width: 35%;
-				height:1.2rem;
-			}
-		}
+
 		&-src {
 			@extend .keyframe-state-number;
+			margin: 13% 0 0 5%;
 		}
+
+		&-duration {
+			@extend .keyframe-state-number;
+			margin: 22% 0 0 5%;
+			display: flex;
+			height: 38%;
+
+			&-index {
+				width: 55%;
+			}
+
+			&-value {
+				width: 30%;
+				height: 1.2rem;
+			}
+		}
+
 		&-update {
-			position:absolute;
-			margin: 1.0rem 0;
-			left:60%;
+			position: absolute;
+			margin: 8% 0 0 60%;
 		}
+
 		&-remove {
-			position:absolute;
-			margin: 1.0rem 0;
-			left:75%;
+			position: absolute;
+			margin: 8% 0 0 80%;
+		}
+	}
+}
+
+
+.trigger {
+	@include fixed($header-height, 0, 0, $canvas-width);
+	width: 15vw;
+	height: $canvas-height;
+	overflow-x: hidden;
+	overflow-y: auto;
+	z-index: 9998;
+	background: $black-alpha;
+	color: $gray5;
+	font-size: 1.1em;
+	transition:0.4s;
+
+	&-index {
+		background: $gray0-alpha;
+		height: 3rem;
+		line-height: 3rem;
+		text-align: center;
+		vertical-align: middle;
+		font-size: 1.1em;
+	}
+
+	&-component {
+		width: 100%;
+		height: 4rem;
+		color: $gray5;
+		transition: .2s;
+
+		&:hover {
+			background: rgba(0, 180, 180, 0.7);
+		}
+
+		&-label {
+			@include absolute(35%, 0, 0, 10%);
 		}
 	}
 }

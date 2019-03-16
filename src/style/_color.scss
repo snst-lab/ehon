@@ -1,10 +1,16 @@
 $black: rgb(20, 20, 40);
+$black-alpha: rgba(20,20,40,0.7);
 $gray0: rgb(50, 50, 70);
+$gray0-alpha: rgba(50,50,70,0.5);
 $gray1: rgb(100, 100, 120);
+$gray1-alpha: rgba(100, 100, 120,0.5);
 $gray2: rgb(125, 125, 145);
 $gray3: rgb(150, 150, 170);
 $gray4: rgb(175, 175, 195);
 $gray5: rgb(200, 200, 220);
 $white: rgb(245, 245, 250);
-$green: rgb(0, 200, 180);
-$pink: rgb(250, 100, 230);
+$green0: rgb(0, 150, 150);
+$green0-alpha: rgba(0,150,150,0.5);
+$green1: rgb(0, 200, 180);
+$pink0: rgb(220, 80, 210);
+$pink1: rgb(250, 100, 230);

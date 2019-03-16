@@ -1,6 +1,6 @@
 import { param, config } from './parameter';
 import { Canvas, Scenes as scene, Now as now } from './canvas';
-import { PalletActive, PalletKeyframe as Keyframe, PalletCamera as Cam } from './pallet';
+import { PalletActive, PalletTrigger, PalletKeyframe as Keyframe, PalletCamera as Cam } from './pallet';
 import { Active, EditorTransform, EditorEventHandler } from './editor';
 
 export let keyDown: string | null = null;
@@ -41,6 +41,7 @@ namespace EventListener {
 			this.IterationChange();
 			this.PushStateClick();
 			this.PlayClick();
+			this.ShowTriggerClick();
 			this.ImageEvent();
 		}
 
@@ -94,12 +95,6 @@ namespace EventListener {
 				}
 			});
 		}
-		private CameraClick(): void {
-			Cam.dom.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				editor.CameraClick(Cam.className);
-			});
-		}
 		private CanvasClick(): void {
 			Canvas.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
@@ -126,6 +121,12 @@ namespace EventListener {
 						}
 					}
 				}
+			});
+		}
+		private CameraClick(): void {
+			Cam.dom.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				editor.CameraClick(Cam.className);
 			});
 		}
 		private TitleChange(): void {
@@ -158,13 +159,17 @@ namespace EventListener {
 				editor.PlayClick();
 			});
 		}
-
-
+		private ShowTriggerClick():void{
+			Keyframe.showtrigger.dom.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				editor.ShowTriggerClick();
+			});
+		}
 		private ImageEvent(): void {
 			Object.defineProperty(window, config.imageClick, {
 				value: function(event: PointerEvent): void {
 					event.preventDefault();
-					const className: string = (<Element>event.target).classList.item(0);
+					const className: string = event.srcElement.classList.item(0);
 					editor.ImageClick(className);
 				}
 			});
@@ -177,7 +182,7 @@ namespace EventListener {
 				value: function(event: DragEvent): void {
 					// event.preventDefault();
 					if (Active === null) return;
-					const className: string = (<Element>event.target).classList.item(0);
+					const className: string = event.srcElement.classList.item(0);
 					if (Active.className !== className) return;
 					dragstart.x = event.clientX;
 					dragstart.y = event.clientY;
@@ -187,7 +192,7 @@ namespace EventListener {
 				value: function(event: DragEvent): void {
 					event.preventDefault();
 					if (Active === null) return;
-					const className: string = (<Element>event.target).classList.item(0);
+					const className: string = event.srcElement.classList.item(0);
 					if (Active.className !== className) return;
 					const correctXY: number = (scene[now].Camera.now.z - Active.now.z) / Active.now.z;
 					const dx: number = (event.clientX - dragstart.x) * 100 / Canvas.element.offsetWidth * correctXY;
