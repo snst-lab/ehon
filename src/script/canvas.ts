@@ -28,6 +28,7 @@ namespace Scene {
 		dom: any;
 		Camera: any;
 		Images: Array<any>;
+		Texts: Array<any>;
 	}
 	export const className: string = 'scene';
 	export let now: number = 0;

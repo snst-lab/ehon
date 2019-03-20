@@ -1,29 +1,72 @@
-import { param, config } from './parameter';
+import { param, config, css } from './parameter';
 import { Canvas } from './canvas';
 import { ComponentState as State } from './component';
 
 namespace Calculation {
 	export class CSS {
-		private styleFix: string = `position:absolute;transform-origin:center;backface-visibility:hidden;background-size:contain;background-position:center;background-repeat:no-repeat;`;
-
-		image(Image: State, Camera: State, pointer: string, option: string): string {
+		imageFloat(Image: State, Camera: State, pointer: string): string {
 			const distanceInv: number = 1 / Math.max(Camera.z - Image.z, 1);
 			const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
-			return `${this.styleFix}${option}
-				background-image:url(${config.imageSrcUrl}${Image.src});
+			return `${css.common}
+				background-image:url(${config.imageSrcUrl}${Image.src});background-size:contain;background-position:center;background-repeat:no-repeat;
 				left:${(Image.x - Camera.x - param.camera.vanishingX) * Image.z * distanceInv + param.camera.vanishingX}%;
 				top:${(Image.y - Camera.y - param.camera.vanishingY) * Image.z * distanceInv + param.camera.vanishingY}%;
 				z-index:${~~Image.z + Canvas.z};
-				width:${param.image.defaultSize * size}%;
-				height:${param.image.defaultSize * param.image.aspectRatio / Canvas.aspectRatio * size}%;
-				transform: rotate(${~~(Image.rotate - Camera.rotate)}deg) scale(${Image.scale});
-				filter:blur(${~~(
-					Image.blur +
+				width:${Image.width * size}%;
+				height:${Image.width * Image.aspectRatio / Canvas.aspectRatio * size}%;
+				transform: rotate(${Image.rotate}deg) scale(${Image.scale});
+				filter:blur(${Image.blur +
 					Math.abs(Camera.z - Image.z - param.camera.initialZ + param.image.initialZ) /
-						param.camera.depthOfField
-				)}px);
-				opacity:${Camera.z < Image.z ? 0 : ~~Image.opacity || 1};
-				pointer-events:${pointer};
+						param.camera.depthOfField}px);
+				opacity:${Camera.z < Image.z ? 0 : Image.opacity};
+				pointer-events:${pointer};${Image.option}
+			`;
+		}
+
+		imageFix(Image: State, Camera: State, pointer: string): string {
+			return `${css.common}
+				background-image:url(${config.imageSrcUrl}${Image.src});background-size:contain;background-position:center;background-repeat:no-repeat;
+				left:${Image.x}%;
+				top:${Image.y}%;
+				z-index:${~~Camera.z};
+				width:${Image.width}%;
+				height:${Image.width * Image.aspectRatio / Canvas.aspectRatio}%;
+				transform: rotate(${Image.rotate}deg) scale(${Image.scale});
+				filter:blur(${Image.blur}px);
+				opacity:${Camera.z < Image.z ? 0 : Image.opacity};
+				pointer-events:${pointer};${Image.option}
+			`;
+		}
+
+		textFloat(Text: State, Camera: State, pointer: string): string {
+			const distanceInv: number = 1 / Math.max(Camera.z - Text.z, 1);
+			const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
+			return `${css.common+css.text}
+				left:${(Text.x - Camera.x - param.camera.vanishingX) * Text.z * distanceInv + param.camera.vanishingX}%;
+				top:${(Text.y - Camera.y - param.camera.vanishingY) * Text.z * distanceInv + param.camera.vanishingY}%;
+				z-index:${~~Text.z + Canvas.z};
+				width:${Text.width}%;
+				height:${Text.width * Text.aspectRatio / Canvas.aspectRatio}%;
+				transform: rotate(${Text.rotate}deg) scale(${Text.scale * size});
+				filter:blur(${Text.blur +
+					Math.abs(Camera.z - Text.z - param.camera.initialZ + param.text.initialZ) /
+						param.camera.depthOfField}px);
+				opacity:${Camera.z < Text.z ? 0 : Text.opacity};
+				pointer-events:${pointer};${Text.option}
+			`;
+		}
+
+		textFix(Text: State, Camera: State, pointer: string): string {
+			return `${css.common+css.text}
+				left:${Text.x}%;
+				top:${Text.y}%;
+				z-index:${~~Camera.z};
+				width:${Text.width}%;
+				height:${Text.width * Text.aspectRatio / Canvas.aspectRatio}%;
+				transform: rotate(${Text.rotate}deg) scale(${Text.scale});
+				filter:blur(${Text.blur}px);
+				opacity:${Camera.z < Text.z ? 0 : Text.opacity};
+				pointer-events:${pointer};${Text.option}
 			`;
 		}
 	}

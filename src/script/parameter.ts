@@ -4,6 +4,11 @@ export let param: { [key: string]: { [key: string]: number } } = {
 		defaultSize: 50,
 		aspectRatio: 1
 	},
+	text: {
+		initialZ: 50,
+		defaultSize: 10,
+		aspectRatio: 5
+	},
 	camera: {
 		initialX: 50,
 		initialY: 50,
@@ -30,15 +35,27 @@ export let config: { [key: string]: string } = {
 	scenePath: 'assets/scene/',
 	imageSrcPath: 'assets/img/',
 	imageSrcUrl: '../../assets/img/',
-	backgroundFile: 'background.jpg',
-	activeOutlineWidth: '3px',
-	activeOutlineStyle: 'solid',
-	activeOutlineColor: 'rgb(0, 200, 180)',
-	triggerOutlineWidth: '3px',
-	triggerOutlineStyle: 'solid',
-	triggerOutlineColor: 'rgb(220, 80, 210)',
-	imageClick: 'imageClick',
-	imageDoubleClick: 'imageDoubleClick',
-	imageDragStart: 'imageDragStart',
-	imageDragEnd: 'imageDragEnd'
+	backgroundFile: 'background.jpg'
+};
+
+export let css: { [key: string]: any } = {
+	common: 'position:absolute;transform-origin:center;backface-visibility:hidden;',
+	text:'font-size:5rem;text-align:center;writing-mode: vertical-rl;color:white;text-shadow: 2px 2px 0 #000,-2px 2px 0 #000,2px -2px 0 #000,-2px -2px 0 #000;',
+	active: {
+		outlineColor: 'rgb(0,200,180)',
+		defaultColor: 'rgb(0,200,180)',
+		editableColor: 'rgb(0,0,240)',
+		outlineStyle: 'solid',
+		outlineWidth: '3px'
+	},
+	resize: {
+		resize: 'both',
+		overflow: 'hidden',
+		cursor: 'move'
+	},
+	option: {
+		outlineColor: 'rgb(255,50,200)',
+		outlineStyle: 'solid',
+		outlineWidth: '3px'
+	}
 };

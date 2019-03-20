@@ -1,7 +1,8 @@
-import { param, config } from './parameter';
+import { param, config, css } from './parameter';
 import { Canvas, Scenes as scene, Now as now } from './canvas';
 import { PalletActive, PalletTrigger, PalletKeyframe as Keyframe, PalletCamera as Cam } from './pallet';
 import { Active, EditorTransform, EditorEventHandler } from './editor';
+import { ComponentImage } from './component';
 
 export let keyDown: string | null = null;
 
@@ -9,10 +10,15 @@ namespace EventListener {
 	const transform = new EditorTransform();
 	const editor = new EditorEventHandler();
 
-	let dragstart: pointerPosition = { x: 0, y: 0 };
+	interface pointerPosition {
+		x: number;
+		y: number;
+	}
+	let dragStartPosition: pointerPosition = { x: 0, y: 0 };
 
 	const keyMap: { [key: number]: string } = {
 		13: 'enter',
+		17: 'ctrl',
 		88: 'x',
 		89: 'y',
 		90: 'z',
@@ -21,11 +27,6 @@ namespace EventListener {
 		66: 'b',
 		79: 'o'
 	};
-
-	interface pointerPosition {
-		x: number;
-		y: number;
-	}
 
 	export class Start {
 		constructor() {
@@ -37,6 +38,8 @@ namespace EventListener {
 			this.CanvasDrop();
 			this.BaseLayerClick();
 			this.TitleChange();
+			this.SwitchFloat();
+			this.SwitchTouch();
 			this.DelayChange();
 			this.IterationChange();
 			this.PushStateClick();
@@ -44,7 +47,6 @@ namespace EventListener {
 			this.ShowTriggerClick();
 			this.ImageEvent();
 		}
-
 		private detectKeyDown(): void {
 			document.addEventListener(
 				'keydown',
@@ -63,7 +65,6 @@ namespace EventListener {
 				false
 			);
 		}
-
 		private CanvasWheel(): void {
 			Canvas.dom.on('mousewheel', (event: WheelEvent): void => {
 				event.preventDefault();
@@ -76,7 +77,7 @@ namespace EventListener {
 						transform.translate(Active, 0, event.deltaY * param.wheelResponse.XY, 0);
 						break;
 					case 'z':
-						transform.translate(Active, 0, 0, event.deltaY * param.wheelResponse.Z);
+						if (Active.float) transform.translate(Active, 0, 0, event.deltaY * param.wheelResponse.Z);
 						break;
 					case 'r':
 						transform.rotate(Active, event.deltaY * param.wheelResponse.rotate);
@@ -101,13 +102,17 @@ namespace EventListener {
 			});
 		}
 		private BaseLayerClick(): void {
-			scene[now].dom.el.firstChild.addEventListener('click', (event: PointerEvent) => {
-				event.preventDefault();
-				editor.BaseLayerClick();
-			},false);
+			scene[now].dom.el.firstChild.addEventListener(
+				'click',
+				(event: PointerEvent) => {
+					event.preventDefault();
+					editor.BaseLayerClick();
+				},
+				false
+			);
 		}
-		private CanvasResize():void{
-			window.addEventListener('resize'||'orientationchange', editor.CanvasResize);
+		private CanvasResize(): void {
+			window.addEventListener('resize' || 'orientationchange', editor.CanvasResize);
 		}
 		private CanvasDrop(): void {
 			Canvas.dom.on('drop', (event: DragEvent) => {
@@ -135,6 +140,21 @@ namespace EventListener {
 				Active.title = PalletActive.title.dom.el.textContent;
 			});
 		}
+		private SwitchTouch(): void {
+			PalletActive.touch.dom.on('change', (event: Event) => {
+				event.preventDefault();
+				Active.touchable = document['active'].touch.checked;
+			});
+		}
+		private SwitchFloat(): void {
+			PalletActive.float.dom.on('change', (event: Event) => {
+				event.preventDefault();
+				Active.float = document['active'].float.checked;
+				Active.now.x = 50 - 0.5 * Active.now.width;
+				Active.now.y = 50 - 0.5 * Active.now.width * Active.now.aspectRatio;
+				Active.transition(Active.now);
+			});
+		}
 		private DelayChange(): void {
 			Keyframe.delay.dom.on('blur', (event: Event) => {
 				event.preventDefault();
@@ -159,45 +179,72 @@ namespace EventListener {
 				editor.PlayClick();
 			});
 		}
-		private ShowTriggerClick():void{
+		private ShowTriggerClick(): void {
 			Keyframe.showtrigger.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
 				editor.ShowTriggerClick();
 			});
 		}
 		private ImageEvent(): void {
-			Object.defineProperty(window, config.imageClick, {
+			Object.defineProperty(window, 'componentClick', {
 				value: function(event: PointerEvent): void {
 					event.preventDefault();
 					const className: string = event.srcElement.classList.item(0);
-					editor.ImageClick(className);
+					const type: string = event.srcElement.classList.item(1);
+					editor.ComponentClick(className, type);
 				}
 			});
-			Object.defineProperty(window, config.imageDoubleClick, {
+			Object.defineProperty(window, 'componentDoubleClick', {
 				value: function(event: PointerEvent): void {
 					event.preventDefault();
+					// if (event.srcElement.getAttribute('contenteditable') === 'true') {
+					// 	event.srcElement.setAttribute('contenteditable', 'false');
+					// } else {
+					// 	event.srcElement.setAttribute('contenteditable', 'true');
+					// }
 				}
 			});
-			Object.defineProperty(window, config.imageDragStart, {
+			Object.defineProperty(window, 'componentDragStart', {
 				value: function(event: DragEvent): void {
 					// event.preventDefault();
-					if (Active === null) return;
+					if (Active === null || event.srcElement===null) return;
 					const className: string = event.srcElement.classList.item(0);
 					if (Active.className !== className) return;
-					dragstart.x = event.clientX;
-					dragstart.y = event.clientY;
+					dragStartPosition.x = event.clientX;
+					dragStartPosition.y = event.clientY;
 				}
 			});
-			Object.defineProperty(window, config.imageDragEnd, {
+			Object.defineProperty(window, 'componentDragEnd', {
 				value: function(event: DragEvent): void {
+					event.preventDefault();
+					if (Active === null || event.srcElement===null) return;
+					const className: string = event.srcElement.classList.item(0);
+					if (Active.className !== className) return;
+					const correctXY: number = Active.float
+						? (scene[now].Camera.now.z - Active.now.z) / Active.now.z
+						: 1;
+					const dx: number =
+						(event.clientX - dragStartPosition.x) * 100 / Canvas.element.offsetWidth * correctXY;
+					const dy: number =
+						(event.clientY - dragStartPosition.y) * 100 / Canvas.element.offsetHeight * correctXY;
+
+					if (keyDown === 'ctrl') {
+						editor.CanvasDropComponent(Active.now.x + dx, Active.now.y + dy, Active.type, null, Active);
+					} else {
+						transform.translate(Active, dx, dy, 0);
+					}
+				}
+			});
+			Object.defineProperty(window, 'componentMouseUp', {
+				value: function(event: PointerEvent): void {
 					event.preventDefault();
 					if (Active === null) return;
 					const className: string = event.srcElement.classList.item(0);
 					if (Active.className !== className) return;
-					const correctXY: number = (scene[now].Camera.now.z - Active.now.z) / Active.now.z;
-					const dx: number = (event.clientX - dragstart.x) * 100 / Canvas.element.offsetWidth * correctXY;
-					const dy: number = (event.clientY - dragstart.y) * 100 / Canvas.element.offsetHeight * correctXY;
-					transform.translate(Active, dx, dy, 0);
+					const distanceInv: number = 1 / Math.max(scene[now].Camera.now.z - Active.now.z, 1);
+					const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
+					Active.now.width = ~~(event.srcElement.clientWidth / Canvas.element.offsetWidth * 100) / size;
+					Active.now.aspectRatio = event.srcElement.clientHeight / event.srcElement.clientWidth;
 				}
 			});
 		}

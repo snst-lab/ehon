@@ -77,6 +77,113 @@ input[type="checkbox"]:checked + label:before {
   transform: rotate(45deg);
 }
 
+/*plus minus */
+.plusminus {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  margin: 1rem 0.5rem 0 0.5rem;
+}
+
+.plusminus,
+.plusminus span {
+  display: inline-block;
+  transition: all .2s;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
+  z-index: 5;
+}
+
+.plusminus span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 0.1rem;
+  background-color: #c8c8c8;
+  border-radius: 0.1rem;
+}
+
+.plusminus span:nth-of-type(1) {
+  top: 0;
+}
+
+.plusminus span:nth-of-type(2) {
+  -webkit-transform: translateY(0.5rem) rotate(90deg);
+  transform: translateY(0.5rem) rotate(90deg);
+  top: -0.5rem;
+}
+
+.plusminus.active span:nth-of-type(1) {
+  opacity: 0;
+}
+
+.plusminus.active span:nth-of-type(2) {
+  -webkit-transform: translateY(0.5rem) rotate(180deg);
+  transform: translateY(0.5rem) rotate(180deg);
+}
+
+/* Toggle Swich */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 2.5rem;
+  height: 1.5rem;
+  margin: 0 0.5rem;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .3s;
+  transition: .3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.1rem;
+  width: 1.1rem;
+  left: 0.2rem;
+  bottom: 0.2rem;
+  background-color: white;
+  -webkit-transition: .3s;
+  transition: .3s;
+}
+
+input:checked + .slider {
+  background-color: turquoise;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px turquoise;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(1rem);
+  -ms-transform: translateX(1rem);
+  transform: translateX(1rem);
+}
+
+.slider.round {
+  border-radius: 1rem;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 @-webkit-keyframes fadein {
   0% {
     opacity: 0;
@@ -174,7 +281,7 @@ header {
 main {
   position: relative;
   top: 5vh;
-  background: #141428;
+  background: #1e1e32;
   overflow: hidden;
   font-size: 12px;
   font-size: 0.75rem;
@@ -226,7 +333,7 @@ footer {
   vertical-align: middle;
   color: white;
   line-height: 5vh;
-  background-color: #141428;
+  background-color: #1e1e32;
   font-size: 12px;
   font-size: 0.75rem;
   z-index: 9999;
@@ -240,14 +347,28 @@ footer {
   left: 85vw;
   width: 15vw;
   height: 47.8125vw;
-  background-color: #141428;
+  background-color: #1e1e32;
   z-index: 9999;
+}
+
+.pallet-fix {
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 20rem;
 }
 
 .material-icons {
   color: #7d7d91;
   transition: .2s;
   transform: scale(1.2);
+  -webkit-user-select: none;
+  /* Chrome all / Safari all */
+  -moz-user-select: none;
+  /* Firefox all */
+  -ms-user-select: none;
+  /* IE 10+ */
+  user-select: none;
 }
 
 .material-icons:hover {
@@ -256,19 +377,19 @@ footer {
 
 .component-camera {
   z-index: 5;
-  margin: 2.5rem;
+  margin: 2rem 2.5rem;
   transform: scale(2);
 }
 
 .active-header, .keyframe-menu {
   width: 100%;
   color: #c8c8dc;
-  background: #141428;
+  background: #1e1e32;
   border-top: solid 1px #323246;
   box-sizing: border-box;
   padding: 0.8rem 1rem;
   font-size: 1.1em;
-  height: 5rem;
+  height: 6rem;
   margin: 0 0 1rem 0;
 }
 
@@ -286,14 +407,19 @@ footer {
   height: 2.5rem;
   font-weight: bold;
   margin: 0 0 0 1em;
+  overflow: hidden;
 }
 
-.active-touchable {
-  position: relative;
-  height: 40%;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 1em;
+.active-touch {
+  position: absolute;
+  margin: 1.1rem 0 0 0;
+  display: flex;
+}
+
+.active-float {
+  position: absolute;
+  margin: 1.1rem 0 0 6rem;
+  display: flex;
 }
 
 .keyframe-menu {
@@ -340,9 +466,10 @@ footer {
 
 .keyframe-state-list {
   width: 100%;
+  height: calc(47.8125vw - 20rem);
   overflow-x: hidden;
   overflow-y: auto;
-  background: #141428;
+  background: #1e1e32;
   color: #c8c8dc;
   font-size: 1.1em;
 }
@@ -368,20 +495,14 @@ footer {
 }
 
 .keyframe-state-number, .keyframe-state-src, .keyframe-state-duration {
-  position: absolute;
-  margin: 3% 0 0 5%;
-  height: 33%;
+  box-sizing: border-box;
+  padding: 0.2rem 0 0.2rem 5%;
+  height: 1.6rem;
   width: 60%;
 }
 
-.keyframe-state-src {
-  margin: 13% 0 0 5%;
-}
-
 .keyframe-state-duration {
-  margin: 22% 0 0 5%;
   display: flex;
-  height: 38%;
 }
 
 .keyframe-state-duration-index {
@@ -393,14 +514,28 @@ footer {
   height: 1.2rem;
 }
 
-.keyframe-state-update {
-  position: absolute;
-  margin: 8% 0 0 60%;
+.keyframe-state-icon {
+  margin: -3.5rem 0 0 55%;
 }
 
-.keyframe-state-remove {
-  position: absolute;
-  margin: 8% 0 0 80%;
+.keyframe-state-update, .keyframe-state-remove {
+  margin: 0 0.5rem 0 0.5rem;
+}
+
+.keyframe-state-option {
+  width: 100%;
+  height: 0;
+  text-indent: 0.8em;
+  background: black;
+  overflow: auto;
+  transition: 0.3s;
+}
+
+.keyframe-state-option-show {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  margin: -0.3rem 0 0 85%;
 }
 
 .trigger {
@@ -417,7 +552,7 @@ footer {
   background: rgba(20, 20, 40, 0.7);
   color: #c8c8dc;
   font-size: 1.1em;
-  transition: 0.4s;
+  transition: 0.3s;
 }
 
 .trigger-index {

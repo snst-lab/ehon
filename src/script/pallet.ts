@@ -1,9 +1,8 @@
 import { DOM } from './domController';
-import { param, config } from './parameter';
+import { param, config, css } from './parameter';
 import { ComponentType as Component } from './component';
 
 namespace Pallet {
-	const outlineStyle: string = `outline:${config.triggerOutlineWidth} ${config.triggerOutlineStyle} ${config.triggerOutlineColor};`;
 	export class Camera {
 		static className = 'component-camera';
 		static dom = new DOM('.component-camera');
@@ -12,12 +11,32 @@ namespace Pallet {
 		static title = class {
 			static className: string = 'active-title-value';
 			static dom = new DOM('.active-title-value');
-		};
+		}
+		static touch = class{
+			static className: string = 'active-touch-switch';
+			static dom = new DOM('.active-touch-switch');
+		}
+		static float = class{
+			static className: string = 'active-float-switch';
+			static dom = new DOM('.active-float-switch');
+		}
 	}
 	export class Trigger {
 		static dom = new DOM('.trigger');
 		static button = new DOM('.keyframe-showtrigger');
-		static show:boolean = false;
+		static opened: boolean = false;
+
+		static show(): void {
+			(<HTMLElement>Trigger.dom.el).style.left = '70vw';
+			(<HTMLElement>Trigger.button.el).style.color = 'rgb(0,200,180)';
+			Trigger.opened = true;
+		}
+
+		static hide(): void {
+			(<HTMLElement>Trigger.dom.el).style.left = '85vw';
+			(<HTMLElement>Trigger.button.el).style.color = '';
+			Trigger.opened = false;
+		}
 
 		static render(now: number, Active: Component, Components: Array<Component>): void {
 			const fragment = new DOM();
@@ -26,7 +45,7 @@ namespace Pallet {
 				<div class='trigger-component'>
 					<input type="checkbox" id="trigger-component0" 
 					${[].indexOf.call(Active.trigger, 'scenechange' + now) > -1 ? 'checked' : ''}>
-					<label class='trigger-component0 trigger-component-label' for="trigger-component0">on Scene to No.${now}</label>
+					<label class='trigger-component0 trigger-component-label' for="trigger-component0">on Scene Change to No.${now}</label>
 				</div>
 				`);
 			fragment.append(`
@@ -97,11 +116,7 @@ namespace Pallet {
 						(event: MouseEvent) => {
 							const className: string = event.srcElement.classList.item(1).replace('trigger-', '');
 							const target: HTMLElement = Components.filter((e) => e.className === className)[0].element;
-							if (Active.className !== className) {
-								target.style.outlineWidth = config.triggerOutlineWidth;
-								target.style.outlineStyle = config.triggerOutlineStyle;
-								target.style.outlineColor = config.triggerOutlineColor;
-							}
+							CSS.setOptionStyle(target);
 						},
 						false
 					);
@@ -109,13 +124,13 @@ namespace Pallet {
 						'mouseleave',
 						(event: MouseEvent) => {
 							const className: string = event.srcElement.classList.item(1).replace('trigger-', '');
+							const target: HTMLElement = Components.filter(
+								(e) => e.className === className && Active.className
+							)[0].element;
 							if (Active.className !== className) {
-								const target: HTMLElement = Components.filter(
-									(e) => e.className === className && Active.className
-								)[0].element;
-								target.style.outlineWidth = '';
-								target.style.outlineStyle = '';
-								target.style.outlineColor = '';
+								CSS.removeOutlineStyle(target);
+							} else {
+								CSS.setActiveStyle(target);
 							}
 						},
 						false
@@ -149,35 +164,50 @@ namespace Pallet {
 			static className: string = 'keyframe-state-list';
 			static dom = new DOM('.keyframe-state-list');
 		};
-		
+		static cssOptionOpened: boolean = false;
 
 		static render(Active: Component): void {
 			PalletActive.title.dom.el.textContent = Active.title;
 			Keyframe.delay.dom.el.textContent = '' + Active.delay;
 			Keyframe.iteration.dom.el.textContent = '' + Active.iteration;
+			document['active'].float.checked =Active.float;
+			document['active'].touch.checked =Active.touchable;
 
 			const fragment = new DOM();
 			for (let [ i, l ]: Array<number> = [ 0, Active.state.length ]; i < l; i++) {
 				fragment.append(`
                     <div class='keyframe-state ${i === l - 1 ? 'keyframe-state-current' : ''} keyframe-state${i}'>
-						<div class='keyframe-state-number keyframe-state-number${i}'>State: ${i}</div>
-						<div class='keyframe-state-src keyframe-state-src${i}'>${Active.state[i].src}</div>
-						<div class='keyframe-state-duration keyframe-state-duration${i}'>
+						<div class='keyframe-state-number${i} keyframe-state-number'>State: ${i}</div>
+						<div class='keyframe-state-src${i} keyframe-state-src' ${Active.type === 'text'
+					? "contenteditable='true'"
+					: ''}>${Active.state[i].src}</div>
+						<div class='keyframe-state-duration${i} keyframe-state-duration'>
 							<div class='keyframe-state-duration-index'>Duration:</div>
-							<div class='keyframe-state-duration-value keyframe-state-duration-value${i}' contenteditable='true'>${Active
+							<div class='keyframe-state-duration-value${i} keyframe-state-duration-value' contenteditable='true'>${Active
 					.state[i].duration}</div>
 						</div>
-						<input type='file' class='keyframe-state-input${i}' style='display:none;'>
-						<i class='keyframe-state-update material-icons keyframe-state-update${i}' state='${i}'>refresh</i>
-						${i > 0
-							? `<i class='keyframe-state-remove material-icons keyframe-state-remove${i}' state='${i}'>delete</i>`
+						${Active.type === 'image' ? `<input type='file' class='keyframe-state-input${i}' style='display:none;'>` : ''}
+						<div class='keyframe-state-icon'>
+							<i class='keyframe-state-update${i} keyframe-state-update material-icons' state='${i}'>refresh</i>
+							${i > 0
+								? `<i class='keyframe-state-remove${i} keyframe-state-remove material-icons' state='${i}'>delete</i>`
+								: ''}
+						</div>
+						${Active.type !== 'camera'
+							? `<div class='keyframe-state-option-show${i} keyframe-state-option-show'><div class='plusminus${i} plusminus'><span></span><span></span></div></div>`
 							: ''}
-                    </div>
+					</div>
+					${Active.type !== 'camera'
+						? `<div class='keyframe-state-option${i} keyframe-state-option' contenteditable='true'>/*Optional CSS*/${CSS.removeActiveStyle(
+								Active.state[i].option
+							)}</div>`
+						: ''}
 					`);
 			}
 			Pallet.Keyframe.stateList.dom.rewrite(fragment.el);
 			Pallet.Keyframe.eventListener(Active);
 		}
+		// <pre class='keyframe-state-option${i} keyframe-state-option'><code class='html hljs' contenteditable='true'> /* Optional CSS here */</code></pre>
 
 		static clear(): void {
 			Pallet.Keyframe.stateList.dom.rewrite('');
@@ -191,7 +221,7 @@ namespace Pallet {
 					'click',
 					(event: PointerEvent) => {
 						// event.preventDefault();
-						Active.transition(Active.state[i], outlineStyle);
+						Active.transition(Active.state[i]);
 						const currentState: Element = document.querySelector('.keyframe-state-current');
 						if (currentState) currentState.classList.remove('keyframe-state-current');
 						document.querySelector('.keyframe-state' + i).classList.add('keyframe-state-current');
@@ -226,7 +256,7 @@ namespace Pallet {
 						false
 					);
 				}
-				if (Active.type !== 'camera') {
+				if (Active.type === 'image') {
 					document.querySelector('.keyframe-state-input' + i).addEventListener(
 						'change',
 						(event: Event) => {
@@ -234,9 +264,7 @@ namespace Pallet {
 							const file: File = (<HTMLInputElement>event.target).files[0];
 							(<HTMLElement>document.querySelector('.keyframe-state-src' + i)).textContent = file.name;
 							Active.state[i].src = file.name;
-							Active.transition(Active.state[i], outlineStyle);
-
-							// console.log(Active.state);
+							Active.transition(Active.state[i]);
 						},
 						false
 					);
@@ -249,7 +277,79 @@ namespace Pallet {
 						false
 					);
 				}
+				if (Active.type === 'text') {
+					document.querySelector('.keyframe-state-src' + i).addEventListener(
+						'blur',
+						(event: Event) => {
+							event.preventDefault();
+							Active.state[i].src = event.srcElement.textContent;
+							Active.transition(Active.state[i]);
+						},
+						false
+					);
+				}
+				if (Active.type !== 'camera') {
+					document.querySelector('.keyframe-state-option-show' + i).addEventListener(
+						'click',
+						(event: PointerEvent) => {
+							event.preventDefault();
+							if (!Keyframe.cssOptionOpened) {
+								Keyframe.cssOptionOpened = true;
+								(<HTMLElement>document.querySelector('.plusminus' + i)).classList.add('active');
+								(<HTMLElement>document.querySelector('.keyframe-state-option' + i)).style.height =
+									'10rem';
+							} else {
+								Keyframe.cssOptionOpened = false;
+								(<HTMLElement>document.querySelector('.plusminus' + i)).classList.remove('active');
+								(<HTMLElement>document.querySelector('.keyframe-state-option' + i)).style.height = '0';
+							}
+						},
+						false
+					);
+					document.querySelector('.keyframe-state-option' + i).addEventListener(
+						'blur',
+						(event: Event) => {
+							event.preventDefault();
+							Active.state[i].option = event.srcElement.textContent.replace('/*Optional CSS*/', '');
+							Active.transition(Active.state[i]);
+						},
+						false
+					);
+				}
 			}
+		}
+	}
+	class CSS {
+		static setOptionStyle(e:HTMLElement) {
+			e.style.outlineColor = css.option.outlineColor;
+			e.style.outlineStyle = css.option.outlineStyle;
+			e.style.outlineWidth = css.option.outlineWidth;
+		}
+		static removeOutlineStyle(e:HTMLElement) {
+			e.style.outlineColor = '';
+			e.style.outlineStyle = '';
+			e.style.outlineWidth = '';
+		}
+		static setActiveStyle(e:HTMLElement) {
+			e.style.outlineColor = css.active.outlineColor;
+			e.style.outlineStyle = css.active.outlineStyle;
+			e.style.outlineWidth = css.active.outlineWidth;
+		}
+		static removeActiveStyle(option: string) {
+			return option
+				.replace(
+					'outline:' +
+						css.active.outlineColor +
+						' ' +
+						css.active.outlineStyle +
+						' ' +
+						css.active.outlineWidth +
+						';',
+					''
+				)
+				.replace('resize:' + css.resize.resize + ';', '')
+				.replace('overflow:' + css.resize.overflow + ';', '')
+				.replace('cursor:' + css.resize.cursor + ';', '');
 		}
 	}
 }

@@ -1,6 +1,6 @@
 import { param } from './parameter';
 import { ComponentType as Component, ComponentState as State } from './component';
-import { Canvas, Scenes as scene, Now as now } from './canvas';
+import { Scenes as scene, Now as now } from './canvas';
 
 export namespace Animation {
 	class Operation {
@@ -10,11 +10,14 @@ export namespace Animation {
 				x: state1.x + state2.x,
 				y: state1.y + state2.y,
 				z: state1.z + state2.z,
+				width :state1.width + state2.width,
+				aspectRatio : state1.aspectRatio + state2.aspectRatio,
 				rotate: state1.rotate + state2.rotate,
 				scale: state1.scale + state2.scale,
 				blur: state1.blur + state2.blur,
 				opacity: state1.opacity + state2.opacity,
-				duration: state1.duration
+				duration: state1.duration,
+				option: state1.option
 			};
 		}
 		diff(oldState: State, newState: State): State {
@@ -24,11 +27,14 @@ export namespace Animation {
 				x: (newState.x - oldState.x) * durInv,
 				y: (newState.y - oldState.y) * durInv,
 				z: (newState.z - oldState.z) * durInv,
+				width: (newState.width - oldState.width) * durInv,
+				aspectRatio: (newState.aspectRatio - oldState.aspectRatio) * durInv,
 				rotate: (newState.rotate - oldState.rotate) * durInv,
 				scale: (newState.scale - oldState.scale) * durInv,
 				blur: (newState.blur - oldState.blur) * durInv,
 				opacity: (newState.opacity - oldState.opacity) * durInv,
-				duration: oldState.duration
+				duration: oldState.duration,
+				option: oldState.option
 			};
 		}
 	}
@@ -93,7 +99,7 @@ export namespace Animation {
 		iterate(target: Component): void {
 			if (this.iteration < target.iteration) {
 				this.iteration += 1;
-				target.transition(target.state[0], '');
+				target.transition(target.state[0]);
 				this.shift(target, 1);
 			} else {
 				this.iteration = 0;
@@ -117,10 +123,10 @@ export namespace Animation {
 		move(target: Component, frame: number, endState: number): void {
 			if (frame % param.animation.skipFrame === 0) {
 				if (frame < target.state[endState].duration) {
-					target.transition(this.op.add(target.now, this.diff[endState - 1]), '');
+					target.transition(this.op.add(target.now, this.diff[endState - 1]));
 					window.requestAnimationFrame(() => this.move(target, frame + 1, endState));
 				} else {
-					target.transition(target.state[endState], '');
+					target.transition(target.state[endState]);
 					this.shift(target, endState + 1);
 				}
 			} else {

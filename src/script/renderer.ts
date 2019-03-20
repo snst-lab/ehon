@@ -20,7 +20,8 @@ namespace Renderer {
 				className: SceneClass + '' + num,
 				dom: new DOM(`<div class='${SceneClass}${num} ${SceneClass}'><div class='base-layer' style='z-index:${Canvas.z}'></div></div>`),
 				Camera: null,
-				Images: []
+				Images: [],
+				Texts:[]
 			});
 		}
 		renderScene(num: number) {
@@ -38,6 +39,9 @@ namespace Renderer {
 		renderComponent(num: number) {
 			const flag = document.createDocumentFragment();
 			scene[num].Images.forEach((e) => {
+				flag.appendChild(e.element);
+			});
+			scene[num].Texts.forEach((e) => {
 				flag.appendChild(e.element);
 			});
 			scene[num].dom.rewrite(flag);
