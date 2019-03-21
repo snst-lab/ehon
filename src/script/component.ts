@@ -1,6 +1,6 @@
 import { DOM } from './domController';
 import { param, config } from './parameter';
-import { Scenes as scene } from './canvas';
+import { Scene } from './canvas';
 import { PalletCamera as Cam } from './pallet';
 import { CalcCSS } from './calculation';
 
@@ -24,6 +24,7 @@ namespace Component {
 	}
 
 	export class Structure {
+		scene:number;
 		type: string;
 		className: string;
 		title: string;
@@ -39,7 +40,6 @@ namespace Component {
 	}
 
 	export class Camera extends Component.Structure {
-		private scene: number;
 		public pointer: string;
 
 		constructor(SceneNum: number, given: Structure) {
@@ -91,15 +91,16 @@ namespace Component {
 					option: ''
 				};
 				this.state = [];
+				this.state.push(state0);
 				this.now = state0;
 			}
 			this.element = <HTMLElement>Cam.dom.el;
 		}
 		transition({ src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option }: State): void {
 			this.now = { src, x, y, z, width, aspectRatio, rotate , scale, blur, opacity, duration, option };
-			scene[this.scene].dom.el.style.transform = `rotate(${rotate}deg)`;
+			Scene._[this.scene].dom.el.style.transform = `rotate(${rotate}deg)`;
 
-			[ ...scene[this.scene].Images, ...scene[this.scene].Texts ].forEach((e) => {
+			[ ...Scene._[this.scene].Images, ...Scene._[this.scene].Texts ].forEach((e) => {
 				e.transition(
 					{
 						src: e.now.src,
@@ -121,14 +122,13 @@ namespace Component {
 	}
 
 	export class Image extends Component.Structure {
-		private scene: number;
 		public pointer: string;
 
 		constructor(SceneNum: number, given: Structure) {
 			super();
 			this.scene = SceneNum;
 			this.type = 'image';
-			this.className = given.className || `scene${this.scene}-img${uniqueString()}`;
+			this.className = given.className || `img${uniqueString()}`;
 			this.title = given.title || this.className;
 			this.touchable = given.touchable || true;
 			this.float = given.float || true;
@@ -159,6 +159,7 @@ namespace Component {
 			} else {
 				this.state = [];
 				this.now = given.now;
+				this.state.push(given.now);
 				this.createElement(this.className, given.now);
 			}
 		}
@@ -170,27 +171,26 @@ namespace Component {
 			 onclick="componentClick(event);"
 			 onmouseup="componentMouseUp(event);"
 			 class="${className} image" 
-			 style="${calcCSS.imageFloat(state, scene[this.scene].Camera.now, this.pointer)}
+			 style="${calcCSS.imageFloat(state, Scene._[this.scene].Camera.now, this.pointer)}
 			 "></div>
 			`).el;
 		}
 		transition({ src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option }: State): void {
 			this.now = { src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option };
 			this.element.style.cssText = this.float
-				? calcCSS.imageFloat(this.now, scene[this.scene].Camera.now, this.pointer)
-				: calcCSS.imageFix(this.now, scene[this.scene].Camera.now, this.pointer);
+				? calcCSS.imageFloat(this.now, Scene._[this.scene].Camera.now, this.pointer)
+				: calcCSS.imageFix(this.now, Scene._[this.scene].Camera.now, this.pointer);
 		}
 	}
 
 	export class Text extends Component.Structure {
-		private scene: number;
 		public pointer: string;
 
 		constructor(SceneNum: number, given: Structure) {
 			super();
 			this.scene = SceneNum;
 			this.type = 'text';
-			this.className = given.className || `scene${this.scene}-txt${uniqueString()}`;
+			this.className = given.className || `txt${uniqueString()}`;
 			this.title = given.title || this.className;
 			this.touchable = given.touchable || true;
 			this.float = given.float || true;
@@ -221,6 +221,7 @@ namespace Component {
 			} else {
 				this.state = [];
 				this.now = given.now;
+				this.state.push(given.now);
 				this.createElement(this.className, given.now);
 			}
 			this.addEventListner();
@@ -235,7 +236,7 @@ namespace Component {
 			 onmouseup="componentMouseUp(event);"
 			 contenteditable="true" 
 			 class="${className} text" 
-			 style="${calcCSS.textFloat(state, scene[this.scene].Camera.now, this.pointer)};"
+			 style="${calcCSS.textFloat(state, Scene._[this.scene].Camera.now, this.pointer)};"
 			 >${state.src}</div>
 			`).el;
 		}
@@ -248,8 +249,8 @@ namespace Component {
 			this.now = { src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option };
 			this.element.textContent = this.now.src;
 			this.element.style.cssText = this.float
-				? calcCSS.textFloat(this.now, scene[this.scene].Camera.now, this.pointer)
-				: calcCSS.textFix(this.now, scene[this.scene].Camera.now, this.pointer);
+				? calcCSS.textFloat(this.now, Scene._[this.scene].Camera.now, this.pointer)
+				: calcCSS.textFix(this.now, Scene._[this.scene].Camera.now, this.pointer);
 		}
 	}
 

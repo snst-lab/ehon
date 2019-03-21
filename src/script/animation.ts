@@ -1,6 +1,6 @@
 import { param } from './parameter';
 import { ComponentType as Component, ComponentState as State } from './component';
-import { Scenes as scene, Now as now } from './canvas';
+import { Scene } from './canvas';
 
 export namespace Animation {
 	class Operation {
@@ -10,8 +10,8 @@ export namespace Animation {
 				x: state1.x + state2.x,
 				y: state1.y + state2.y,
 				z: state1.z + state2.z,
-				width :state1.width + state2.width,
-				aspectRatio : state1.aspectRatio + state2.aspectRatio,
+				width: state1.width + state2.width,
+				aspectRatio: state1.aspectRatio + state2.aspectRatio,
 				rotate: state1.rotate + state2.rotate,
 				scale: state1.scale + state2.scale,
 				blur: state1.blur + state2.blur,
@@ -42,24 +42,12 @@ export namespace Animation {
 	export class Register {
 		constructor(target: Component, eventName: string) {
 			if (target.state.length !== 1) return;
-			scene[now].dom.el.addEventListener(
+			Scene._[Scene.now].dom.el.addEventListener(
 				eventName,
 				(event: PointerEvent) => {
 					event.preventDefault();
 					if (
-						[].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1 ||
-						[].indexOf.call(target.trigger, 'scene' + now) > -1
-					) {
-						new Animation.Play(target);
-					}
-				},
-				false
-			);
-			document.addEventListener(
-				'sceneChange',
-				(event: Event) => {
-					if (
-						[].indexOf.call(target.trigger, event.srcElement.classList.item(0) || 'scenechange' + now) > -1
+						[].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1
 					) {
 						new Animation.Play(target);
 					}

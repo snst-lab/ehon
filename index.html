@@ -25,9 +25,29 @@
         <div class='canvas' style='z-index:3;' ondragover="event.preventDefault();"></div>
         <div class='pallet'>
             <div class='pallet-fix'>
-                <i class="component-camera material-icons">
-                    videocam
-                </i>
+                <div class='scene-changer'>
+                    <i class="scene-changer-back material-icons">
+                        chevron_left
+                    </i>
+                    <i class="scene-changer-forward material-icons">
+                        chevron_right
+                    </i>
+                    <div class='scene-changer-current'>Scene 0</div>
+                    <i class="scene-changer-remove material-icons">
+                        delete
+                    </i>
+                    <i class="scene-changer-add material-icons">
+                        add
+                    </i>
+                </div>
+                <div class='layer-controller'>
+                    <i class="showlayer material-icons">
+                        layers
+                    </i>
+                    <i class="camera material-icons">
+                        videocam
+                    </i>
+                </div>
                 <div class='active-header'>
                     <div class='active-title'>
                         <div class='active-title-index'>Active:</div>
@@ -66,6 +86,7 @@
             </div>
             <div class='keyframe-state-list'></div>
         </div>
+        <div class='layer'></div>
         <div class='trigger'></div>
     </main>
     <footer>Copyright &copy; 2019 TANUSUKE</footer>

@@ -1,24 +1,158 @@
 import { DOM } from './domController';
 import { param, config, css } from './parameter';
 import { ComponentType as Component } from './component';
+import { Scene } from './canvas';
+import { Active as ActiveComponent } from './editor';
 
 namespace Pallet {
+	export class SceneChanger {
+		static className = 'scene-changer';
+		static forward = new DOM('.scene-changer-forward');
+		static back = new DOM('.scene-changer-back');
+		static current = new DOM('.scene-changer-current');
+		static add = new DOM('.scene-changer-add');
+		static remove = new DOM('.scene-changer-remove');
+	}
 	export class Camera {
-		static className = 'component-camera';
-		static dom = new DOM('.component-camera');
+		static className = 'camera';
+		static dom = new DOM('.camera');
 	}
 	export class Active {
 		static title = class {
 			static className: string = 'active-title-value';
 			static dom = new DOM('.active-title-value');
-		}
-		static touch = class{
+		};
+		static touch = class {
 			static className: string = 'active-touch-switch';
 			static dom = new DOM('.active-touch-switch');
-		}
-		static float = class{
+		};
+		static float = class {
 			static className: string = 'active-float-switch';
 			static dom = new DOM('.active-float-switch');
+		};
+	}
+	export class Layer {
+		static dom = new DOM('.layer');
+		static button = new DOM('.showlayer');
+		static opened: boolean = false;
+		static show(): void {
+			(<HTMLElement>Layer.dom.el).style.left = '70vw';
+			(<HTMLElement>Layer.button.el).style.color = 'rgb(0,200,180)';
+			Trigger.hide();
+			Layer.opened = true;
+		}
+		static hide(): void {
+			(<HTMLElement>Layer.dom.el).style.left = '85vw';
+			(<HTMLElement>Layer.button.el).style.color = '';
+			Layer.opened = false;
+		}
+		static render(selector: any): void {
+			const fragment = new DOM();
+			fragment.append('<div class="layer-index">Layer</div>');
+			fragment.append(`
+			<div class='layer-component layer-component0'>
+					<i class='layer-component-icon material-icons'>videocam</i>
+					<div class='layer-component-title layer-component-title0'>${Scene._[Scene.now].Camera.title}</div>
+			</div>
+			`);
+			for (let [ i, l ]: Array<number> = [ 0, Scene._[Scene.now].Images.length ]; i < l; i++) {
+				fragment.append(`
+					<div class='layer-component layer-component${i + 1}'>
+						<i class='layer-component-icon material-icons'>insert_photo</i>
+						<div class='layer-component-title layer-component-title${i + 1}'>${Scene._[Scene.now].Images[i].title}</div>
+						<i class='layer-component-remove layer-component-remove${i + 1} material-icons'>delete</i>
+					</div>
+					`);
+			}
+			for (
+				let [ i, k, l ]: Array<number> = [
+					0,
+					Scene._[Scene.now].Images.length,
+					Scene._[Scene.now].Texts.length
+				];
+				i < l;
+				i++
+			) {
+				fragment.append(`
+					<div class='layer-component layer-component${i + 1 + k}'>
+						<i class='layer-component-icon material-icons'>text_fields</i>
+						<div class='layer-component-title layer-component-title${i + 1 + k}'>${Scene._[Scene.now].Texts[i].title}</div>
+						<i class='layer-component-remove layer-component-remove${i + 1 + k} material-icons'>delete</i>
+					</div>
+					`);
+			}
+			Pallet.Layer.dom.rewrite(fragment.el);
+			Pallet.Layer.eventListener(selector);
+		}
+		static clear(): void {
+			Pallet.Layer.dom.rewrite('');
+		}
+
+		static eventListener(selector: any): void {
+			for (let [ i, l ]: Array<number> = [ 0, Scene._[Scene.now].Images.length ]; i < l; i++) {
+				document.querySelector('.layer-component-remove' + (i + 1)).addEventListener(
+					'click',
+					(event: PointerEvent) => {
+						selector.release();
+						Scene._[Scene.now].Images[i].element.remove();
+						Scene._[Scene.now].Images.splice(i, 1);
+						Layer.render(selector);
+					},
+					false
+				);
+			}
+			for (
+				let [ i, k, l ]: Array<number> = [
+					0,
+					Scene._[Scene.now].Images.length,
+					Scene._[Scene.now].Texts.length
+				];
+				i < l;
+				i++
+			) {
+				document.querySelector('.layer-component-remove' + (i + 1 + k)).addEventListener(
+					'click',
+					(event: PointerEvent) => {
+						selector.release();
+						Scene._[Scene.now].Texts[i].element.remove();
+						Scene._[Scene.now].Texts.splice(i, 1);
+						Layer.render(selector);
+					},
+					false
+				);
+			}
+			const Components: Array<Component> = [
+				Scene._[Scene.now].Camera,
+				...Scene._[Scene.now].Images,
+				...Scene._[Scene.now].Texts
+			];
+			for (let [ i, l ]: Array<number> = [ 0, Components.length ]; i < l; i++) {
+				document.querySelector('.layer-component-title' + i).addEventListener(
+					'click',
+					(event: PointerEvent) => {
+						selector.activate(Components[i].className, Components[i].type);
+					},
+					false
+				);
+				document.querySelector('.layer-component' + i).addEventListener(
+					'mouseenter',
+					(event: MouseEvent) => {
+						CSS.setOptionStyle(Components[i].element);
+					},
+					false
+				);
+				document.querySelector('.layer-component' + i).addEventListener(
+					'mouseleave',
+					(event: MouseEvent) => {
+						if (ActiveComponent !== null && ActiveComponent.className === Components[i].className) {
+							CSS.setActiveStyle(Components[i].element);
+						} else {
+							CSS.removeOutlineStyle(Components[i].element);
+						}
+					},
+					false
+				);
+			}
 		}
 	}
 	export class Trigger {
@@ -27,8 +161,10 @@ namespace Pallet {
 		static opened: boolean = false;
 
 		static show(): void {
+			if (ActiveComponent === null) return;
 			(<HTMLElement>Trigger.dom.el).style.left = '70vw';
 			(<HTMLElement>Trigger.button.el).style.color = 'rgb(0,200,180)';
+			Layer.hide();
 			Trigger.opened = true;
 		}
 
@@ -38,49 +174,54 @@ namespace Pallet {
 			Trigger.opened = false;
 		}
 
-		static render(now: number, Active: Component, Components: Array<Component>): void {
+		static render(): void {
+			const Components: Array<Component> = [
+				Scene._[Scene.now].Camera,
+				...Scene._[Scene.now].Images,
+				...Scene._[Scene.now].Texts
+			];
 			const fragment = new DOM();
 			fragment.append('<div class="trigger-index">Animation Trigger</div>');
 			fragment.append(`
 				<div class='trigger-component'>
 					<input type="checkbox" id="trigger-component0" 
-					${[].indexOf.call(Active.trigger, 'scenechange' + now) > -1 ? 'checked' : ''}>
-					<label class='trigger-component0 trigger-component-label' for="trigger-component0">on Scene Change to No.${now}</label>
+					${[].indexOf.call(ActiveComponent.trigger, 'scenechange') > -1 ? 'checked' : ''}>
+					<label class='trigger-component0 trigger-component-label' for="trigger-component0">Scene Change to No.${Scene.now}</label>
 				</div>
 				`);
 			fragment.append(`
 				<div class='trigger-component'>
 					<input type="checkbox" id="trigger-component1" 
-					${[].indexOf.call(Active.trigger, 'scene' + now) > -1 ? 'checked' : ''}>
-					<label class='trigger-component1 trigger-component-label' for="trigger-component1">on Canvas Touch</label>
+					${[].indexOf.call(ActiveComponent.trigger, 'canvas') > -1 ? 'checked' : ''}>
+					<label class='trigger-component1 trigger-component-label' for="trigger-component1">Canvas Touch</label>
 				</div>
 			`);
 			for (let [ i, l ]: Array<number> = [ 0, Components.length ]; i < l; i++) {
 				fragment.append(`
-					<div class='trigger-component trigger-${Components[i].className}'>
+					<div class='trigger-component'>
 						<input type="checkbox" id="trigger-component${i + 2}" 
-						${[].indexOf.call(Active.trigger, Components[i].className) > -1 ? 'checked' : ''}>
+						${[].indexOf.call(ActiveComponent.trigger, Components[i].className) > -1 ? 'checked' : ''}>
 						<label class='trigger-component${i + 2} trigger-component-label' for="trigger-component${i + 2}">${Components[i]
 					.title}</label>
 					</div>
 					`);
 			}
 			Pallet.Trigger.dom.rewrite(fragment.el);
-			Pallet.Trigger.eventListener(now, Active, Components);
+			Pallet.Trigger.eventListener(Components);
 		}
 
 		static clear(): void {
 			Pallet.Trigger.dom.rewrite('');
 		}
 
-		static eventListener(now: number, Active: Component, Components: Array<Component>): void {
+		static eventListener(Components: Array<Component>): void {
 			document.querySelector('.trigger-component0').addEventListener(
 				'click',
 				(event: PointerEvent) => {
-					if ([].indexOf.call(Active.trigger, 'scenechange' + now) < 0) {
-						Active.trigger.push('scenechange' + now);
+					if ([].indexOf.call(ActiveComponent.trigger, 'scenechange') < 0) {
+						ActiveComponent.trigger.push('scenechange');
 					} else {
-						Active.trigger = Active.trigger.filter((e) => e !== 'scenechange' + now);
+						ActiveComponent.trigger = ActiveComponent.trigger.filter((e) => e !== 'scenechange');
 					}
 				},
 				false
@@ -88,10 +229,10 @@ namespace Pallet {
 			document.querySelector('.trigger-component1').addEventListener(
 				'click',
 				(event: PointerEvent) => {
-					if ([].indexOf.call(Active.trigger, 'scene' + now) < 0) {
-						Active.trigger.push('scene' + now);
+					if ([].indexOf.call(ActiveComponent.trigger, 'canvas') < 0) {
+						ActiveComponent.trigger.push('canvas');
 					} else {
-						Active.trigger = Active.trigger.filter((e) => e !== 'scene' + now);
+						ActiveComponent.trigger = ActiveComponent.trigger.filter((e) => e !== 'canvas');
 					}
 				},
 				false
@@ -100,43 +241,35 @@ namespace Pallet {
 				document.querySelector('.trigger-component' + (i + 2)).addEventListener(
 					'click',
 					(event: PointerEvent) => {
-						if ([].indexOf.call(Active.trigger, Components[i].className) < 0) {
-							Active.trigger.push(Components[i].className);
+						if ([].indexOf.call(ActiveComponent.trigger, Components[i].className) < 0) {
+							ActiveComponent.trigger.push(Components[i].className);
 						} else {
-							Active.trigger = Active.trigger.filter((e) => e !== Components[i].className);
+							ActiveComponent.trigger = ActiveComponent.trigger.filter(
+								(e) => e !== Components[i].className
+							);
+						}
+					},
+					false
+				);
+				document.querySelector('.trigger-component' + (i + 2)).addEventListener(
+					'mouseenter',
+					(event: MouseEvent) => {
+						CSS.setOptionStyle(Components[i].element);
+					},
+					false
+				);
+				document.querySelector('.trigger-component' + (i + 2)).addEventListener(
+					'mouseleave',
+					(event: MouseEvent) => {
+						if (ActiveComponent !== null && ActiveComponent.className === Components[i].className) {
+							CSS.setActiveStyle(Components[i].element);
+						} else {
+							CSS.removeOutlineStyle(Components[i].element);
 						}
 					},
 					false
 				);
 			}
-			document.querySelectorAll('.trigger-component').forEach((e, i) => {
-				if (i > 1) {
-					e.addEventListener(
-						'mouseenter',
-						(event: MouseEvent) => {
-							const className: string = event.srcElement.classList.item(1).replace('trigger-', '');
-							const target: HTMLElement = Components.filter((e) => e.className === className)[0].element;
-							CSS.setOptionStyle(target);
-						},
-						false
-					);
-					e.addEventListener(
-						'mouseleave',
-						(event: MouseEvent) => {
-							const className: string = event.srcElement.classList.item(1).replace('trigger-', '');
-							const target: HTMLElement = Components.filter(
-								(e) => e.className === className && Active.className
-							)[0].element;
-							if (Active.className !== className) {
-								CSS.removeOutlineStyle(target);
-							} else {
-								CSS.setActiveStyle(target);
-							}
-						},
-						false
-					);
-				}
-			});
 		}
 	}
 	export class Keyframe {
@@ -152,10 +285,6 @@ namespace Pallet {
 			static className: string = 'keyframe-push-state';
 			static dom = new DOM('.keyframe-push-state');
 		};
-		static showtrigger = class {
-			static className: string = 'keyframe-showtrigger';
-			static dom = new DOM('.keyframe-showtrigger');
-		};
 		static play = class {
 			static className: string = 'keyframe-play';
 			static dom = new DOM('.keyframe-play');
@@ -166,46 +295,48 @@ namespace Pallet {
 		};
 		static cssOptionOpened: boolean = false;
 
-		static render(Active: Component): void {
-			PalletActive.title.dom.el.textContent = Active.title;
-			Keyframe.delay.dom.el.textContent = '' + Active.delay;
-			Keyframe.iteration.dom.el.textContent = '' + Active.iteration;
-			document['active'].float.checked =Active.float;
-			document['active'].touch.checked =Active.touchable;
+		static render(): void {
+			PalletActive.title.dom.el.textContent = ActiveComponent.title;
+			Keyframe.delay.dom.el.textContent = '' + ActiveComponent.delay;
+			Keyframe.iteration.dom.el.textContent = '' + ActiveComponent.iteration;
+			document['active'].float.checked = ActiveComponent.float;
+			document['active'].touch.checked = ActiveComponent.touchable;
 
 			const fragment = new DOM();
-			for (let [ i, l ]: Array<number> = [ 0, Active.state.length ]; i < l; i++) {
+			for (let [ i, l ]: Array<number> = [ 0, ActiveComponent.state.length ]; i < l; i++) {
 				fragment.append(`
                     <div class='keyframe-state ${i === l - 1 ? 'keyframe-state-current' : ''} keyframe-state${i}'>
 						<div class='keyframe-state-number${i} keyframe-state-number'>State: ${i}</div>
-						<div class='keyframe-state-src${i} keyframe-state-src' ${Active.type === 'text'
+						<div class='keyframe-state-src${i} keyframe-state-src' ${ActiveComponent.type === 'text'
 					? "contenteditable='true'"
-					: ''}>${Active.state[i].src}</div>
+					: ''}>${ActiveComponent.state[i].src}</div>
 						<div class='keyframe-state-duration${i} keyframe-state-duration'>
 							<div class='keyframe-state-duration-index'>Duration:</div>
-							<div class='keyframe-state-duration-value${i} keyframe-state-duration-value' contenteditable='true'>${Active
+							<div class='keyframe-state-duration-value${i} keyframe-state-duration-value' contenteditable='true'>${ActiveComponent
 					.state[i].duration}</div>
 						</div>
-						${Active.type === 'image' ? `<input type='file' class='keyframe-state-input${i}' style='display:none;'>` : ''}
+						${ActiveComponent.type === 'image'
+							? `<input type='file' class='keyframe-state-input${i}' style='display:none;'>`
+							: ''}
 						<div class='keyframe-state-icon'>
 							<i class='keyframe-state-update${i} keyframe-state-update material-icons' state='${i}'>refresh</i>
 							${i > 0
 								? `<i class='keyframe-state-remove${i} keyframe-state-remove material-icons' state='${i}'>delete</i>`
 								: ''}
 						</div>
-						${Active.type !== 'camera'
+						${ActiveComponent.type !== 'camera'
 							? `<div class='keyframe-state-option-show${i} keyframe-state-option-show'><div class='plusminus${i} plusminus'><span></span><span></span></div></div>`
 							: ''}
 					</div>
-					${Active.type !== 'camera'
+					${ActiveComponent.type !== 'camera'
 						? `<div class='keyframe-state-option${i} keyframe-state-option' contenteditable='true'>/*Optional CSS*/${CSS.removeActiveStyle(
-								Active.state[i].option
+								ActiveComponent.state[i].option
 							)}</div>`
 						: ''}
 					`);
 			}
 			Pallet.Keyframe.stateList.dom.rewrite(fragment.el);
-			Pallet.Keyframe.eventListener(Active);
+			Pallet.Keyframe.eventListener();
 		}
 		// <pre class='keyframe-state-option${i} keyframe-state-option'><code class='html hljs' contenteditable='true'> /* Optional CSS here */</code></pre>
 
@@ -213,15 +344,15 @@ namespace Pallet {
 			Pallet.Keyframe.stateList.dom.rewrite('');
 		}
 
-		static eventListener(Active: Component): void {
+		static eventListener(): void {
 			const input: HTMLInputElement = document.createElement('input');
 			input.type = 'file';
-			for (let [ i, l ]: Array<number> = [ 0, Active.state.length ]; i < l; i++) {
+			for (let [ i, l ]: Array<number> = [ 0, ActiveComponent.state.length ]; i < l; i++) {
 				document.querySelector('.keyframe-state-number' + i).addEventListener(
 					'click',
 					(event: PointerEvent) => {
 						// event.preventDefault();
-						Active.transition(Active.state[i]);
+						ActiveComponent.transition(ActiveComponent.state[i]);
 						const currentState: Element = document.querySelector('.keyframe-state-current');
 						if (currentState) currentState.classList.remove('keyframe-state-current');
 						document.querySelector('.keyframe-state' + i).classList.add('keyframe-state-current');
@@ -232,7 +363,7 @@ namespace Pallet {
 					'blur',
 					(event: Event) => {
 						event.preventDefault();
-						Active.state[i].duration = Number(event.srcElement.textContent);
+						ActiveComponent.state[i].duration = Number(event.srcElement.textContent);
 					},
 					false
 				);
@@ -240,8 +371,8 @@ namespace Pallet {
 					'click',
 					(event: PointerEvent) => {
 						event.preventDefault();
-						Active.state[i] = Active.now;
-						Pallet.Keyframe.render(Active);
+						ActiveComponent.state[i] = ActiveComponent.now;
+						Pallet.Keyframe.render();
 					},
 					false
 				);
@@ -250,21 +381,21 @@ namespace Pallet {
 						'click',
 						(event: PointerEvent) => {
 							event.preventDefault();
-							Active.state.splice(i, 1);
-							Pallet.Keyframe.render(Active);
+							ActiveComponent.state.splice(i, 1);
+							Pallet.Keyframe.render();
 						},
 						false
 					);
 				}
-				if (Active.type === 'image') {
+				if (ActiveComponent.type === 'image') {
 					document.querySelector('.keyframe-state-input' + i).addEventListener(
 						'change',
 						(event: Event) => {
 							event.preventDefault();
 							const file: File = (<HTMLInputElement>event.target).files[0];
 							(<HTMLElement>document.querySelector('.keyframe-state-src' + i)).textContent = file.name;
-							Active.state[i].src = file.name;
-							Active.transition(Active.state[i]);
+							ActiveComponent.state[i].src = file.name;
+							ActiveComponent.transition(ActiveComponent.state[i]);
 						},
 						false
 					);
@@ -277,18 +408,18 @@ namespace Pallet {
 						false
 					);
 				}
-				if (Active.type === 'text') {
+				if (ActiveComponent.type === 'text') {
 					document.querySelector('.keyframe-state-src' + i).addEventListener(
 						'blur',
 						(event: Event) => {
 							event.preventDefault();
-							Active.state[i].src = event.srcElement.textContent;
-							Active.transition(Active.state[i]);
+							ActiveComponent.state[i].src = event.srcElement.textContent;
+							ActiveComponent.transition(ActiveComponent.state[i]);
 						},
 						false
 					);
 				}
-				if (Active.type !== 'camera') {
+				if (ActiveComponent.type !== 'camera') {
 					document.querySelector('.keyframe-state-option-show' + i).addEventListener(
 						'click',
 						(event: PointerEvent) => {
@@ -310,8 +441,11 @@ namespace Pallet {
 						'blur',
 						(event: Event) => {
 							event.preventDefault();
-							Active.state[i].option = event.srcElement.textContent.replace('/*Optional CSS*/', '');
-							Active.transition(Active.state[i]);
+							ActiveComponent.state[i].option = event.srcElement.textContent.replace(
+								'/*Optional CSS*/',
+								''
+							);
+							ActiveComponent.transition(ActiveComponent.state[i]);
 						},
 						false
 					);
@@ -320,40 +454,35 @@ namespace Pallet {
 		}
 	}
 	class CSS {
-		static setOptionStyle(e:HTMLElement) {
+		static setOptionStyle(e: HTMLElement) {
 			e.style.outlineColor = css.option.outlineColor;
 			e.style.outlineStyle = css.option.outlineStyle;
 			e.style.outlineWidth = css.option.outlineWidth;
 		}
-		static removeOutlineStyle(e:HTMLElement) {
+		static removeOutlineStyle(e: HTMLElement) {
 			e.style.outlineColor = '';
 			e.style.outlineStyle = '';
 			e.style.outlineWidth = '';
 		}
-		static setActiveStyle(e:HTMLElement) {
+		static setActiveStyle(e: HTMLElement) {
 			e.style.outlineColor = css.active.outlineColor;
 			e.style.outlineStyle = css.active.outlineStyle;
 			e.style.outlineWidth = css.active.outlineWidth;
 		}
 		static removeActiveStyle(option: string) {
 			return option
-				.replace(
-					'outline:' +
-						css.active.outlineColor +
-						' ' +
-						css.active.outlineStyle +
-						' ' +
-						css.active.outlineWidth +
-						';',
-					''
-				)
+				.replace('outline-color:' + css.active.outlineColor + ';', '')
+				.replace('outline-style:' + css.active.outlineStyle + ';', '')
+				.replace('outline-width:' + css.active.outlineWidth + ';', '')
 				.replace('resize:' + css.resize.resize + ';', '')
 				.replace('overflow:' + css.resize.overflow + ';', '')
 				.replace('cursor:' + css.resize.cursor + ';', '');
 		}
 	}
 }
+export const PalletSceneChanger = Pallet.SceneChanger;
 export const PalletCamera = Pallet.Camera;
 export const PalletActive = Pallet.Active;
 export const PalletKeyframe = Pallet.Keyframe;
 export const PalletTrigger = Pallet.Trigger;
+export const PalletLayer = Pallet.Layer;

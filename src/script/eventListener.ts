@@ -1,15 +1,25 @@
 import { param, config, css } from './parameter';
-import { Canvas, Scenes as scene, Now as now } from './canvas';
-import { PalletActive, PalletTrigger, PalletKeyframe as Keyframe, PalletCamera as Cam } from './pallet';
-import { Active, EditorTransform, EditorEventHandler } from './editor';
-import { ComponentImage } from './component';
+import { Canvas, Scene } from './canvas';
+import {
+	PalletActive,
+	PalletSceneChanger as SceneChanger,
+	PalletLayer as Layer,
+	PalletTrigger as Trigger,
+	PalletKeyframe as Keyframe,
+	PalletCamera as Cam,
+	PalletLayer
+} from './pallet';
+import {
+	Active,
+	EditorSelector as selector,
+	EditorTransform as transform,
+	EditorEventHandler as editor
+} from './editor';
+import { AnimationPlay } from './animation';
 
 export let keyDown: string | null = null;
 
 namespace EventListener {
-	const transform = new EditorTransform();
-	const editor = new EditorEventHandler();
-
 	interface pointerPosition {
 		x: number;
 		y: number;
@@ -30,13 +40,13 @@ namespace EventListener {
 
 	export class Start {
 		constructor() {
-			this.detectKeyDown();
+			this.DetectKeyDown();
 			this.CanvasWheel();
-			this.CanvasClick();
-			this.CanvasResize();
+			this.CanvasRightClick();
+			// this.CanvasResize();
+			this.SceneChange();
 			this.CameraClick();
 			this.CanvasDrop();
-			this.BaseLayerClick();
 			this.TitleChange();
 			this.SwitchFloat();
 			this.SwitchTouch();
@@ -44,10 +54,11 @@ namespace EventListener {
 			this.IterationChange();
 			this.PushStateClick();
 			this.PlayClick();
+			this.ShowLayerClick();
 			this.ShowTriggerClick();
 			this.ImageEvent();
 		}
-		private detectKeyDown(): void {
+		private DetectKeyDown(): void {
 			document.addEventListener(
 				'keydown',
 				(event: KeyboardEvent) => {
@@ -96,23 +107,29 @@ namespace EventListener {
 				}
 			});
 		}
-		private CanvasClick(): void {
-			Canvas.dom.on('click', (event: PointerEvent) => {
+		private CanvasRightClick(): void {
+			Scene._[Scene.now].dom.on('contextmenu', (event: PointerEvent) => {
 				event.preventDefault();
+				[
+					Scene._[Scene.now].Camera,
+					...Scene._[Scene.now].Images,
+					...Scene._[Scene.now].Texts
+				].forEach((c) => {
+					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
+						new AnimationPlay(c);
+					}
+				});
 			});
 		}
-		private BaseLayerClick(): void {
-			scene[now].dom.el.firstChild.addEventListener(
-				'click',
-				(event: PointerEvent) => {
-					event.preventDefault();
-					editor.BaseLayerClick();
-				},
-				false
-			);
-		}
 		private CanvasResize(): void {
-			window.addEventListener('resize' || 'orientationchange', editor.CanvasResize);
+			window.addEventListener('resize' || 'orientationchange', () => {
+				new Canvas.Resize(() => {
+					Canvas.aspectRatio = Canvas.element.offsetHeight / Canvas.element.offsetWidth;
+					[ ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((e) => {
+						e.transition(e.now);
+					});
+				});
+			});
 		}
 		private CanvasDrop(): void {
 			Canvas.dom.on('drop', (event: DragEvent) => {
@@ -128,6 +145,42 @@ namespace EventListener {
 				}
 			});
 		}
+		private SceneChange(): void {
+			document.addEventListener('sceneChange', () => {
+				selector.release();
+				PalletLayer.hide();
+				
+				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				[
+					Scene._[Scene.now].Camera,
+					...Scene._[Scene.now].Images,
+					...Scene._[Scene.now].Texts
+				].forEach((c) => {
+					c.transition(c.state[0]);
+					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
+						new AnimationPlay(c);
+					}
+				});
+			});
+			SceneChanger.forward.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.now = Math.min(Scene.now + 1, Scene._.length - 1);
+				Scene.change(Scene.now);
+			});
+			SceneChanger.back.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.now = Math.max(Scene.now - 1, 0);
+				Scene.change(Scene.now);
+			});
+			SceneChanger.remove.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.remove(Scene.now);
+			});
+			SceneChanger.add.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.add();
+			});
+		}
 		private CameraClick(): void {
 			Cam.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
@@ -136,18 +189,23 @@ namespace EventListener {
 		}
 		private TitleChange(): void {
 			PalletActive.title.dom.on('blur', (event: Event) => {
+				if(Active===null) return;
 				event.preventDefault();
 				Active.title = PalletActive.title.dom.el.textContent;
 			});
 		}
 		private SwitchTouch(): void {
 			PalletActive.touch.dom.on('change', (event: Event) => {
+				if(Active===null) return;
 				event.preventDefault();
 				Active.touchable = document['active'].touch.checked;
+				Active.pointer = Active.touchable ? 'auto' : 'none';
+				Active.element.style.pointerEvents = Active.touchable ? 'auto' : 'none';
 			});
 		}
 		private SwitchFloat(): void {
 			PalletActive.float.dom.on('change', (event: Event) => {
+				if(Active===null) return;
 				event.preventDefault();
 				Active.float = document['active'].float.checked;
 				Active.now.x = 50 - 0.5 * Active.now.width;
@@ -157,35 +215,53 @@ namespace EventListener {
 		}
 		private DelayChange(): void {
 			Keyframe.delay.dom.on('blur', (event: Event) => {
+				if(Active===null) return;
 				event.preventDefault();
 				Active.delay = Number(Keyframe.delay.dom.el.textContent);
 			});
 		}
 		private IterationChange(): void {
 			Keyframe.iteration.dom.on('blur', (event: Event) => {
+				if(Active===null) return;
 				event.preventDefault();
 				Active.iteration = Number(Keyframe.iteration.dom.el.textContent);
 			});
 		}
-		private PushStateClick(): void {
-			Keyframe.pushState.dom.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				editor.PushStateClick();
-			});
-		}
-		private PlayClick(): void {
-			Keyframe.play.dom.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				editor.PlayClick();
-			});
-		}
 		private ShowTriggerClick(): void {
-			Keyframe.showtrigger.dom.on('click', (event: PointerEvent) => {
+			Trigger.button.on('click', (event: PointerEvent) => {
+				if (Active === null) return;
 				event.preventDefault();
 				editor.ShowTriggerClick();
 			});
 		}
+		private PlayClick(): void {
+			Keyframe.play.dom.on('click', (event: PointerEvent) => {
+				if (Active === null) return;
+				event.preventDefault();
+				editor.PlayClick();
+			});
+		}
+		private PushStateClick(): void {
+			Keyframe.pushState.dom.on('click', (event: PointerEvent) => {
+				if (Active === null) return;
+				event.preventDefault();
+				editor.PushStateClick();
+			});
+		}
+		private ShowLayerClick(): void {
+			Layer.button.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				editor.ShowLayerClick();
+			});
+		}
+
 		private ImageEvent(): void {
+			Object.defineProperty(window, 'baseLayerClick', {
+				value: function(event: PointerEvent): void {
+					event.preventDefault();
+					editor.BaseLayerClick();
+				}
+			});
 			Object.defineProperty(window, 'componentClick', {
 				value: function(event: PointerEvent): void {
 					event.preventDefault();
@@ -207,7 +283,7 @@ namespace EventListener {
 			Object.defineProperty(window, 'componentDragStart', {
 				value: function(event: DragEvent): void {
 					// event.preventDefault();
-					if (Active === null || event.srcElement===null) return;
+					if (Active === null || event.srcElement === null) return;
 					const className: string = event.srcElement.classList.item(0);
 					if (Active.className !== className) return;
 					dragStartPosition.x = event.clientX;
@@ -217,11 +293,11 @@ namespace EventListener {
 			Object.defineProperty(window, 'componentDragEnd', {
 				value: function(event: DragEvent): void {
 					event.preventDefault();
-					if (Active === null || event.srcElement===null) return;
+					if (Active === null || event.srcElement === null) return;
 					const className: string = event.srcElement.classList.item(0);
 					if (Active.className !== className) return;
 					const correctXY: number = Active.float
-						? (scene[now].Camera.now.z - Active.now.z) / Active.now.z
+						? (Scene._[Active.scene].Camera.now.z - Active.now.z) / Active.now.z
 						: 1;
 					const dx: number =
 						(event.clientX - dragStartPosition.x) * 100 / Canvas.element.offsetWidth * correctXY;
@@ -241,7 +317,7 @@ namespace EventListener {
 					if (Active === null) return;
 					const className: string = event.srcElement.classList.item(0);
 					if (Active.className !== className) return;
-					const distanceInv: number = 1 / Math.max(scene[now].Camera.now.z - Active.now.z, 1);
+					const distanceInv: number = 1 / Math.max(Scene._[Active.scene].Camera.now.z - Active.now.z, 1);
 					const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
 					Active.now.width = ~~(event.srcElement.clientWidth / Canvas.element.offsetWidth * 100) / size;
 					Active.now.aspectRatio = event.srcElement.clientHeight / event.srcElement.clientWidth;

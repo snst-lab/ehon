@@ -51,8 +51,8 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - [x] 7. change image src & duration
 - [x] 8. attach components as animation trigger 
 - [x] 9. add text component & make component to be copyable 
-- [ ] 10. show layer table & select layer to be editable ("self" is prepared alias of layer) 
-- [ ] 11. select animation trigger element  
+- [x] 10. show layer table & select layer to be editable
+- [ ] 11. add audio component
 - [ ] 12. save story as json file
 - [ ] 13. undo/redo
 

@@ -105,7 +105,6 @@ footer {
 .material-icons {
 	color: $gray2;
 	transition: .2s;
-	transform: scale(1.2);
 	-webkit-user-select: none;  /* Chrome all / Safari all */
 	-moz-user-select: none;     /* Firefox all */
 	-ms-user-select: none;      /* IE 10+ */
@@ -116,12 +115,40 @@ footer {
 	}
 }
 
-.component-camera {
-	z-index: 5;
-	margin: 2rem 2.5rem;
-	transform: scale(2);
-}
+.scene-changer{
+	position:absolute;
+	display:flex;
+	border-bottom: solid 1px $gray0;
+	width:100%;
+	height:2rem;
 
+	&-current{
+		color:$white;
+		font-size:0.8rem;
+		font-weight:100;
+		margin:0.4rem 0 0 0.5rem;
+	}
+	&-forward{
+		margin:0.3rem 0 0 0.1rem;
+	}
+	&-back{
+		margin:0.3rem 0 0 0.5rem;
+	}
+	&-remove{
+		margin:0.3rem 0 0 0.7rem;
+	}
+	&-add{
+		margin:0.3rem 0 0 0.3rem;
+	}
+}
+.camera {
+	transform: scale(1.8);
+	margin: 3.3rem 0 1.2rem 2rem;
+}
+.showlayer {
+	transform: scale(1.5);
+	margin: 3.3rem 0 1.2rem 2rem;
+}
 .active {
 	&-header {
 		width: 100%;
@@ -152,12 +179,14 @@ footer {
 	}
 	&-touch {
 		position: absolute;
+		font-size:0.7rem;
 		margin:1.1rem 0 0 0;
 		display:flex;
 	}
 	&-float {
 		position: absolute;
-		margin:1.1rem 0 0 6rem;
+		font-size:0.7rem;
+		margin:1.1rem 0 0 5rem;
 		display:flex;
 	}
 }
@@ -181,7 +210,7 @@ footer {
 			width: 20%;
 			height: 1.2rem;
 			font-weight: bold;
-			margin: 0 0 0 1em;
+			margin: 0 0 0 2em;
 		}
 	}
 
@@ -256,6 +285,7 @@ footer {
 
 		&-src {
 			@extend .keyframe-state-number;
+			overflow:hidden;
 		}
 
 		&-duration {
@@ -263,7 +293,7 @@ footer {
 			display: flex;
 
 			&-index {
-				width: 55%;
+				width: 60%;
 			}
 
 			&-value {
@@ -272,10 +302,11 @@ footer {
 			}
 		}
 		&-icon{
-			margin: -3.5rem 0 0 55%;
+			margin: -3.2rem 0 0 55%;
 		}
 		&-update {
-			margin: 0 0.5rem 0 0.5rem;
+			margin: 0 0 0 0.5rem;
+			transform:scale(1.1);
 		}
 		&-remove {
 			@extend .keyframe-state-update;
@@ -292,7 +323,7 @@ footer {
 			position:relative;
 			width:2rem;
 			height:2rem;
-			margin: -0.3rem 0 0 85%;
+			margin: -0.5rem 0 0 85%;
 		}
 	}
 }
@@ -307,7 +338,7 @@ footer {
 	z-index: 9998;
 	background: $black-alpha;
 	color: $gray5;
-	font-size: 1.1em;
+	font-size: 1em;
 	transition:0.3s;
 
 	&-index {
@@ -331,6 +362,29 @@ footer {
 
 		&-label {
 			@include absolute(35%, 0, 0, 10%);
+		}
+	}
+}
+
+.layer{
+	@extend .trigger;
+	&-index {
+		@extend .trigger-index;
+	}
+	&-component {
+		@extend .trigger-component;
+		display:flex;
+		&-icon{
+			margin: 1.2rem 0.5rem 0 0.5rem;
+		}
+		&-title {
+			line-height:4rem;
+			vertical-align:middle;
+			width:65%;
+			overflow:hidden;
+		}
+		&-remove{
+			margin: 1.2rem 0 0 0;
 		}
 	}
 }
