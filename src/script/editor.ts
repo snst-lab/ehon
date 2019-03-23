@@ -6,15 +6,18 @@ import {
 	ComponentStructure as Struct,
 	ComponentState as State,
 	ComponentImage as Image,
-	ComponentText as Text
+	ComponentText as Text,
+	ComponentSound as Sound
 } from './component';
 import { Animation } from './animation';
+import { SoundPlayer } from './soundPlayer';
 
 export let Active: Component = null;
 
 export namespace Editor {
 	class CSS {
-		static setActiveStyle(c: Component) {
+		static setActiveStyle(c: Component): void {
+			if (c.type === 'sound') return;
 			this.removeActiveStyle(c);
 			c.element.style.outlineColor = css.active.outlineColor;
 			c.element.style.outlineStyle = css.active.outlineStyle;
@@ -48,7 +51,8 @@ export namespace Editor {
 			});
 		}
 
-		static removeActiveStyle(c: Component) {
+		static removeActiveStyle(c: Component): void {
+			if (c.type === 'sound') return;
 			c.element.style.outlineColor = '';
 			c.element.style.outlineStyle = '';
 			c.element.style.outlineWidth = '';
@@ -71,10 +75,6 @@ export namespace Editor {
 		private type: string | null;
 
 		activate(className: string, type: string): void {
-			if (Active !== null && Active.className === className) {
-				this.release();
-				return;
-			}
 			this.type = type;
 			[ ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts, Scene._[Scene.now].Camera ].forEach((e) => {
 				if (e.className !== className) {
@@ -82,6 +82,9 @@ export namespace Editor {
 				}
 			});
 			Active = this.select(className);
+			if (Active.type === 'text') {
+				Active.element.contentEditable = 'true';
+			}
 			new Promise((resolve) => {
 				Keyframe.render();
 				Trigger.render();
@@ -95,9 +98,14 @@ export namespace Editor {
 				//component style off
 				CSS.removeActiveStyle(Active);
 				//penetration
-				if (Active.type === 'image' || Active.type === 'text') {
+				if (Active.type === 'image') {
 					Active.element.style.pointerEvents = 'none';
 					Active.pointer = 'none';
+				}
+				if (Active.type === 'text') {
+					Active.element.style.pointerEvents = 'none';
+					Active.pointer = 'none';
+					Active.element.contentEditable = 'false';
 				}
 				//pallet style off
 				PalletActive.title.dom.el.textContent = '';
@@ -124,6 +132,8 @@ export namespace Editor {
 					return Scene._[Scene.now].Images.filter((e) => e.className === className)[0];
 				case 'text':
 					return Scene._[Scene.now].Texts.filter((e) => e.className === className)[0];
+				case 'sound':
+					return Scene._[Scene.now].Sounds.filter((e) => e.className === className)[0];
 				case 'camera':
 					return Scene._[Scene.now].Camera;
 			}
@@ -132,43 +142,47 @@ export namespace Editor {
 
 	export class Transform {
 		translate(Active: Component, dx: number, dy: number, dz: number): void {
-			const state: State = {
-				src: Active.now.src,
-				x: Active.now.x + dx,
-				y: Active.now.y + dy,
-				z: Active.now.z + ~~dz,
-				width: Active.now.width,
-				aspectRatio: Active.now.aspectRatio,
-				rotate: Active.now.rotate,
-				scale: Active.now.scale,
-				blur: Active.now.blur,
-				opacity: Active.now.opacity,
-				duration: param.animation.defaultDuration,
-				option: Active.now.option
-			};
-			Active.transition(state);
+			if (Active.type !== 'sound') {
+				const state: State = {
+					src: Active.now.src,
+					x: Active.now.x + dx,
+					y: Active.now.y + dy,
+					z: Active.now.z + ~~dz,
+					width: Active.now.width,
+					aspectRatio: Active.now.aspectRatio,
+					rotate: Active.now.rotate,
+					scale: Active.now.scale,
+					blur: Active.now.blur,
+					opacity: Active.now.opacity,
+					duration: param.animation.defaultDuration,
+					option: Active.now.option
+				};
+				Active.transition(state);
+			}
 		}
 
 		rotate(Active: Component, delta: number): void {
-			const state: State = {
-				src: Active.now.src,
-				x: Active.now.x,
-				y: Active.now.y,
-				z: Active.now.z,
-				width: Active.now.width,
-				aspectRatio: Active.now.aspectRatio,
-				rotate: Active.now.rotate + ~~delta,
-				scale: Active.now.scale,
-				blur: Active.now.blur,
-				opacity: Active.now.opacity,
-				duration: param.animation.defaultDuration,
-				option: Active.now.option
-			};
-			Active.transition(state);
+			if (Active.type !== 'sound') {
+				const state: State = {
+					src: Active.now.src,
+					x: Active.now.x,
+					y: Active.now.y,
+					z: Active.now.z,
+					width: Active.now.width,
+					aspectRatio: Active.now.aspectRatio,
+					rotate: Active.now.rotate + ~~delta,
+					scale: Active.now.scale,
+					blur: Active.now.blur,
+					opacity: Active.now.opacity,
+					duration: param.animation.defaultDuration,
+					option: Active.now.option
+				};
+				Active.transition(state);
+			}
 		}
 
 		scale(Active: Component, delta: number): void {
-			if (Active.type !== 'camera') {
+			if (Active.type === 'image' || Active.type === 'text') {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -188,7 +202,7 @@ export namespace Editor {
 		}
 
 		blur(Active: Component, delta: number): void {
-			if (Active.type !== 'camera') {
+			if (Active.type === 'image' || Active.type === 'text') {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -208,7 +222,7 @@ export namespace Editor {
 		}
 
 		opacity(Active: Component, delta: number): void {
-			if (Active.type !== 'camera') {
+			if (Active.type === 'image' || Active.type === 'text') {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -235,7 +249,8 @@ export namespace Editor {
 
 			if (/.png|.gif|.jpg|jpeg|.PNG|.GIF|.JPG|.JPEG$/.test(file.name)) {
 				this.CanvasDropComponent(x, y, 'image', file, null);
-			} else if (/.wav|.mp3$/.test(file.name)) {
+			} else if (/.wav|.mp3|.ogg$/.test(file.name)) {
+				this.CanvasDropComponent(x, y, 'sound', file, null);
 			} else {
 				this.CanvasDropComponent(x, y, 'text', file, null);
 			}
@@ -244,60 +259,63 @@ export namespace Editor {
 			let struct: Struct;
 			let component: Component;
 			if (given === null) {
-				let state0: State = {
-					src: file.name,
-					x:
-						(Scene._[Scene.now].Camera.now.z / param[type].initialZ - 1) *
-							(x - param[type].defaultSize * 0.5) +
-						Scene._[Scene.now].Camera.now.x +
-						(2 - Scene._[Scene.now].Camera.now.z / param[type].initialZ) * param.camera.vanishingX,
-					y:
-						(Scene._[Scene.now].Camera.now.z / param[type].initialZ - 1) *
-							(y - param[type].defaultSize * param[type].aspectRatio * 0.5) +
-						Scene._[Scene.now].Camera.now.y +
-						(2 - Scene._[Scene.now].Camera.now.z / param[type].initialZ) * param.camera.vanishingY,
-					z: param[type].initialZ,
-					width: param[type].defaultSize,
-					aspectRatio: param[type].aspectRatio,
-					rotate: 0,
-					scale: 1,
-					blur: 0,
-					opacity: 1,
-					duration: param.animation.defaultDuration,
-					option: ''
-				};
+				let state0: State;
+				if (type !== 'sound') {
+					state0 = {
+						src: file.name,
+						x:
+							(Scene._[Scene.now].Camera.now.z / param[type].initialZ - 1) *
+								(x - param[type].defaultSize * 0.5) +
+							Scene._[Scene.now].Camera.now.x +
+							(2 - Scene._[Scene.now].Camera.now.z / param[type].initialZ) * param.camera.vanishingX,
+						y:
+							(Scene._[Scene.now].Camera.now.z / param[type].initialZ - 1) *
+								(y - param[type].defaultSize * param[type].aspectRatio * 0.5) +
+							Scene._[Scene.now].Camera.now.y +
+							(2 - Scene._[Scene.now].Camera.now.z / param[type].initialZ) * param.camera.vanishingY,
+						z: param[type].initialZ,
+						width: param[type].defaultSize,
+						aspectRatio: param[type].aspectRatio,
+						rotate: 0,
+						scale: 1,
+						blur: 0,
+						opacity: 1,
+						duration: param.animation.defaultDuration,
+						option: ''
+					};
+				} else {
+					state0 = {
+						src: file.name,
+						x: null,
+						y: null,
+						z: null,
+						width: null,
+						aspectRatio: null,
+						rotate: null,
+						scale: null,
+						blur: null,
+						opacity: null,
+						duration: param.animation.defaultDuration,
+						option: ''
+					};
+				}
 				struct = {
 					scene: Scene.now,
-					type: null,
+					type: type,
 					className: null,
 					title: null,
-					touchable: null,
-					float: null,
-					trigger: null,
-					iteration: null,
-					delay: null,
-					running: null,
-					state: null,
+					touchable: true,
+					float: true,
+					trigger: [],
+					iteration: 1,
+					delay: 0,
+					state: [ state0 ],
 					now: state0,
 					element: null
 				};
 			} else {
-				const state0: State = {
-					src: given.now.src,
-					x: x,
-					y: y,
-					z: given.now.z,
-					width: given.now.width,
-					aspectRatio: given.now.aspectRatio,
-					rotate: given.now.rotate,
-					scale: given.now.scale,
-					blur: given.now.blur,
-					opacity: given.now.opacity,
-					duration: given.now.duration,
-					option: given.now.option
-				};
 				struct = {
-					scene: Scene.now,
+					scene: given.scene,
 					type: type,
 					className: null,
 					title: given.title,
@@ -306,22 +324,26 @@ export namespace Editor {
 					trigger: given.trigger,
 					iteration: given.iteration,
 					delay: given.delay,
-					running: null,
-					state: null,
-					now: state0,
+					state: given.state,
+					now: given.state[0],
 					element: null
 				};
 			}
 			if (type === 'image') {
-				component = new Image(Scene.now, struct);
+				component = new Image(struct);
 				Scene._[Scene.now].Images.push(component);
 				Scene._[Scene.now].dom.append(component.element);
 				EditorSelector.activate(component.className, 'image');
 			} else if (type === 'text') {
-				component = new Text(Scene.now, struct);
+				component = new Text(struct);
 				Scene._[Scene.now].Texts.push(component);
 				Scene._[Scene.now].dom.append(component.element);
 				EditorSelector.activate(component.className, 'text');
+			} else if (type === 'sound') {
+				component = new Sound(struct);
+				Scene._[Scene.now].Sounds.push(component);
+				EditorSelector.activate(component.className, 'sound');
+				new SoundPlayer.Register(Active, 'contextmenu');
 			}
 			Keyframe.render();
 			Layer.render(EditorSelector);
@@ -335,10 +357,12 @@ export namespace Editor {
 			EditorSelector.activate(className, 'camera');
 		}
 		PushStateClick(): void {
-			if (Active.state.length === 1) {
-				new Animation.Register(Active, 'contextmenu');
+			if (Active.type !== 'sound') {
+				if (Active.state.length === 1) {
+					new Animation.Register(Active, 'contextmenu');
+				}
+				Active.transition(Active.now);
 			}
-			Active.transition(Active.now);
 			CSS.removeActiveStyle(Active);
 			Active.state.push(Active.now);
 			Keyframe.render();
@@ -360,7 +384,11 @@ export namespace Editor {
 			}
 		}
 		PlayClick(): void {
-			new Animation.Play(Active);
+			if (Active.type !== 'sound') {
+				new Animation.Play(Active);
+			} else {
+				new SoundPlayer.Play(Active);
+			}
 		}
 		BaseLayerClick(): void {
 			EditorSelector.recover();

@@ -211,6 +211,7 @@ footer {
 			height: 1.2rem;
 			font-weight: bold;
 			margin: 0 0 0 2em;
+			overflow:hidden;
 		}
 	}
 
@@ -299,6 +300,7 @@ footer {
 			&-value {
 				width: 30%;
 				height: 1.2rem;
+				overflow:hidden;
 			}
 		}
 		&-icon{

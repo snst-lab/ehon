@@ -65,7 +65,7 @@ namespace Pallet {
 					`);
 			}
 			for (
-				let [ i, k, l ]: Array<number> = [
+				let [ i, j, l ]: Array<number> = [
 					0,
 					Scene._[Scene.now].Images.length,
 					Scene._[Scene.now].Texts.length
@@ -74,10 +74,29 @@ namespace Pallet {
 				i++
 			) {
 				fragment.append(`
-					<div class='layer-component layer-component${i + 1 + k}'>
+					<div class='layer-component layer-component${i + 1 + j}'>
 						<i class='layer-component-icon material-icons'>text_fields</i>
-						<div class='layer-component-title layer-component-title${i + 1 + k}'>${Scene._[Scene.now].Texts[i].title}</div>
-						<i class='layer-component-remove layer-component-remove${i + 1 + k} material-icons'>delete</i>
+						<div class='layer-component-title layer-component-title${i + 1 + j}'>${Scene._[Scene.now].Texts[i].title}</div>
+						<i class='layer-component-remove layer-component-remove${i + 1 + j} material-icons'>delete</i>
+					</div>
+					`);
+			}
+			for (
+				let [ i, j, k, l ]: Array<number> = [
+					0,
+					Scene._[Scene.now].Images.length,
+					Scene._[Scene.now].Texts.length,
+					Scene._[Scene.now].Sounds.length
+				];
+				i < l;
+				i++
+			) {
+				fragment.append(`
+					<div class='layer-component layer-component${i + 1 + j + k}'>
+						<i class='layer-component-icon material-icons'>music_note</i>
+						<div class='layer-component-title layer-component-title${i + 1 + j + k}'>${Scene._[Scene.now].Sounds[i]
+					.title}</div>
+						<i class='layer-component-remove layer-component-remove${i + 1 + j + k} material-icons'>delete</i>
 					</div>
 					`);
 			}
@@ -102,7 +121,7 @@ namespace Pallet {
 				);
 			}
 			for (
-				let [ i, k, l ]: Array<number> = [
+				let [ i, j, l ]: Array<number> = [
 					0,
 					Scene._[Scene.now].Images.length,
 					Scene._[Scene.now].Texts.length
@@ -110,7 +129,7 @@ namespace Pallet {
 				i < l;
 				i++
 			) {
-				document.querySelector('.layer-component-remove' + (i + 1 + k)).addEventListener(
+				document.querySelector('.layer-component-remove' + (i + 1 + j)).addEventListener(
 					'click',
 					(event: PointerEvent) => {
 						selector.release();
@@ -121,10 +140,32 @@ namespace Pallet {
 					false
 				);
 			}
+			for (
+				let [ i, j, k, l ]: Array<number> = [
+					0,
+					Scene._[Scene.now].Images.length,
+					Scene._[Scene.now].Texts.length,
+					Scene._[Scene.now].Sounds.length
+				];
+				i < l;
+				i++
+			) {
+				document.querySelector('.layer-component-remove' + (i + 1 + j + k)).addEventListener(
+					'click',
+					(event: PointerEvent) => {
+						selector.release();
+						Scene._[Scene.now].Sounds[i].element.remove();
+						Scene._[Scene.now].Sounds.splice(i, 1);
+						Layer.render(selector);
+					},
+					false
+				);
+			}
 			const Components: Array<Component> = [
 				Scene._[Scene.now].Camera,
 				...Scene._[Scene.now].Images,
-				...Scene._[Scene.now].Texts
+				...Scene._[Scene.now].Texts,
+				...Scene._[Scene.now].Sounds
 			];
 			for (let [ i, l ]: Array<number> = [ 0, Components.length ]; i < l; i++) {
 				document.querySelector('.layer-component-title' + i).addEventListener(
@@ -134,24 +175,26 @@ namespace Pallet {
 					},
 					false
 				);
-				document.querySelector('.layer-component' + i).addEventListener(
-					'mouseenter',
-					(event: MouseEvent) => {
-						CSS.setOptionStyle(Components[i].element);
-					},
-					false
-				);
-				document.querySelector('.layer-component' + i).addEventListener(
-					'mouseleave',
-					(event: MouseEvent) => {
-						if (ActiveComponent !== null && ActiveComponent.className === Components[i].className) {
-							CSS.setActiveStyle(Components[i].element);
-						} else {
-							CSS.removeOutlineStyle(Components[i].element);
-						}
-					},
-					false
-				);
+				if(Components[i].type!=='sound'){
+					document.querySelector('.layer-component' + i).addEventListener(
+						'mouseenter',
+						(event: MouseEvent) => {
+							CSS.setOptionStyle(Components[i].element);
+						},
+						false
+					);
+					document.querySelector('.layer-component' + i).addEventListener(
+						'mouseleave',
+						(event: MouseEvent) => {
+							if (ActiveComponent !== null && ActiveComponent.className === Components[i].className) {
+								CSS.setActiveStyle(Components[i].element);
+							} else {
+								CSS.removeOutlineStyle(Components[i].element);
+							}
+						},
+						false
+					);
+				}
 			}
 		}
 	}
@@ -315,7 +358,7 @@ namespace Pallet {
 							<div class='keyframe-state-duration-value${i} keyframe-state-duration-value' contenteditable='true'>${ActiveComponent
 					.state[i].duration}</div>
 						</div>
-						${ActiveComponent.type === 'image'
+						${ActiveComponent.type === 'image' || ActiveComponent.type === 'sound'
 							? `<input type='file' class='keyframe-state-input${i}' style='display:none;'>`
 							: ''}
 						<div class='keyframe-state-icon'>
@@ -387,7 +430,7 @@ namespace Pallet {
 						false
 					);
 				}
-				if (ActiveComponent.type === 'image') {
+				if (ActiveComponent.type === 'image' || ActiveComponent.type === 'sound') {
 					document.querySelector('.keyframe-state-input' + i).addEventListener(
 						'change',
 						(event: Event) => {

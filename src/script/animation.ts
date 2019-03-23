@@ -68,6 +68,7 @@ export namespace Animation {
 			this.stateLength = target.state.length;
 			if (this.stateLength < 2) return;
 			target.running = true;
+			target.transition(target.state[0]);
 			this.calcDiff(target);
 			this.delayStart(target, 0);
 		}
@@ -85,9 +86,13 @@ export namespace Animation {
 			}
 		}
 		iterate(target: Component): void {
-			if (this.iteration < target.iteration) {
+			if(this.iteration===0){
 				this.iteration += 1;
+				this.shift(target, 1);
+			}
+			else if (this.iteration>0 && this.iteration < target.iteration) {
 				target.transition(target.state[0]);
+				this.iteration += 1;
 				this.shift(target, 1);
 			} else {
 				this.iteration = 0;

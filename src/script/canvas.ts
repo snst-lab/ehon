@@ -1,5 +1,6 @@
 import { DOM } from './domController';
-import { ComponentCamera as Camera } from './component';
+import { param, config } from './parameter';
+import { ComponentState as State, ComponentCamera as Camera } from './component';
 
 export namespace Canvas {
 	export const className: string = 'canvas';
@@ -30,6 +31,7 @@ export namespace Scene {
 		Camera: any;
 		Images: Array<any>;
 		Texts: Array<any>;
+		Sounds: Array<any>;
 	}
 	export const className: string = 'scene';
 	export let now: number = 0;
@@ -48,14 +50,42 @@ export namespace Scene {
 
 	export function add(): void {
 		const num: number = _.length;
+		const camera0:State = {
+			src:'',
+			x:param.camera.initialX,
+			y:param.camera.initialY,
+			z:param.camera.initialZ,
+			width: null,
+			aspectRatio: null,
+			rotate: 0,
+			scale: null,
+			blur: null,
+			opacity: null,
+			duration: param.animation.defaultDuration,
+			option: ''
+		};
 		Scene._.push({
 			className: Scene.className + '' + num,
 			dom: new DOM(
 				`<div class='${Scene.className}${num} ${Scene.className}'><div class='base-layer' style='z-index:${Canvas.z}' onclick='baseLayerClick(event);'></div></div>`
 			),
-			Camera: new Camera(num, null),
+			Camera: new Camera({
+				scene: num,
+				type: 'camera',
+				className: 'camera',
+				title: 'Camera',
+				touchable: true,
+				float: true,
+				trigger: [],
+				delay: 0,
+				iteration: 1,
+				state: [camera0],
+				now: camera0,
+				element: document.querySelector('.camera'),
+			}),
 			Images: [],
-			Texts: []
+			Texts: [],
+			Sounds:[]
 		});
 		Canvas.dom.append(Scene._[num].dom.el);
 		change(num);

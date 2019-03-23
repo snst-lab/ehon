@@ -16,6 +16,7 @@ import {
 	EditorEventHandler as editor
 } from './editor';
 import { AnimationPlay } from './animation';
+import { SoundPlayerPlay } from './soundPlayer';
 
 export let keyDown: string | null = null;
 
@@ -43,6 +44,7 @@ namespace EventListener {
 			this.DetectKeyDown();
 			this.CanvasWheel();
 			this.CanvasRightClick();
+			this.CanvasDoubleClick();
 			// this.CanvasResize();
 			this.SceneChange();
 			this.CameraClick();
@@ -119,6 +121,17 @@ namespace EventListener {
 						new AnimationPlay(c);
 					}
 				});
+				Scene._[Scene.now].Sounds.forEach((c) => {
+					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
+						new SoundPlayerPlay(c);
+					}
+				});
+			});
+		}
+		private CanvasDoubleClick(): void {
+			Canvas.dom.on('dblclick', (event: PointerEvent) => {
+				event.preventDefault();
+				selector.release();
 			});
 		}
 		private CanvasResize(): void {
@@ -149,16 +162,21 @@ namespace EventListener {
 			document.addEventListener('sceneChange', () => {
 				selector.release();
 				PalletLayer.hide();
-				
+
 				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
 				[
 					Scene._[Scene.now].Camera,
 					...Scene._[Scene.now].Images,
 					...Scene._[Scene.now].Texts
 				].forEach((c) => {
-					c.transition(c.state[0]);
+					// c.transition(c.state[0]);
 					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
 						new AnimationPlay(c);
+					}
+				});
+				Scene._[Scene.now].Sounds.forEach((c) => {
+					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
+						new SoundPlayerPlay(c);
 					}
 				});
 			});
@@ -189,14 +207,14 @@ namespace EventListener {
 		}
 		private TitleChange(): void {
 			PalletActive.title.dom.on('blur', (event: Event) => {
-				if(Active===null) return;
+				if (Active === null) return;
 				event.preventDefault();
 				Active.title = PalletActive.title.dom.el.textContent;
 			});
 		}
 		private SwitchTouch(): void {
 			PalletActive.touch.dom.on('change', (event: Event) => {
-				if(Active===null) return;
+				if (Active === null) return;
 				event.preventDefault();
 				Active.touchable = document['active'].touch.checked;
 				Active.pointer = Active.touchable ? 'auto' : 'none';
@@ -205,7 +223,7 @@ namespace EventListener {
 		}
 		private SwitchFloat(): void {
 			PalletActive.float.dom.on('change', (event: Event) => {
-				if(Active===null) return;
+				if (Active === null) return;
 				event.preventDefault();
 				Active.float = document['active'].float.checked;
 				Active.now.x = 50 - 0.5 * Active.now.width;
@@ -215,14 +233,14 @@ namespace EventListener {
 		}
 		private DelayChange(): void {
 			Keyframe.delay.dom.on('blur', (event: Event) => {
-				if(Active===null) return;
+				if (Active === null) return;
 				event.preventDefault();
 				Active.delay = Number(Keyframe.delay.dom.el.textContent);
 			});
 		}
 		private IterationChange(): void {
 			Keyframe.iteration.dom.on('blur', (event: Event) => {
-				if(Active===null) return;
+				if (Active === null) return;
 				event.preventDefault();
 				Active.iteration = Number(Keyframe.iteration.dom.el.textContent);
 			});
@@ -273,6 +291,7 @@ namespace EventListener {
 			Object.defineProperty(window, 'componentDoubleClick', {
 				value: function(event: PointerEvent): void {
 					event.preventDefault();
+					// selector.release();
 					// if (event.srcElement.getAttribute('contenteditable') === 'true') {
 					// 	event.srcElement.setAttribute('contenteditable', 'false');
 					// } else {

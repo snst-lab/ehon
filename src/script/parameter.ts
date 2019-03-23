@@ -33,8 +33,9 @@ export let param: { [key: string]: { [key: string]: number } } = {
 export let config: { [key: string]: string } = {
 	mode: 'edit',
 	scenePath: 'assets/scene/',
-	imageSrcPath: 'assets/img/',
-	imageSrcUrl: '../../assets/img/',
+	imageSrcPath: 'assets/image/',
+	soundSrcPath: 'assets/sound/',
+	imageSrcUrl: '../../assets/image/',
 	backgroundFile: 'background.jpg'
 };
 
