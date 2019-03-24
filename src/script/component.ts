@@ -1,11 +1,10 @@
 import { DOM } from './domController';
-import { param, config } from './parameter';
+import { param, config } from './setting';
 import { Scene } from './canvas';
-import { CalcCSS } from './calculation';
+import { calcCSS } from './calculation';
 
 namespace Component {
 	export type Type = Image | Text | Camera | Sound | null;
-	const calcCSS = new CalcCSS();
 
 	export class Structure {
 		scene: number;
@@ -13,12 +12,14 @@ namespace Component {
 		className: string;
 		title: string;
 		touchable: boolean;
+		pointer: string;
 		float: boolean;
 		trigger: Array<string>;
 		delay: number;
 		iteration: number;
 		state: Array<State>;
 		now: State;
+		running: boolean;
 		element: HTMLElement | HTMLAudioElement;
 	}
 
@@ -33,14 +34,13 @@ namespace Component {
 		scale: number | null;
 		blur: number | null;
 		opacity: number | null;
+		chroma: number | null;
+		light: number | null;
 		duration: number | null;
 		option: string | null;
 	}
 
 	export class Camera extends Component.Structure {
-		public pointer: string;
-		public running: boolean;
-
 		constructor(given: Structure) {
 			super();
 			this.scene = given.scene;
@@ -48,6 +48,7 @@ namespace Component {
 			this.className = given.className;
 			this.title = given.title;
 			this.touchable = true;
+			this.pointer = 'auto';
 			this.float = true;
 			this.title = given.title || this.className;
 			this.touchable = true;
@@ -55,14 +56,43 @@ namespace Component {
 			this.trigger = given.trigger || [];
 			this.iteration = given.iteration || 1;
 			this.delay = given.delay || 0;
-			this.state = given.state || [];
-			this.now = given.now;
-			this.element = given.element;
-			this.pointer = 'auto';
+			this.state = given.state;
+			this.now = given.state[0];
 			this.running = false;
+			this.element = document.querySelector('.camera');
 		}
-		transition({ src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option }: State): void {
-			this.now = { src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option };
+		transition({
+			src,
+			x,
+			y,
+			z,
+			width,
+			aspectRatio,
+			rotate,
+			scale,
+			blur,
+			opacity,
+			chroma,
+			light,
+			duration,
+			option
+		}: State): void {
+			this.now = {
+				src,
+				x,
+				y,
+				z,
+				width,
+				aspectRatio,
+				rotate,
+				scale,
+				blur,
+				opacity,
+				chroma,
+				light,
+				duration,
+				option
+			};
 			Scene._[this.scene].dom.el.style.transform = `rotate(${rotate}deg)`;
 
 			[ ...Scene._[this.scene].Images, ...Scene._[this.scene].Texts ].forEach((e) => {
@@ -77,6 +107,8 @@ namespace Component {
 					scale: e.now.scale,
 					blur: e.now.blur,
 					opacity: e.now.opacity,
+					chroma: e.now.chroma,
+					light: e.now.light,
 					duration: param.animation.defaultDuration,
 					option: e.now.option
 				});
@@ -85,27 +117,24 @@ namespace Component {
 	}
 
 	export class Image extends Component.Structure {
-		public pointer: string;
-		public running: boolean;
-
-		constructor(given: Structure) {
+		constructor(given: Structure, camera: State) {
 			super();
 			this.scene = given.scene;
 			this.type = 'image';
 			this.className = given.className || `img${uniqueString()}`;
 			this.title = given.title || this.className;
-			this.touchable = given.touchable || true;
-			this.float = given.float || true;
+			this.touchable = given.touchable;
+			this.pointer = this.touchable ? 'auto' : 'none';
+			this.float = given.float;
 			this.trigger = given.trigger || [];
 			this.iteration = given.iteration || 1;
 			this.delay = given.delay || 0;
-			this.state = given.state || [];
-			this.now = given.now;
-			this.createElement(this.className, given.now);
-			this.pointer = this.touchable ? 'auto' : 'none';
+			this.state = given.state;
+			this.now = given.state[0];
 			this.running = false;
+			this.createElement(this.className, given.state[0], camera);
 		}
-		createElement(className: string, state: State): void {
+		createElement(className: string, given: State, camera: State): void {
 			this.element = <HTMLElement>new DOM(`
 			<div draggable="true" 
 			 ondragstart="componentDragStart(event);"
@@ -113,12 +142,42 @@ namespace Component {
 			 onclick="componentClick(event);"
 			 onmouseup="componentMouseUp(event);"
 			 class="${className} image" 
-			 style="${calcCSS.imageFloat(state, Scene._[this.scene].Camera.now, this.pointer)}
+			 style="${calcCSS.imageFloat(given, camera, this.pointer)}
 			 "></div>
 			`).el;
 		}
-		transition({ src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option }: State): void {
-			this.now = { src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option };
+		transition({
+			src,
+			x,
+			y,
+			z,
+			width,
+			aspectRatio,
+			rotate,
+			scale,
+			blur,
+			opacity,
+			chroma,
+			light,
+			duration,
+			option
+		}: State): void {
+			this.now = {
+				src,
+				x,
+				y,
+				z,
+				width,
+				aspectRatio,
+				rotate,
+				scale,
+				blur,
+				opacity,
+				chroma,
+				light,
+				duration,
+				option
+			};
 			this.element.style.cssText = this.float
 				? calcCSS.imageFloat(this.now, Scene._[this.scene].Camera.now, this.pointer)
 				: calcCSS.imageFix(this.now, Scene._[this.scene].Camera.now, this.pointer);
@@ -126,27 +185,24 @@ namespace Component {
 	}
 
 	export class Text extends Component.Structure {
-		public pointer: string;
-		public running: boolean;
-
-		constructor(given: Structure) {
+		constructor(given: Structure, camera: State) {
 			super();
 			this.scene = given.scene;
 			this.type = 'text';
 			this.className = given.className || `txt${uniqueString()}`;
 			this.title = given.title || this.className;
-			this.touchable = given.touchable || true;
-			this.float = given.float || true;
+			this.touchable = given.touchable;
+			this.pointer = this.touchable ? 'auto' : 'none';
+			this.float = given.float;
 			this.trigger = given.trigger || [];
 			this.iteration = given.iteration || 1;
 			this.delay = given.delay || 0;
-			this.state = given.state || [];
-			this.now = given.now;
-			this.createElement(this.className, given.now);
-			this.pointer = this.touchable ? 'auto' : 'none';
+			this.state = given.state;
+			this.now = given.state[0];
 			this.running = false;
+			this.createElement(this.className, given.state[0], camera);
 		}
-		createElement(className: string, state: State): void {
+		createElement(className: string, given: State, camera: State): void {
 			this.element = <HTMLElement>new DOM(`
 			<div draggable="true" contenteditable="false" 
 			 ondragstart="componentDragStart(event);"
@@ -154,12 +210,42 @@ namespace Component {
 			 onclick="componentClick(event);"
 			 onmouseup="componentMouseUp(event);"
 			 class="${className} text" 
-			 style="${calcCSS.textFloat(state, Scene._[this.scene].Camera.now, this.pointer)}
-			 ">${state.src}</div>
+			 style="${calcCSS.textFloat(given, camera, this.pointer)}
+			 ">${given.src}</div>
 			`).el;
 		}
-		transition({ src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option }: State): void {
-			this.now = { src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option };
+		transition({
+			src,
+			x,
+			y,
+			z,
+			width,
+			aspectRatio,
+			rotate,
+			scale,
+			blur,
+			opacity,
+			chroma,
+			light,
+			duration,
+			option
+		}: State): void {
+			this.now = {
+				src,
+				x,
+				y,
+				z,
+				width,
+				aspectRatio,
+				rotate,
+				scale,
+				blur,
+				opacity,
+				chroma,
+				light,
+				duration,
+				option
+			};
 			this.element.style.cssText = this.float
 				? calcCSS.textFloat(this.now, Scene._[this.scene].Camera.now, this.pointer)
 				: calcCSS.textFix(this.now, Scene._[this.scene].Camera.now, this.pointer);
@@ -167,37 +253,68 @@ namespace Component {
 	}
 
 	export class Sound extends Component.Structure {
-		public pointer: string;
-		public running: boolean;
-
 		constructor(given: Structure) {
 			super();
 			this.scene = given.scene;
 			this.type = 'sound';
 			this.className = given.className || `sound${uniqueString()}`;
 			this.title = given.title || this.className;
-			this.touchable = given.touchable || true;
-			this.float = given.float || true;
+			this.touchable = given.touchable;
+			this.pointer = 'auto';
+			this.float = given.float;
 			this.trigger = given.trigger || [];
 			this.iteration = given.iteration || 1;
 			this.delay = given.delay || 0;
-			this.state = given.state || [];
-			this.now = given.now;
+			this.state = given.state;
+			this.now = given.state[0];
+			this.running = false;
+			this.createElement(this.className);
+		}
+		createElement(className: string): void {
 			this.element = new Audio(config.soundSrcPath + this.state[0].src);
+			this.element.className = className;
 			const self: Sound = this;
 			this.element.onended = (): void => {
 				self.running = false;
 			};
-			this.pointer = 'auto';
-			this.running = false;
 		}
-		transition({ src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option }: State): void {
-			this.now = { src, x, y, z, width, aspectRatio, rotate, scale, blur, opacity, duration, option };
+		transition({
+			src,
+			x,
+			y,
+			z,
+			width,
+			aspectRatio,
+			rotate,
+			scale,
+			blur,
+			opacity,
+			chroma,
+			light,
+			duration,
+			option
+		}: State): void {
+			this.now = {
+				src,
+				x,
+				y,
+				z,
+				width,
+				aspectRatio,
+				rotate,
+				scale,
+				blur,
+				opacity,
+				chroma,
+				light,
+				duration,
+				option
+			};
 			const audio = <HTMLAudioElement>this.element;
-			audio.pause();
-			audio.currentTime = 0.0;
-			audio.src = config.soundSrcPath+src;
-			audio.play();
+			audio.src = config.soundSrcPath + src;
+			audio.play().catch((error) => {
+				console.log(error);
+			});
 		}
 	}
 	const uniqueString = (): string =>

@@ -339,6 +339,22 @@ footer {
   z-index: 9999;
 }
 
+.material-icons {
+  color: #7d7d91;
+  transition: .2s;
+  -webkit-user-select: none;
+  /* Chrome all / Safari all */
+  -moz-user-select: none;
+  /* Firefox all */
+  -ms-user-select: none;
+  /* IE 10+ */
+  user-select: none;
+}
+
+.material-icons:hover {
+  color: #00c8b4;
+}
+
 .pallet {
   position: fixed;
   top: 5vh;
@@ -356,22 +372,6 @@ footer {
   overflow-x: hidden;
   overflow-y: auto;
   height: 21rem;
-}
-
-.material-icons {
-  color: #7d7d91;
-  transition: .2s;
-  -webkit-user-select: none;
-  /* Chrome all / Safari all */
-  -moz-user-select: none;
-  /* Firefox all */
-  -ms-user-select: none;
-  /* IE 10+ */
-  user-select: none;
-}
-
-.material-icons:hover {
-  color: #00c8b4;
 }
 
 .scene-changer {
@@ -411,6 +411,11 @@ footer {
 }
 
 .showlayer {
+  transform: scale(1.5);
+  margin: 3.3rem 0 1.2rem 2rem;
+}
+
+.save {
   transform: scale(1.5);
   margin: 3.3rem 0 1.2rem 2rem;
 }

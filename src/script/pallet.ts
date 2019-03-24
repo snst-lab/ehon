@@ -1,5 +1,5 @@
 import { DOM } from './domController';
-import { param, config, css } from './parameter';
+import { css } from './setting';
 import { ComponentType as Component } from './component';
 import { Scene } from './canvas';
 import { Active as ActiveComponent } from './editor';
@@ -16,6 +16,10 @@ namespace Pallet {
 	export class Camera {
 		static className = 'camera';
 		static dom = new DOM('.camera');
+	}
+	export class Save {
+		static className = 'save';
+		static dom = new DOM('.save');
 	}
 	export class Active {
 		static title = class {
@@ -219,7 +223,6 @@ namespace Pallet {
 
 		static render(): void {
 			const Components: Array<Component> = [
-				Scene._[Scene.now].Camera,
 				...Scene._[Scene.now].Images,
 				...Scene._[Scene.now].Texts
 			];
@@ -524,6 +527,7 @@ namespace Pallet {
 	}
 }
 export const PalletSceneChanger = Pallet.SceneChanger;
+export const PalletSave = Pallet.Save;
 export const PalletCamera = Pallet.Camera;
 export const PalletActive = Pallet.Active;
 export const PalletKeyframe = Pallet.Keyframe;

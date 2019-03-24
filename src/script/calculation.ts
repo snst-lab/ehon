@@ -1,4 +1,4 @@
-import { param, config, css } from './parameter';
+import { param, config, css } from './setting';
 import { Canvas } from './canvas';
 import { ComponentState as State } from './component';
 
@@ -17,8 +17,7 @@ namespace Calculation {
 				transform: rotate(${Image.rotate}deg) scale(${Image.scale});
 				filter:blur(${Image.blur +
 					Math.abs(Camera.z - Image.z - param.camera.initialZ + param.image.initialZ) /
-						param.camera.depthOfField}px);
-				opacity:${Camera.z < Image.z ? 0 : Image.opacity};
+						param.camera.depthOfField}px) opacity(${Image.opacity}%) saturate(${Image.chroma}%) brightness(${Image.light}%);
 				pointer-events:${pointer};${Image.option}
 			`;
 		}
@@ -32,8 +31,7 @@ namespace Calculation {
 				width:${Image.width}%;
 				height:${Image.width * Image.aspectRatio / Canvas.aspectRatio}%;
 				transform: rotate(${Image.rotate}deg) scale(${Image.scale});
-				filter:blur(${Image.blur}px);
-				opacity:${Camera.z < Image.z ? 0 : Image.opacity};
+				filter:blur(${Image.blur}px) opacity(${Image.opacity}%) saturate(${Image.chroma}%) brightness(${Image.light}%);
 				pointer-events:${pointer};${Image.option}
 			`;
 		}
@@ -50,8 +48,7 @@ namespace Calculation {
 				transform: rotate(${Text.rotate}deg) scale(${Text.scale * size});
 				filter:blur(${Text.blur +
 					Math.abs(Camera.z - Text.z - param.camera.initialZ + param.text.initialZ) /
-						param.camera.depthOfField}px);
-				opacity:${Camera.z < Text.z ? 0 : Text.opacity};
+						param.camera.depthOfField}px) opacity(${Text.opacity}%) saturate(${Text.chroma}%) brightness(${Text.light}%);
 				pointer-events:${pointer};${Text.option}
 			`;
 		}
@@ -64,11 +61,10 @@ namespace Calculation {
 				width:${Text.width}%;
 				height:${Text.width * Text.aspectRatio / Canvas.aspectRatio}%;
 				transform: rotate(${Text.rotate}deg) scale(${Text.scale});
-				filter:blur(${Text.blur}px);
-				opacity:${Camera.z < Text.z ? 0 : Text.opacity};
+				filter:blur(${Text.blur}px) opacity(${Text.opacity}%) saturate(${Text.chroma}%) brightness(${Text.light}%);
 				pointer-events:${pointer};${Text.option}
 			`;
 		}
 	}
 }
-export const CalcCSS = Calculation.CSS;
+export const calcCSS = new Calculation.CSS();

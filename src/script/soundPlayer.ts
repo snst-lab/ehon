@@ -1,4 +1,4 @@
-import { param } from './parameter';
+import { param } from './setting';
 import { ComponentType as Component } from './component';
 import { Scene } from './canvas';
 
@@ -6,7 +6,7 @@ export namespace SoundPlayer {
 	export class Register {
 		constructor(target: Component, eventName: string) {
 			if (target.state.length !== 1) return;
-			Scene._[Scene.now].dom.el.addEventListener(
+			Scene._[target.scene].dom.el.addEventListener(
 				eventName,
 				(event: PointerEvent) => {
 					event.preventDefault();
@@ -25,16 +25,10 @@ export namespace SoundPlayer {
 
 		constructor(target: Component) {
 			if (target === null) return;
-			if (target.running) {
-				(<HTMLAudioElement>target.element).pause();
-				target.running = false;
-				return;
-			} else {
-				this.stateLength = target.state.length;
-				if (this.stateLength < 1) return;
-				target.running = true;
-				this.delayStart(target, 0);
-			}
+			this.stateLength = target.state.length;
+			if (this.stateLength < 1) return;
+			target.running = true;
+			this.delayStart(target, 0);
 		}
 		delayStart(target: Component, frame: number): void {
 			if (frame < target.delay) {

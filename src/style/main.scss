@@ -84,6 +84,18 @@ footer {
 	z-index: 9999;
 }
 
+.material-icons {
+	color: $gray2;
+	transition: .2s;
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select: none;     /* Firefox all */
+	-ms-user-select: none;      /* IE 10+ */
+	user-select: none;   
+
+	&:hover {
+		color: $green1;
+	}
+}
 
 .pallet {
 	@include fixed($header-height, 0, 0, 85vw);
@@ -97,21 +109,6 @@ footer {
 		overflow-x:hidden;
 		overflow-y:auto;
 		height:$pallet-fix-height;
-	}
-}
-
-
-
-.material-icons {
-	color: $gray2;
-	transition: .2s;
-	-webkit-user-select: none;  /* Chrome all / Safari all */
-	-moz-user-select: none;     /* Firefox all */
-	-ms-user-select: none;      /* IE 10+ */
-	user-select: none;   
-
-	&:hover {
-		color: $green1;
 	}
 }
 
@@ -146,6 +143,10 @@ footer {
 	margin: 3.3rem 0 1.2rem 2rem;
 }
 .showlayer {
+	transform: scale(1.5);
+	margin: 3.3rem 0 1.2rem 2rem;
+}
+.save {
 	transform: scale(1.5);
 	margin: 3.3rem 0 1.2rem 2rem;
 }

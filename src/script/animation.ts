@@ -1,4 +1,4 @@
-import { param } from './parameter';
+import { param,config } from './setting';
 import { ComponentType as Component, ComponentState as State } from './component';
 import { Scene } from './canvas';
 
@@ -16,6 +16,8 @@ export namespace Animation {
 				scale: state1.scale + state2.scale,
 				blur: state1.blur + state2.blur,
 				opacity: state1.opacity + state2.opacity,
+				chroma: state1.chroma + state2.chroma,
+				light: state1.light + state2.light,
 				duration: state1.duration,
 				option: state1.option
 			};
@@ -33,6 +35,8 @@ export namespace Animation {
 				scale: (newState.scale - oldState.scale) * durInv,
 				blur: (newState.blur - oldState.blur) * durInv,
 				opacity: (newState.opacity - oldState.opacity) * durInv,
+				chroma: (newState.chroma - oldState.chroma) * durInv,
+				light: (newState.light - oldState.light) * durInv,
 				duration: oldState.duration,
 				option: oldState.option
 			};
@@ -40,11 +44,25 @@ export namespace Animation {
 	}
 
 	export class Register {
-		constructor(target: Component, eventName: string) {
+		constructor(target: Component) {
 			if (target.state.length !== 1) return;
-			Scene._[Scene.now].dom.el.addEventListener(
-				eventName,
+			Scene._[target.scene].dom.el.addEventListener(
+				'click',
 				(event: PointerEvent) => {
+					if(!config.live) return;
+					event.preventDefault();
+					if (
+						[].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1
+					) {
+						new Animation.Play(target);
+					}
+				},
+				false
+			);
+			Scene._[target.scene].dom.el.addEventListener(
+				'contextmenu',
+				(event: PointerEvent) => {
+					if(config.live) return;
 					event.preventDefault();
 					if (
 						[].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1

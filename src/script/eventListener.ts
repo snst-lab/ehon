@@ -1,4 +1,4 @@
-import { param, config, css } from './parameter';
+import { param, config } from './setting';
 import { Canvas, Scene } from './canvas';
 import {
 	PalletActive,
@@ -6,11 +6,13 @@ import {
 	PalletLayer as Layer,
 	PalletTrigger as Trigger,
 	PalletKeyframe as Keyframe,
-	PalletCamera as Cam,
+	PalletSave as Save,
+	PalletCamera as CameraIcon,
 	PalletLayer
 } from './pallet';
 import {
 	Active,
+	EditorCSS as CSS,
 	EditorSelector as selector,
 	EditorTransform as transform,
 	EditorEventHandler as editor
@@ -36,35 +38,42 @@ namespace EventListener {
 		83: 's',
 		82: 'r',
 		66: 'b',
-		79: 'o'
+		79: 'o',
+		76: 'l',
+		67: 'c'
 	};
-
-	export class Start {
-		constructor() {
-			this.DetectKeyDown();
-			this.CanvasWheel();
-			this.CanvasRightClick();
-			this.CanvasDoubleClick();
-			// this.CanvasResize();
-			this.SceneChange();
-			this.CameraClick();
-			this.CanvasDrop();
-			this.TitleChange();
-			this.SwitchFloat();
-			this.SwitchTouch();
-			this.DelayChange();
-			this.IterationChange();
-			this.PushStateClick();
-			this.PlayClick();
-			this.ShowLayerClick();
-			this.ShowTriggerClick();
-			this.ImageEvent();
+	export class EventListen {
+		constructor() {}
+		start(): void {
+				this.CanvasClick();
+				this.SceneChange();
+				this.SceneChanger();
+				// this.CanvasResize();
+				this.DetectKeyDown();
+				this.CanvasWheel();
+				this.CanvasRightClick();
+				this.CanvasDoubleClick();
+				this.CameraClick();
+				this.SaveClick();
+				this.CanvasDrop();
+				this.TitleChange();
+				this.SwitchFloat();
+				this.SwitchTouch();
+				this.DelayChange();
+				this.IterationChange();
+				this.PushStateClick();
+				this.PlayClick();
+				this.ShowLayerClick();
+				this.ShowTriggerClick();
+				this.ImageEvent();
+				Scene.change(0);
 		}
 		private DetectKeyDown(): void {
 			document.addEventListener(
 				'keydown',
 				(event: KeyboardEvent) => {
 					if (keyDown === null) {
+						// console.log(event.keyCode);
 						keyDown = keyMap[event.keyCode];
 					}
 				},
@@ -80,8 +89,8 @@ namespace EventListener {
 		}
 		private CanvasWheel(): void {
 			Canvas.dom.on('mousewheel', (event: WheelEvent): void => {
-				event.preventDefault();
 				if (Active === null) return;
+				event.preventDefault();
 				switch (keyDown) {
 					case 'x':
 						transform.translate(Active, event.deltaY * param.wheelResponse.XY, 0, 0);
@@ -104,13 +113,97 @@ namespace EventListener {
 					case 'o':
 						transform.opacity(Active, event.deltaY * param.wheelResponse.opacity);
 						break;
+					case 'l':
+						transform.light(Active, event.deltaY * param.wheelResponse.light);
+						break;
+					case 'c':
+						transform.chroma(Active, event.deltaY * param.wheelResponse.chroma);
+						break;
 					default:
 						break;
 				}
 			});
 		}
+		private SceneChange(): void {
+			document.addEventListener('sceneChange', () => {
+				[
+					Scene._[Scene.now].Camera,
+					...Scene._[Scene.now].Images,
+					...Scene._[Scene.now].Texts
+				].forEach((c) => {
+					c.transition(c.state[0]);
+					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
+						new AnimationPlay(c);
+					}
+				});
+				Scene._[Scene.now].Sounds.forEach((c) => {
+					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
+						for (let [ i, l ]: Array<number> = [ 0, Scene._.length ]; i < l; i++) {
+							if (i !== Scene.now)
+								Scene._[i].Sounds.forEach((d) => {
+									d.element.pause();
+								});
+						}
+						new SoundPlayerPlay(c);
+					}
+				});
+			});
+		}
+		private SceneChanger(): void {
+			SceneChanger.forward.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.now = Math.min(Scene.now + 1, Scene._.length - 1);
+				Scene.change(Scene.now);
+				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				selector.release();
+				PalletLayer.hide();
+			});
+			SceneChanger.back.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.now = Math.max(Scene.now - 1, 0);
+				Scene.change(Scene.now);
+				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				selector.release();
+				PalletLayer.hide();
+			});
+			SceneChanger.remove.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.remove(Scene.now);
+				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				selector.release();
+				PalletLayer.hide();
+			});
+			SceneChanger.add.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				editor.addNewScene();
+				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				selector.release();
+				PalletLayer.hide();
+			});
+		}
+		private CanvasClick(): void {
+			Scene._[Scene.now].dom.on('click', (event: PointerEvent) => {
+				if (!config.live) return;
+				event.preventDefault();
+				[
+					Scene._[Scene.now].Camera,
+					...Scene._[Scene.now].Images,
+					...Scene._[Scene.now].Texts
+				].forEach((c) => {
+					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
+						new AnimationPlay(c);
+					}
+				});
+				Scene._[Scene.now].Sounds.forEach((c) => {
+					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
+						new SoundPlayerPlay(c);
+					}
+				});
+			});
+		}
 		private CanvasRightClick(): void {
 			Scene._[Scene.now].dom.on('contextmenu', (event: PointerEvent) => {
+				if (config.live) return;
 				event.preventDefault();
 				[
 					Scene._[Scene.now].Camera,
@@ -158,51 +251,22 @@ namespace EventListener {
 				}
 			});
 		}
-		private SceneChange(): void {
-			document.addEventListener('sceneChange', () => {
-				selector.release();
-				PalletLayer.hide();
-
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
-				[
-					Scene._[Scene.now].Camera,
-					...Scene._[Scene.now].Images,
-					...Scene._[Scene.now].Texts
-				].forEach((c) => {
-					// c.transition(c.state[0]);
-					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
-						new AnimationPlay(c);
-					}
-				});
-				Scene._[Scene.now].Sounds.forEach((c) => {
-					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
-						new SoundPlayerPlay(c);
-					}
-				});
-			});
-			SceneChanger.forward.on('click', (event: PointerEvent) => {
+		private CameraClick(): void {
+			CameraIcon.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
-				Scene.now = Math.min(Scene.now + 1, Scene._.length - 1);
-				Scene.change(Scene.now);
-			});
-			SceneChanger.back.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				Scene.now = Math.max(Scene.now - 1, 0);
-				Scene.change(Scene.now);
-			});
-			SceneChanger.remove.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				Scene.remove(Scene.now);
-			});
-			SceneChanger.add.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				Scene.add();
+				editor.CameraClick(CameraIcon.className);
 			});
 		}
-		private CameraClick(): void {
-			Cam.dom.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				editor.CameraClick(Cam.className);
+		private SaveClick(): void {
+			Save.dom.append(`<a id="save" href="" download="story.json" style="display:none;"></a>`);
+
+			const anchor = <HTMLAnchorElement>document.querySelector('#save');
+			Save.dom.on('click', () => {
+				if (Active !== null) CSS.removeActiveStyle(Active);
+				const json = JSON.stringify(Scene._);
+				const blob = new Blob([ json ], { type: 'application/json' });
+				anchor.href = window.URL.createObjectURL(blob);
+				anchor.click();
 			});
 		}
 		private TitleChange(): void {
@@ -345,4 +409,4 @@ namespace EventListener {
 		}
 	}
 }
-export const EventListenerStart = EventListener.Start;
+export const EventListen = EventListener.EventListen;

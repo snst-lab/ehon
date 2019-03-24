@@ -1,29 +1,73 @@
-import { param, config } from './parameter';
+import { fileReader } from './fileManager';
+import { config } from './setting';
 import { Canvas, Scene } from './canvas';
+import {
+	ComponentStructure as Struct,
+	ComponentCamera as Camera,
+	ComponentImage as Image,
+	ComponentText as Text,
+	ComponentSound as Sound
+} from './component';
+import { EditorEventHandler as editor } from './editor';
 
 namespace Renderer {
-	export class Start {
-		constructor() {
-			if (config.mode==='edit') {
-				Scene.add();
-			} else {
-				for (let i = 0; i < 2; i++) {
-					this.setScene(i);
-					this.renderScene(i);
-					// this.setComponent(i);
-				}
-			}
+	export class Render {
+		private scene: Array<Scene.Structure> = [];
+		constructor() {}
+		start(): Promise<void> {
+			return new Promise((resolve) => {
+				this.clear();
+				this.loadFile(config.storyPath)
+					.then(() => {
+						for (let [ i, l ]: Array<number> = [ 0, this.scene.length ]; i < l; i++) {
+							this.setScene(i);
+							this.renderScene(i);
+						}
+						this.scene = [];
+						resolve();
+					})
+					.catch(() => {
+						editor.addNewScene();
+						resolve();
+					});
+			});
 		}
-		setScene(num: number) {}
+		loadFile(storyPath: string): Promise<void> {
+			return new Promise((resolve, reject) => {
+				fileReader({ url: storyPath, type: 'GET', async: true })
+					.then((data: XMLHttpRequest) => {
+						this.scene = JSON.parse(data.responseText);
+						if (this.scene.length > 0) resolve();
+						else reject();
+					})
+					.catch(() => {
+						reject();
+					});
+			});
+		}
+		clear(): void {
+			Scene._ = [];
+			Canvas.dom.rewrite('');
+		}
+		setScene(num: number): void {
+			let camera: Struct = new Camera(this.scene[num].Camera);
+			let images: Array<Struct> = [];
+			this.scene[num].Images.forEach((e) => {
+				images.push(new Image(e, camera.state[0]));
+			});
+			let texts: Array<Struct> = [];
+			this.scene[num].Texts.forEach((e) => {
+				texts.push(new Text(e, camera.state[0]));
+			});
+			let sounds: Array<Struct> = [];
+			this.scene[num].Sounds.forEach((e) => {
+				sounds.push(new Sound(e));
+			});
+			Scene.add(camera, images, texts, sounds);
+		}
 		renderScene(num: number) {
 			Canvas.dom.append(Scene._[num].dom.el);
-		}
-		setComponent(num: number) {
-			//    for(let i=0; i<images.length; i++){
-			//        scene[i].Images.push(new Component.Image(num,images[i]));
-			//    }
-		}
-		renderComponent(num: number) {
+
 			const flag = document.createDocumentFragment();
 			Scene._[num].Images.forEach((e) => {
 				flag.appendChild(e.element);
@@ -31,8 +75,11 @@ namespace Renderer {
 			Scene._[num].Texts.forEach((e) => {
 				flag.appendChild(e.element);
 			});
-			Scene._[num].dom.rewrite(flag);
+			Scene._[num].Sounds.forEach((e) => {
+				flag.appendChild(e.element);
+			});
+			Scene._[num].dom.append(flag);
 		}
 	}
 }
-export const RendererStart = Renderer.Start;
+export const Render = Renderer.Render;

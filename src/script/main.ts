@@ -1,12 +1,21 @@
-import { EventListenerStart } from './eventListener';
-import { RendererStart } from './renderer';
+import { EventListen } from './eventListener';
+import { Render } from './renderer';
+import { readSetting } from './setting';
 
 namespace Main {
-	new RendererStart();
-	new EventListenerStart();
-
-	class Start {
-		constructor() {	}
+	class Start{
+		constructor(){
+			readSetting()
+			.then(() => {
+				return new Render().start();
+			})
+			.then(() => {
+				new EventListen().start();
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+		}
 	}
 	new Start();
 }

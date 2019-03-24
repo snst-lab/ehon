@@ -1,6 +1,4 @@
 import { DOM } from './domController';
-import { param, config } from './parameter';
-import { ComponentState as State, ComponentCamera as Camera } from './component';
 
 export namespace Canvas {
 	export const className: string = 'canvas';
@@ -25,7 +23,7 @@ export namespace Canvas {
 }
 
 export namespace Scene {
-	export interface Type {
+	export interface Structure {
 		className: string;
 		dom: any;
 		Camera: any;
@@ -35,7 +33,7 @@ export namespace Scene {
 	}
 	export const className: string = 'scene';
 	export let now: number = 0;
-	export let _: Array<Type> = [];
+	export let _: Array<Structure> = [];
 
 	export function change(num: number): void {
 		Scene.now = num;
@@ -48,47 +46,18 @@ export namespace Scene {
 		document.dispatchEvent(event);
 	}
 
-	export function add(): void {
-		const num: number = _.length;
-		const camera0:State = {
-			src:'',
-			x:param.camera.initialX,
-			y:param.camera.initialY,
-			z:param.camera.initialZ,
-			width: null,
-			aspectRatio: null,
-			rotate: 0,
-			scale: null,
-			blur: null,
-			opacity: null,
-			duration: param.animation.defaultDuration,
-			option: ''
-		};
+	export function add(camera:any, images:any, texts:any, sounds:any): void {
+		const num = _.length;
 		Scene._.push({
 			className: Scene.className + '' + num,
 			dom: new DOM(
 				`<div class='${Scene.className}${num} ${Scene.className}'><div class='base-layer' style='z-index:${Canvas.z}' onclick='baseLayerClick(event);'></div></div>`
 			),
-			Camera: new Camera({
-				scene: num,
-				type: 'camera',
-				className: 'camera',
-				title: 'Camera',
-				touchable: true,
-				float: true,
-				trigger: [],
-				delay: 0,
-				iteration: 1,
-				state: [camera0],
-				now: camera0,
-				element: document.querySelector('.camera'),
-			}),
-			Images: [],
-			Texts: [],
-			Sounds:[]
+			Camera: camera,
+			Images: images,
+			Texts: texts,
+			Sounds: sounds
 		});
-		Canvas.dom.append(Scene._[num].dom.el);
-		change(num);
 	}
 
 	export function remove(num: number): void {

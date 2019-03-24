@@ -53,7 +53,7 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - [x] 9. add text component & make component to be copyable 
 - [x] 10. show layer table & select layer to be editable
 - [x] 11. add audio component
-- [ ] 12. save story as json file
+- [x] 12. save story as json file
 - [ ] 13. undo/redo
 
 
