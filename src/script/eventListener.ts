@@ -1,8 +1,10 @@
 import { param, config } from './setting';
-import { Canvas, Scene } from './canvas';
+import { Frame, Canvas, Scene } from './canvas';
 import {
-	PalletActive,
+	PalletDom,
+	PalletLiveEditToggle as LiveEditToggle,
 	PalletSceneChanger as SceneChanger,
+	PalletActive,
 	PalletLayer as Layer,
 	PalletTrigger as Trigger,
 	PalletKeyframe as Keyframe,
@@ -17,8 +19,8 @@ import {
 	EditorTransform as transform,
 	EditorEventHandler as editor
 } from './editor';
-import { AnimationPlay } from './animation';
-import { SoundPlayerPlay } from './soundPlayer';
+import { Animation } from './animation';
+import { SoundPlayer } from './soundPlayer';
 
 export let keyDown: string | null = null;
 
@@ -44,29 +46,65 @@ namespace EventListener {
 	};
 	export class EventListen {
 		constructor() {}
+
 		start(): void {
-				this.CanvasClick();
-				this.SceneChange();
-				this.SceneChanger();
-				// this.CanvasResize();
-				this.DetectKeyDown();
-				this.CanvasWheel();
-				this.CanvasRightClick();
-				this.CanvasDoubleClick();
-				this.CameraClick();
-				this.SaveClick();
-				this.CanvasDrop();
-				this.TitleChange();
-				this.SwitchFloat();
-				this.SwitchTouch();
-				this.DelayChange();
-				this.IterationChange();
-				this.PushStateClick();
-				this.PlayClick();
-				this.ShowLayerClick();
-				this.ShowTriggerClick();
-				this.ImageEvent();
-				Scene.change(0);
+			this.CanvasTouch();
+			this.SceneChange();
+			this.SceneChanger();
+			this.AnimationRegister();
+			this.CanvasSwipe();
+			this.HoverHeader();
+			this.VolumeToggle();
+			// Below is edit mode unique method
+			this.liveEditToggle();
+			this.DetectKeyDown();
+			this.CanvasWheel();
+			this.CanvasDoubleClick();
+			this.CameraClick();
+			this.SaveClick();
+			this.CanvasDrop();
+			this.TitleChange();
+			this.SwitchFloat();
+			this.SwitchTouch();
+			this.DelayChange();
+			this.IterationChange();
+			this.PushStateClick();
+			this.PlayClick();
+			this.ShowLayerClick();
+			this.ShowTriggerClick();
+			this.ImageEvent();
+			Scene.init();
+		}
+		private liveEditToggle(): void {
+			LiveEditToggle.dom.on('change', (event: Event) => {
+				event.preventDefault();
+				config.live = document['live-edit'].toggle.checked;
+				if (config.live) {
+					selector.release();
+					PalletDom.style.display = 'none';
+					Canvas.element.classList.remove('canvas-edit');
+					Canvas.element.classList.add('canvas-live');
+					Canvas.paper.classList.remove('paper-edit');
+					Canvas.paper.classList.add('paper-live');
+					Frame.header.classList.remove('header-edit');
+					Frame.header.classList.add('header-live');
+					Frame.footer.classList.remove('footer-edit');
+					Frame.footer.classList.add('footer-live');
+					Frame.headerTitle.contentEditable = 'false';
+					Frame.show();
+				} else {
+					PalletDom.style.display = '';
+					Canvas.element.classList.remove('canvas-live');
+					Canvas.element.classList.add('canvas-edit');
+					Canvas.paper.classList.remove('paper-live');
+					Canvas.paper.classList.add('paper-edit');
+					Frame.header.classList.remove('header-live');
+					Frame.header.classList.add('header-edit');
+					Frame.footer.classList.remove('footer-live');
+					Frame.footer.classList.add('footer-edit');
+					Frame.headerTitle.contentEditable = 'true';
+				}
+			});
 		}
 		private DetectKeyDown(): void {
 			document.addEventListener(
@@ -89,7 +127,7 @@ namespace EventListener {
 		}
 		private CanvasWheel(): void {
 			Canvas.dom.on('mousewheel', (event: WheelEvent): void => {
-				if (Active === null) return;
+				if (config.live || Active === null) return;
 				event.preventDefault();
 				switch (keyDown) {
 					case 'x':
@@ -124,65 +162,8 @@ namespace EventListener {
 				}
 			});
 		}
-		private SceneChange(): void {
-			document.addEventListener('sceneChange', () => {
-				[
-					Scene._[Scene.now].Camera,
-					...Scene._[Scene.now].Images,
-					...Scene._[Scene.now].Texts
-				].forEach((c) => {
-					c.transition(c.state[0]);
-					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
-						new AnimationPlay(c);
-					}
-				});
-				Scene._[Scene.now].Sounds.forEach((c) => {
-					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
-						for (let [ i, l ]: Array<number> = [ 0, Scene._.length ]; i < l; i++) {
-							if (i !== Scene.now)
-								Scene._[i].Sounds.forEach((d) => {
-									d.element.pause();
-								});
-						}
-						new SoundPlayerPlay(c);
-					}
-				});
-			});
-		}
-		private SceneChanger(): void {
-			SceneChanger.forward.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				Scene.now = Math.min(Scene.now + 1, Scene._.length - 1);
-				Scene.change(Scene.now);
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
-				selector.release();
-				PalletLayer.hide();
-			});
-			SceneChanger.back.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				Scene.now = Math.max(Scene.now - 1, 0);
-				Scene.change(Scene.now);
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
-				selector.release();
-				PalletLayer.hide();
-			});
-			SceneChanger.remove.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				Scene.remove(Scene.now);
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
-				selector.release();
-				PalletLayer.hide();
-			});
-			SceneChanger.add.on('click', (event: PointerEvent) => {
-				event.preventDefault();
-				editor.addNewScene();
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
-				selector.release();
-				PalletLayer.hide();
-			});
-		}
-		private CanvasClick(): void {
-			Scene._[Scene.now].dom.on('click', (event: PointerEvent) => {
+		private CanvasTouch(): void {
+			Canvas.dom.touch((event: TouchEvent) => {
 				if (!config.live) return;
 				event.preventDefault();
 				[
@@ -191,34 +172,148 @@ namespace EventListener {
 					...Scene._[Scene.now].Texts
 				].forEach((c) => {
 					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
-						new AnimationPlay(c);
+						new Animation.Play(c);
 					}
 				});
 				Scene._[Scene.now].Sounds.forEach((c) => {
 					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
-						new SoundPlayerPlay(c);
+						new SoundPlayer.Play(c);
 					}
 				});
 			});
+			if (!config.live) {
+				Canvas.dom.on('contextmenu', (event: PointerEvent) => {
+					if (config.live) return;
+					event.preventDefault();
+					[
+						Scene._[Scene.now].Camera,
+						...Scene._[Scene.now].Images,
+						...Scene._[Scene.now].Texts
+					].forEach((c) => {
+						if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
+							new Animation.Play(c);
+						}
+					});
+					Scene._[Scene.now].Sounds.forEach((c) => {
+						if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
+							new SoundPlayer.Play(c);
+						}
+					});
+				});
+			}
 		}
-		private CanvasRightClick(): void {
-			Scene._[Scene.now].dom.on('contextmenu', (event: PointerEvent) => {
-				if (config.live) return;
-				event.preventDefault();
-				[
-					Scene._[Scene.now].Camera,
-					...Scene._[Scene.now].Images,
-					...Scene._[Scene.now].Texts
-				].forEach((c) => {
-					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
-						new AnimationPlay(c);
+		private AnimationRegister(): void {
+			for (let [ i, l ]: Array<number> = [ 0, Scene._.length ]; i < l; i++) {
+				[ Scene._[i].Camera, ...Scene._[i].Images, ...Scene._[i].Texts ].forEach((c) => {
+					if (c.state.length > 0) {
+						new Animation.Register(c);
 					}
 				});
+				Scene._[i].Sounds.forEach((c) => {
+					new SoundPlayer.Register(c);
+				});
+			}
+		}
+		private VolumeToggle(): void {
+			Frame.volume.addEventListener(
+				'click',
+				() => {
+					if (config.volumeOn) {
+						Frame.volumeOff();
+					} else {
+						Frame.volumeOn();
+					}
+				},
+				false
+			);
+		}
+		private HoverHeader(): void {
+			Frame.header.addEventListener(
+				'mouseenter',
+				() => {
+					Frame.show();
+				},
+				false
+			);
+			Frame.header.addEventListener(
+				'mouseleave',
+				() => {
+					Frame.hide();
+				},
+				false
+			);
+		}
+		private SceneChange(): void {
+			document.addEventListener('sceneChange', () => {
+				for (let [ i, l ]: Array<number> = [ 0, Scene._.length ]; i < l; i++) {
+					[ Scene._[i].Camera, ...Scene._[i].Images, ...Scene._[i].Texts ].forEach((c) => {
+						if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') > -1) {
+							new Animation.Play(c);
+						} else if (i !== Scene.now) {
+							c.running = false;
+						}
+					});
+				}
 				Scene._[Scene.now].Sounds.forEach((c) => {
-					if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') > -1) {
-						new SoundPlayerPlay(c);
+					if ([].indexOf.call(c.trigger, 'scenechange') > -1) {
+						for (let [ i, l ]: Array<number> = [ 0, Scene._.length ]; i < l; i++) {
+							if (i !== Scene.now){
+								Scene._[i].Sounds.forEach((d) => {
+									d.element.pause();
+								});
+							}
+						}
+						new SoundPlayer.Play(c);
 					}
 				});
+
+
+			});
+		}
+		private SceneChanger(): void {
+			SceneChanger.forward.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.change(Scene.now + 1);
+				SceneChanger.current.el.textContent = 'Scene:' + Scene.now;
+				selector.release();
+				PalletLayer.hide();
+			});
+			SceneChanger.back.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.change(Scene.now - 1);
+				SceneChanger.current.el.textContent = 'Scene:' + Scene.now;
+				selector.release();
+				PalletLayer.hide();
+			});
+			SceneChanger.remove.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				Scene.remove(Scene.now);
+				SceneChanger.current.el.textContent = 'Scene:' + Scene.now;
+				selector.release();
+				PalletLayer.hide();
+			});
+			SceneChanger.add.on('click', (event: PointerEvent) => {
+				event.preventDefault();
+				editor.addNewScene();
+				SceneChanger.current.el.textContent = 'Scene:' + Scene.now;
+				selector.release();
+				PalletLayer.hide();
+			});
+		}
+		private CanvasSwipe(): void {
+			Canvas.dom.swipe('left', (event: TouchEvent) => {
+				event.preventDefault();
+				Scene.change(Scene.now + 1);
+				SceneChanger.current.el.textContent = 'Scene:' + Scene.now;
+				selector.release();
+				PalletLayer.hide();
+			});
+			Canvas.dom.swipe('right', (event: TouchEvent) => {
+				event.preventDefault();
+				Scene.change(Scene.now - 1);
+				SceneChanger.current.el.textContent = 'Scene:' + Scene.now;
+				selector.release();
+				PalletLayer.hide();
 			});
 		}
 		private CanvasDoubleClick(): void {
@@ -228,17 +323,29 @@ namespace EventListener {
 			});
 		}
 		private CanvasResize(): void {
-			window.addEventListener('resize' || 'orientationchange', () => {
-				new Canvas.Resize(() => {
-					Canvas.aspectRatio = Canvas.element.offsetHeight / Canvas.element.offsetWidth;
-					[ ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((e) => {
-						e.transition(e.now);
-					});
+			class Resize {
+				private running: boolean | number = false;
+				constructor(callback: Function) {
+					window.addEventListener('resize' || 'orientationchange', this.resizeEventSaver(callback));
+				}
+				resizeEventSaver(callback: Function): EventListenerOrEventListenerObject {
+					if (this.running) return;
+					this.running = setTimeout(() => {
+						this.running = false;
+						callback();
+					}, 500);
+				}
+			}
+			new Resize(() => {
+				Canvas.aspectRatio = Canvas.element.offsetHeight / Canvas.element.offsetWidth;
+				[ ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((e) => {
+					e.transition(e.now);
 				});
 			});
 		}
 		private CanvasDrop(): void {
 			Canvas.dom.on('drop', (event: DragEvent) => {
+				if (config.live) return;
 				event.preventDefault();
 				if (event.dataTransfer.items) {
 					// Use DataTransferItemList interface to access the file(s)
@@ -263,7 +370,11 @@ namespace EventListener {
 			const anchor = <HTMLAnchorElement>document.querySelector('#save');
 			Save.dom.on('click', () => {
 				if (Active !== null) CSS.removeActiveStyle(Active);
-				const json = JSON.stringify(Scene._);
+
+				const json = JSON.stringify({
+					title: Frame.headerTitle.textContent,
+					scenes: Scene._
+				});
 				const blob = new Blob([ json ], { type: 'application/json' });
 				anchor.href = window.URL.createObjectURL(blob);
 				anchor.click();
@@ -340,31 +451,31 @@ namespace EventListener {
 		private ImageEvent(): void {
 			Object.defineProperty(window, 'baseLayerClick', {
 				value: function(event: PointerEvent): void {
+					if (config.live) return;
 					event.preventDefault();
 					editor.BaseLayerClick();
 				}
 			});
 			Object.defineProperty(window, 'componentClick', {
 				value: function(event: PointerEvent): void {
+					if (config.live) return;
 					event.preventDefault();
 					const className: string = event.srcElement.classList.item(0);
 					const type: string = event.srcElement.classList.item(1);
 					editor.ComponentClick(className, type);
 				}
 			});
-			Object.defineProperty(window, 'componentDoubleClick', {
+			Object.defineProperty(window, 'componentBlur', {
 				value: function(event: PointerEvent): void {
+					if (config.live || Active.type !== 'text') return;
 					event.preventDefault();
-					// selector.release();
-					// if (event.srcElement.getAttribute('contenteditable') === 'true') {
-					// 	event.srcElement.setAttribute('contenteditable', 'false');
-					// } else {
-					// 	event.srcElement.setAttribute('contenteditable', 'true');
-					// }
+					Active.now.src = event.srcElement.textContent;
+					Active.transition(Active.now);
 				}
 			});
 			Object.defineProperty(window, 'componentDragStart', {
 				value: function(event: DragEvent): void {
+					if (config.live) return;
 					// event.preventDefault();
 					if (Active === null || event.srcElement === null) return;
 					const className: string = event.srcElement.classList.item(0);
@@ -375,6 +486,7 @@ namespace EventListener {
 			});
 			Object.defineProperty(window, 'componentDragEnd', {
 				value: function(event: DragEvent): void {
+					if (config.live) return;
 					event.preventDefault();
 					if (Active === null || event.srcElement === null) return;
 					const className: string = event.srcElement.classList.item(0);
@@ -396,13 +508,14 @@ namespace EventListener {
 			});
 			Object.defineProperty(window, 'componentMouseUp', {
 				value: function(event: PointerEvent): void {
+					if (config.live) return;
 					event.preventDefault();
 					if (Active === null) return;
 					const className: string = event.srcElement.classList.item(0);
 					if (Active.className !== className) return;
 					const distanceInv: number = 1 / Math.max(Scene._[Active.scene].Camera.now.z - Active.now.z, 1);
 					const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
-					Active.now.width = ~~(event.srcElement.clientWidth / Canvas.element.offsetWidth * 100) / size;
+					Active.now.width = ~~(event.srcElement.clientWidth / Canvas.element.clientWidth * 100) / size;
 					Active.now.aspectRatio = event.srcElement.clientHeight / event.srcElement.clientWidth;
 				}
 			});

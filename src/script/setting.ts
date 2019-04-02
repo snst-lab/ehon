@@ -1,6 +1,6 @@
 import { fileReader } from './fileManager';
 
-export let config: { [key: string]: string };
+export let config: { [key: string]: any };
 export let param: { [key: string]: { [key: string]: number } };
 export let css: { [key: string]: any };
 

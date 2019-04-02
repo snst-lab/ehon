@@ -136,11 +136,13 @@ namespace Component {
 		}
 		createElement(className: string, given: State, camera: State): void {
 			this.element = <HTMLElement>new DOM(`
-			<div draggable="true" 
-			 ondragstart="componentDragStart(event);"
-			 ondragend="componentDragEnd(event);"
-			 onclick="componentClick(event);"
-			 onmouseup="componentMouseUp(event);"
+			<div ${!config.live	?
+				`draggable="true" 
+				 ondragstart="componentDragStart(event);"
+				 ondragend="componentDragEnd(event);"
+			     onclick="componentClick(event);"
+			     onmouseup="componentMouseUp(event);"`
+				: ''}
 			 class="${className} image" 
 			 style="${calcCSS.imageFloat(given, camera, this.pointer)}
 			 "></div>
@@ -204,11 +206,14 @@ namespace Component {
 		}
 		createElement(className: string, given: State, camera: State): void {
 			this.element = <HTMLElement>new DOM(`
-			<div draggable="true" contenteditable="false" 
-			 ondragstart="componentDragStart(event);"
-			 ondragend="componentDragEnd(event);"
-			 onclick="componentClick(event);"
-			 onmouseup="componentMouseUp(event);"
+			<div ${!config.live ?
+			   `draggable="true" contenteditable="false" 
+				ondragstart="componentDragStart(event);"
+				ondragend="componentDragEnd(event);"
+				onclick="componentClick(event);"
+				onblur="componentBlur(event);"
+				onmouseup="componentMouseUp(event);"`
+				: ''}
 			 class="${className} text" 
 			 style="${calcCSS.textFloat(given, camera, this.pointer)}
 			 ">${given.src}</div>
@@ -273,10 +278,6 @@ namespace Component {
 		createElement(className: string): void {
 			this.element = new Audio(config.soundSrcPath + this.state[0].src);
 			this.element.className = className;
-			const self: Sound = this;
-			this.element.onended = (): void => {
-				self.running = false;
-			};
 		}
 		transition({
 			src,
@@ -310,11 +311,13 @@ namespace Component {
 				duration,
 				option
 			};
-			const audio = <HTMLAudioElement>this.element;
-			audio.src = config.soundSrcPath + src;
-			audio.play().catch((error) => {
-				console.log(error);
-			});
+			if(config.volumeOn){
+				const audio = <HTMLAudioElement>this.element;
+				audio.src = config.soundSrcPath + src;
+				audio.play().catch((error) => {
+					console.log(error);
+				});
+			}
 		}
 	}
 	const uniqueString = (): string =>

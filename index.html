@@ -19,9 +19,30 @@
 </head>
 
 <body>
-    <header>ehon</header>
+    <header class='header-edit'>
+        <span class='header-title' contenteditable='true'></span>
+        <span class='header-page'>
+            0　ページ
+        </span>
+        <span class='header-live-edit'>
+            <form name='live-edit'>
+                edit
+                <label class="switch">
+                    <input type="checkbox" name='toggle' class='live-edit-toggle'>
+                    <span class="slider round"></span>
+                </label>
+                live
+            </form>
+        </span>
+    </header>
+    <i class="volume material-icons">
+        volume_up
+    </i>
     <main>
-        <div class='canvas' style='z-index:3;' ondragover="event.preventDefault();"></div>
+        <div class='canvas canvas-edit' style='z-index:3;' ondragover="event.preventDefault();"></div>
+        <div class='paper paper-edit'>
+            <audio class='paper-sound' src='assets/sound/page1.mp3' preload='auto'></audio>
+        </div>
         <div class='pallet'>
             <div class='pallet-fix'>
                 <div class='scene-changer'>
@@ -87,11 +108,12 @@
                 </div>
             </div>
             <div class='keyframe-state-list'></div>
+            <div class='layer'></div>
+            <div class='trigger'></div>
         </div>
-        <div class='layer'></div>
-        <div class='trigger'></div>
+
     </main>
-    <footer>Copyright &copy; 2019 TANUSUKE</footer>
+    <footer class='footer-edit'>Copyright &copy; 2019 TANUSUKE</footer>
     <script type='text/javascript' src='build/script/main.js'></script>
 </body>
 

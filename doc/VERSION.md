@@ -37,7 +37,7 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 ### Version x
 
 - [x] 0. project launch
-- [ ] 1. first release
+- [x] 1. first release
 
 >### Minor
 ### Version 0.x
@@ -58,6 +58,14 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 
 
 >### Patch
+### Version 0.12.x
+<details open>
+<summary>1</summary>
+
+- bugfix: Fixed a bug that animation continues after scene change<br>
+- improve: Enabled to play music repeatedly
+</details>
+
 
 ### Version 0.7.x
 <details open>

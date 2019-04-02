@@ -1,14 +1,14 @@
-import { param } from './setting';
+import { param, config } from './setting';
 import { ComponentType as Component } from './component';
 import { Scene } from './canvas';
 
 export namespace SoundPlayer {
 	export class Register {
-		constructor(target: Component, eventName: string) {
-			if (target.state.length !== 1) return;
+		constructor(target: Component) {
 			Scene._[target.scene].dom.el.addEventListener(
-				eventName,
+				'touchend',
 				(event: PointerEvent) => {
+					if (!config.live) return;
 					event.preventDefault();
 					if ([].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1) {
 						new SoundPlayer.Play(target);
@@ -16,6 +16,19 @@ export namespace SoundPlayer {
 				},
 				false
 			);
+			if (!config.live) {
+				Scene._[target.scene].dom.el.addEventListener(
+					'contextmenu',
+					(event: PointerEvent) => {
+						if (config.live) return;
+						event.preventDefault();
+						if ([].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1) {
+							new SoundPlayer.Play(target);
+						}
+					},
+					false
+				);
+			}
 		}
 	}
 
@@ -27,7 +40,6 @@ export namespace SoundPlayer {
 			if (target === null) return;
 			this.stateLength = target.state.length;
 			if (this.stateLength < 1) return;
-			target.running = true;
 			this.delayStart(target, 0);
 		}
 		delayStart(target: Component, frame: number): void {
@@ -35,6 +47,9 @@ export namespace SoundPlayer {
 				window.requestAnimationFrame(() => this.delayStart(target, frame + 1));
 			} else {
 				this.iterate(target);
+				target.element.onended = (): void => {
+					this.wait(target,0);
+				};
 			}
 		}
 		iterate(target: Component): void {
@@ -49,9 +64,7 @@ export namespace SoundPlayer {
 		shift(target: Component, endState: number): void {
 			if (endState < this.stateLength) {
 				window.requestAnimationFrame(() => this.move(target, 0, endState));
-			} else {
-				this.wait(target, 0);
-			}
+			} 
 		}
 		wait(target: Component, frame: number): void {
 			if (frame < target.state[0].duration) {
@@ -61,15 +74,11 @@ export namespace SoundPlayer {
 			}
 		}
 		move(target: Component, frame: number, endState: number): void {
-			if (frame % param.animation.skipFrame === 0) {
-				if (frame < target.state[endState].duration) {
-					window.requestAnimationFrame(() => this.move(target, frame + 1, endState));
-				} else {
-					target.transition(target.state[endState]);
-					this.shift(target, endState + 1);
-				}
-			} else {
+			if (frame < target.state[endState].duration) {
 				window.requestAnimationFrame(() => this.move(target, frame + 1, endState));
+			} else {
+				target.transition(target.state[endState]);
+				this.shift(target, endState + 1);
 			}
 		}
 	}

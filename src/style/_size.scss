@@ -1,9 +1,12 @@
-$header-height: 5vh;
+$header-height: 7vh;
 $main-height: 95vh;
 $cover-height: 40vh;
 $footer-height: 5vh;
-$canvas-width:85vw;
-$canvas-height:47.8125vw;
-$canvas-bottom : calc(5vh + 47.8125vw);
+$canvas-live-width:100vw;
+$canvas-live-height:56.25vw;
+$canvas-live-bottom : calc(7vh + 56.25vw);
+$canvas-edit-width:85vw;
+$canvas-edit-height:47.8125vw;
+$canvas-edit-bottom : calc(7vh + 47.8125vw);
 $pallet-fix-height: 21rem;
 $pallet-flex-height: calc(47.8125vw - 21rem);

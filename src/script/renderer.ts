@@ -1,6 +1,7 @@
+import { DOM } from './domController';
 import { fileReader } from './fileManager';
 import { config } from './setting';
-import { Canvas, Scene } from './canvas';
+import { Canvas, Scene, Frame } from './canvas';
 import {
 	ComponentStructure as Struct,
 	ComponentCamera as Camera,
@@ -14,9 +15,10 @@ namespace Renderer {
 	export class Render {
 		private scene: Array<Scene.Structure> = [];
 		constructor() {}
+
 		start(): Promise<void> {
 			return new Promise((resolve) => {
-				this.clear();
+				this.clearCanvas();
 				this.loadFile(config.storyPath)
 					.then(() => {
 						for (let [ i, l ]: Array<number> = [ 0, this.scene.length ]; i < l; i++) {
@@ -32,11 +34,13 @@ namespace Renderer {
 					});
 			});
 		}
-		loadFile(storyPath: string): Promise<void> {
+		private loadFile(storyPath: string): Promise<void> {
 			return new Promise((resolve, reject) => {
 				fileReader({ url: storyPath, type: 'GET', async: true })
 					.then((data: XMLHttpRequest) => {
-						this.scene = JSON.parse(data.responseText);
+						const json = JSON.parse(data.responseText); 
+						Frame.headerTitle.textContent = json['title'];
+						this.scene = json['scenes'];
 						if (this.scene.length > 0) resolve();
 						else reject();
 					})
@@ -45,11 +49,11 @@ namespace Renderer {
 					});
 			});
 		}
-		clear(): void {
+		private clearCanvas(): void {
 			Scene._ = [];
 			Canvas.dom.rewrite('');
 		}
-		setScene(num: number): void {
+		private setScene(num: number): void {
 			let camera: Struct = new Camera(this.scene[num].Camera);
 			let images: Array<Struct> = [];
 			this.scene[num].Images.forEach((e) => {
@@ -65,7 +69,7 @@ namespace Renderer {
 			});
 			Scene.add(camera, images, texts, sounds);
 		}
-		renderScene(num: number) {
+		private renderScene(num: number) {
 			Canvas.dom.append(Scene._[num].dom.el);
 
 			const flag = document.createDocumentFragment();

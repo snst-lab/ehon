@@ -5,6 +5,12 @@ import { Scene } from './canvas';
 import { Active as ActiveComponent } from './editor';
 
 namespace Pallet {
+	export const dom = <HTMLElement>document.querySelector('.pallet');
+
+	export class LiveEditToggle {
+		static className = 'live-edit-toggle';
+		static dom = new DOM('.live-edit-toggle');
+	}
 	export class SceneChanger {
 		static className = 'scene-changer';
 		static forward = new DOM('.scene-changer-forward');
@@ -40,13 +46,13 @@ namespace Pallet {
 		static button = new DOM('.showlayer');
 		static opened: boolean = false;
 		static show(): void {
-			(<HTMLElement>Layer.dom.el).style.left = '70vw';
+			(<HTMLElement>Layer.dom.el).style.left = '-15vw';
 			(<HTMLElement>Layer.button.el).style.color = 'rgb(0,200,180)';
 			Trigger.hide();
 			Layer.opened = true;
 		}
 		static hide(): void {
-			(<HTMLElement>Layer.dom.el).style.left = '85vw';
+			(<HTMLElement>Layer.dom.el).style.left = '0';
 			(<HTMLElement>Layer.button.el).style.color = '';
 			Layer.opened = false;
 		}
@@ -179,7 +185,7 @@ namespace Pallet {
 					},
 					false
 				);
-				if(Components[i].type!=='sound'){
+				if (Components[i].type !== 'sound') {
 					document.querySelector('.layer-component' + i).addEventListener(
 						'mouseenter',
 						(event: MouseEvent) => {
@@ -209,23 +215,20 @@ namespace Pallet {
 
 		static show(): void {
 			if (ActiveComponent === null) return;
-			(<HTMLElement>Trigger.dom.el).style.left = '70vw';
+			(<HTMLElement>Trigger.dom.el).style.left = '-15vw';
 			(<HTMLElement>Trigger.button.el).style.color = 'rgb(0,200,180)';
 			Layer.hide();
 			Trigger.opened = true;
 		}
 
 		static hide(): void {
-			(<HTMLElement>Trigger.dom.el).style.left = '85vw';
+			(<HTMLElement>Trigger.dom.el).style.left = '0';
 			(<HTMLElement>Trigger.button.el).style.color = '';
 			Trigger.opened = false;
 		}
 
 		static render(): void {
-			const Components: Array<Component> = [
-				...Scene._[Scene.now].Images,
-				...Scene._[Scene.now].Texts
-			];
+			const Components: Array<Component> = [ ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ];
 			const fragment = new DOM();
 			fragment.append('<div class="trigger-index">Animation Trigger</div>');
 			fragment.append(`
@@ -526,6 +529,8 @@ namespace Pallet {
 		}
 	}
 }
+export const PalletDom = Pallet.dom;
+export const PalletLiveEditToggle = Pallet.LiveEditToggle;
 export const PalletSceneChanger = Pallet.SceneChanger;
 export const PalletSave = Pallet.Save;
 export const PalletCamera = Pallet.Camera;

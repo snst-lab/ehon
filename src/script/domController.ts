@@ -117,6 +117,118 @@ namespace DOMController {
 			super(node);
 		}
 		/**
+		 * Touch Event Listner for Touch Devices
+		 * @param sensitivity : callback when swipe length is less than screensize x 1/sensitivity
+		 */
+		touch(callback: Function, sensitivity?: number) {
+			const coefficient: number = typeof sensitivity !== 'undefined' ? 1 / sensitivity : 0.05;
+			this.el.addEventListener(
+				'touchstart',
+				(event: TouchEvent) => {
+					if (event.cancelable) event.preventDefault();
+					this.el.removeEventListener('touchstart', null, false);
+					let x: number = event.changedTouches[0].pageX;
+					let y: number = event.changedTouches[0].pageY;
+					this.el.addEventListener('touchend', (event: TouchEvent) => {
+						this.el.removeEventListener('touchend', null, false);
+						if (
+							event.changedTouches[0].pageX > x - window.screen.width * coefficient &&
+							event.changedTouches[0].pageX < x + window.screen.width * coefficient &&
+							event.changedTouches[0].pageY > y - window.screen.height * coefficient &&
+							event.changedTouches[0].pageY < y + window.screen.height * coefficient
+						) {
+							callback(event);
+						}
+						x = 0;
+						y = 0;
+					});
+				},
+				false
+			);
+		}
+		/**
+		 * Swipe Event Listner for Touch Devices
+		 * @param direction :  specify the direction by string [left , right , top , bottom] 
+		 * @param sensitivity : callback when swipe length is more than screensize x 1/sensitivity
+		 */
+		swipe(direction: string, callback: Function, sensitivity?: number) {
+			const coefficient: number = typeof sensitivity !== 'undefined' ? 1 / sensitivity : 0.1;
+			switch (direction) {
+				case 'left':
+					this.el.addEventListener(
+						'touchstart',
+						(event: TouchEvent) => {
+							if (event.cancelable) event.preventDefault();
+							this.el.removeEventListener('touchstart', null, false);
+							let position: number = event.changedTouches[0].pageX;
+							this.el.addEventListener('touchend', (event: TouchEvent) => {
+								this.el.removeEventListener('touchend', null, false);
+								if (event.changedTouches[0].pageX < position - window.screen.width * coefficient) {
+									callback(event);
+								}
+								position = 0;
+							});
+						},
+						false
+					);
+					break;
+				case 'right':
+					this.el.addEventListener(
+						'touchstart',
+						(event: TouchEvent) => {
+							this.el.removeEventListener('touchstart', null, false);
+							if (event.cancelable) event.preventDefault();
+							let position: number = event.changedTouches[0].pageX;
+							this.el.addEventListener('touchend', (event: TouchEvent) => {
+								this.el.removeEventListener('touchend', null, false);
+								if (event.changedTouches[0].pageX > position + window.screen.width * coefficient) {
+									callback(event);
+								}
+								position = window.screen.width;
+							});
+						},
+						false
+					);
+					break;
+				case 'up':
+					this.el.addEventListener(
+						'touchstart',
+						(event: TouchEvent) => {
+							if (event.cancelable) event.preventDefault();
+							this.el.removeEventListener('touchstart', null, false);
+							let position: number = event.changedTouches[0].pageY;
+							this.el.addEventListener('touchend', (event: TouchEvent) => {
+								this.el.removeEventListener('touchend', null, false);
+								if (event.changedTouches[0].pageY < position - window.screen.height * coefficient) {
+									callback(event);
+								}
+								position = 0;
+							});
+						},
+						false
+					);
+					break;
+				case 'down':
+					this.el.addEventListener(
+						'touchstart',
+						(event: TouchEvent) => {
+							if (event.cancelable) event.preventDefault();
+							this.el.removeEventListener('touchstart', null, false);
+							let position: number = event.changedTouches[0].pageY;
+							this.el.addEventListener('touchend', (event: TouchEvent) => {
+								this.el.removeEventListener('touchend', null, false);
+								if (event.changedTouches[0].pageY > position + window.screen.height * coefficient) {
+									callback(event);
+								}
+								position = window.screen.height;
+							});
+						},
+						false
+					);
+					break;
+			}
+		}
+		/**
 		 	Use Intersection observer to detect the intersection of an element and a visible region
 		*/
 		inview(callback: any, options?: IntersectionObserverOption): void {

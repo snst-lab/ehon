@@ -1,4 +1,4 @@
-import { param, css } from './setting';
+import { config,param, css } from './setting';
 import { Canvas, Scene } from './canvas';
 import { PalletActive, PalletKeyframe as Keyframe, PalletLayer as Layer, PalletTrigger as Trigger } from './pallet';
 import {
@@ -75,6 +75,8 @@ export namespace Editor {
 		private type: string | null;
 
 		activate(className: string, type: string): void {
+			if (config.live) return;
+
 			this.type = type;
 			[ ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts, Scene._[Scene.now].Camera ].forEach((e) => {
 				if (e.className !== className) {
@@ -308,8 +310,8 @@ export namespace Editor {
 				scale: null,
 				blur: null,
 				opacity: null,
-				chroma:null,
-				light:null,
+				chroma: null,
+				light: null,
 				duration: param.animation.defaultDuration,
 				option: ''
 			};
@@ -319,14 +321,14 @@ export namespace Editor {
 				className: 'camera',
 				title: 'Camera',
 				touchable: true,
-				pointer:'auto',
+				pointer: 'auto',
 				float: true,
 				trigger: [],
 				delay: 0,
 				iteration: 1,
 				state: [ camera0 ],
 				now: camera0,
-				running:false,
+				running: false,
 				element: document.querySelector('.camera')
 			});
 			Scene.add(camera, [], [], []);
@@ -370,8 +372,8 @@ export namespace Editor {
 						scale: 1,
 						blur: 0,
 						opacity: 100,
-						chroma:100,
-						light:100,
+						chroma: 100,
+						light: 100,
 						duration: param.animation.defaultDuration,
 						option: ''
 					};
@@ -387,8 +389,8 @@ export namespace Editor {
 						scale: null,
 						blur: null,
 						opacity: null,
-						chroma:null,
-						light:null,
+						chroma: null,
+						light: null,
 						duration: param.animation.defaultDuration,
 						option: ''
 					};
@@ -406,14 +408,14 @@ export namespace Editor {
 					delay: 0,
 					state: [ state0 ],
 					now: null,
-					running:false,
+					running: false,
 					element: null
 				};
 			} else {
 				state0 = {
 					src: given.now.src,
-					x:x,
-					y:y,
+					x: x,
+					y: y,
 					z: given.now.z,
 					width: given.now.width,
 					aspectRatio: given.now.aspectRatio,
@@ -437,9 +439,9 @@ export namespace Editor {
 					trigger: given.trigger,
 					iteration: given.iteration,
 					delay: given.delay,
-					state: [state0],
+					state: [ state0 ],
 					now: null,
-					running:false,
+					running: false,
 					element: null
 				};
 			}
@@ -458,7 +460,7 @@ export namespace Editor {
 				Scene._[Scene.now].Sounds.push(component);
 				Scene._[Scene.now].dom.append(component.element);
 				EditorSelector.activate(component.className, 'sound');
-				new SoundPlayer.Register(Active, 'contextmenu');
+				new SoundPlayer.Register(Active);
 			}
 			Keyframe.render();
 			Layer.render(EditorSelector);
@@ -473,7 +475,9 @@ export namespace Editor {
 		}
 		PushStateClick(): void {
 			if (Active.type !== 'sound') {
-				new Animation.Register(Active);
+				if (Active.state.length === 1){
+					new Animation.Register(Active);
+				}
 				Active.transition(Active.now);
 			}
 			CSS.removeActiveStyle(Active);
