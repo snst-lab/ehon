@@ -339,7 +339,7 @@ export namespace Editor {
 			const x: number = X / (Canvas.element.offsetWidth + Canvas.element.offsetLeft) * 100;
 			const y: number = Y / (Canvas.element.offsetHeight + Canvas.element.offsetTop) * 100;
 
-			if (/.png|.gif|.jpg|jpeg|.PNG|.GIF|.JPG|.JPEG$/.test(file.name)) {
+			if (/.png|.gif|.jpg|jpeg|.PNG|.GIF|.JPG|.JPEG|.svg|.SVG$/.test(file.name)) {
 				this.CanvasDropComponent(x, y, 'image', file, null);
 			} else if (/.wav|.mp3|.ogg$/.test(file.name)) {
 				this.CanvasDropComponent(x, y, 'sound', file, null);

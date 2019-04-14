@@ -50,7 +50,7 @@ export namespace Animation {
 				(event: PointerEvent) => {
 					if (!config.live) return;
 					event.preventDefault();
-					if ([].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1) {
+					if ([].indexOf.call(target.trigger, (<HTMLElement>event.srcElement).classList.item(0)) > -1) {
 						new Animation.Play(target);
 					}
 				},
@@ -62,7 +62,7 @@ export namespace Animation {
 					(event: PointerEvent) => {
 						if (config.live) return;
 						event.preventDefault();
-						if ([].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1) {
+						if ([].indexOf.call(target.trigger, (<HTMLElement>event.srcElement).classList.item(0)) > -1) {
 							new Animation.Play(target);
 						}
 					},

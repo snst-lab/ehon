@@ -65,7 +65,11 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - bugfix: Fixed a bug that animation continues after scene change<br>
 - improve: Enabled to play music repeatedly
 </details>
+<details open>
+<summary>2</summary>
 
+- improve: Enabled to add svg image
+</details>
 
 ### Version 0.7.x
 <details open>

@@ -373,7 +373,7 @@ main {
 
 .volume {
   position: fixed;
-  top: 2.5vh;
+  top: 2vh;
   right: 0;
   bottom: 0;
   left: 96vw;
@@ -381,7 +381,7 @@ main {
   z-index: 9999;
   width: 1.5rem;
   height: 1.5rem;
-  transform: scale(2.5);
+  transform: scale(2);
 }
 
 .header-live-edit {

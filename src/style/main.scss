@@ -113,12 +113,12 @@ main {
 }
 
 .volume{
-	@include fixed(2.5vh, 0, 0, 96vw);
+	@include fixed(2vh, 0, 0, 96vw);
 	color:rgba(100,100,100,0.5);
 	z-index:9999;
 	width:1.5rem;
 	height:1.5rem;
-	transform:scale(2.5);
+	transform:scale(2);
 }
 
 // Below is edit mode unique style
