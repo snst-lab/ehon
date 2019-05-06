@@ -7,24 +7,23 @@ namespace Calculation {
 		imageFloat(Image: State, Camera: State, pointer: string): string {
 			const distanceInv: number = 1 / Math.max(Camera.z - Image.z, 1);
 			const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
-			return `${css.common}
-				background-image:url(${config.imageSrcUrl}${Image.src});background-size:contain;background-position:center;background-repeat:no-repeat;
+			return `background-image:url(${config.imageSrcUrl}${Image.src});
 				left:${(Image.x - Camera.x - param.camera.vanishingX) * Image.z * distanceInv + param.camera.vanishingX}%;
 				top:${(Image.y - Camera.y - param.camera.vanishingY) * Image.z * distanceInv + param.camera.vanishingY}%;
 				z-index:${~~Image.z + Canvas.z};
-				width:${Image.width * size}%;
-				height:${Image.width * Image.aspectRatio / Canvas.aspectRatio * size}%;
+				width:${Image.width*size}%;
+				height:${Image.width * Image.aspectRatio / Canvas.aspectRatio*size}%;
 				transform: rotate(${Image.rotate}deg) scale(${Image.scale});
 				filter:blur(${Image.blur +
 					Math.abs(Camera.z - Image.z - param.camera.initialZ + param.image.initialZ) /
-						param.camera.depthOfField}px) opacity(${Image.opacity}%) saturate(${Image.chroma}%) brightness(${Image.light}%);
+						param.camera
+							.depthOfField}px) opacity(${Image.opacity}%) saturate(${Image.chroma}%) brightness(${Image.light}%);
 				pointer-events:${pointer};${Image.option}
 			`;
 		}
 
 		imageFix(Image: State, Camera: State, pointer: string): string {
-			return `${css.common}
-				background-image:url(${config.imageSrcUrl}${Image.src});background-size:contain;background-position:center;background-repeat:no-repeat;
+			return `background-image:url(${config.imageSrcUrl}${Image.src});
 				left:${Image.x}%;
 				top:${Image.y}%;
 				z-index:${~~Camera.z};
@@ -39,22 +38,23 @@ namespace Calculation {
 		textFloat(Text: State, Camera: State, pointer: string): string {
 			const distanceInv: number = 1 / Math.max(Camera.z - Text.z, 1);
 			const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
-			return `${css.common+css.text}
+			return `
 				left:${(Text.x - Camera.x - param.camera.vanishingX) * Text.z * distanceInv + param.camera.vanishingX}%;
 				top:${(Text.y - Camera.y - param.camera.vanishingY) * Text.z * distanceInv + param.camera.vanishingY}%;
 				z-index:${~~Text.z + Canvas.z};
-				width:${Text.width}%;
-				height:${Text.width * Text.aspectRatio / Canvas.aspectRatio}%;
-				transform: rotate(${Text.rotate}deg) scale(${Text.scale * size});
+				width:${Text.width*size}%;
+				height:${Text.width * Text.aspectRatio / Canvas.aspectRatio*size}%;
+				transform: rotate(${Text.rotate}deg) scale(${Text.scale});
 				filter:blur(${Text.blur +
 					Math.abs(Camera.z - Text.z - param.camera.initialZ + param.text.initialZ) /
-						param.camera.depthOfField}px) opacity(${Text.opacity}%) saturate(${Text.chroma}%) brightness(${Text.light}%);
+						param.camera
+							.depthOfField}px) opacity(${Text.opacity}%) saturate(${Text.chroma}%) brightness(${Text.light}%);
 				pointer-events:${pointer};${Text.option}
 			`;
 		}
 
 		textFix(Text: State, Camera: State, pointer: string): string {
-			return `${css.common+css.text}
+			return `
 				left:${Text.x}%;
 				top:${Text.y}%;
 				z-index:${~~Camera.z};

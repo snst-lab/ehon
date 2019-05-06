@@ -64,6 +64,10 @@ export namespace Scene {
 			if (i === 0) scene.dom.el.style.display = '';
 			else scene.dom.el.style.display = 'none';
 		});
+		Scene.now = 0;
+		const event = document.createEvent('HTMLEvents');
+		event.initEvent('sceneChange', true, false);
+		document.dispatchEvent(event);
 	}
 	export function change(num: number): void {
 		if (Scene.now < num && num < Scene._.length) {

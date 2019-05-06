@@ -70,6 +70,11 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 
 - improve: Enabled to add svg image
 </details>
+<details open>
+<summary>3</summary>
+
+- refactor: make a part of cssText in script change place to sass
+</details>
 
 ### Version 0.7.x
 <details open>

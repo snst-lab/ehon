@@ -22,7 +22,7 @@
 		"camera": {
 			"initialX": 50,
 			"initialY": 50,
-			"initialZ": 200,
+			"initialZ": 500,
 			"depthOfField": 50,
 			"vanishingX": 50,
 			"vanishingY": 50
@@ -43,8 +43,6 @@
 		}
 	},
 	"css": {
-		"common": "position:absolute;transform-origin:center;backface-visibility:hidden;",
-		"text": "font-size:5rem;text-align:center;writing-mode: vertical-rl;color:white;text-shadow: 1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;",
 		"active": {
 			"outlineColor": "rgb(0,200,180)",
 			"defaultColor": "rgb(0,200,180)",

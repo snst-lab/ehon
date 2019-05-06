@@ -460,8 +460,8 @@ namespace EventListener {
 				value: function(event: PointerEvent): void {
 					if (config.live) return;
 					event.preventDefault();
-					const className: string = event.srcElement.classList.item(0);
-					const type: string = event.srcElement.classList.item(1);
+					const className: string = (<HTMLElement>event.srcElement).classList.item(0);
+					const type: string = (<HTMLElement>event.srcElement).classList.item(1);
 					editor.ComponentClick(className, type);
 				}
 			});
@@ -469,7 +469,7 @@ namespace EventListener {
 				value: function(event: PointerEvent): void {
 					if (config.live || Active.type !== 'text') return;
 					event.preventDefault();
-					Active.now.src = event.srcElement.textContent;
+					Active.now.src =  (<HTMLElement>event.srcElement).textContent;
 					Active.transition(Active.now);
 				}
 			});
@@ -478,7 +478,7 @@ namespace EventListener {
 					if (config.live) return;
 					// event.preventDefault();
 					if (Active === null || event.srcElement === null) return;
-					const className: string = event.srcElement.classList.item(0);
+					const className: string = (<HTMLElement>event.srcElement).classList.item(0);
 					if (Active.className !== className) return;
 					dragStartPosition.x = event.clientX;
 					dragStartPosition.y = event.clientY;
@@ -489,7 +489,7 @@ namespace EventListener {
 					if (config.live) return;
 					event.preventDefault();
 					if (Active === null || event.srcElement === null) return;
-					const className: string = event.srcElement.classList.item(0);
+					const className: string = (<HTMLElement>event.srcElement).classList.item(0);
 					if (Active.className !== className) return;
 					const correctXY: number = Active.float
 						? (Scene._[Active.scene].Camera.now.z - Active.now.z) / Active.now.z
@@ -511,12 +511,12 @@ namespace EventListener {
 					if (config.live) return;
 					event.preventDefault();
 					if (Active === null) return;
-					const className: string = event.srcElement.classList.item(0);
+					const className: string = (<HTMLElement>event.srcElement).classList.item(0);
 					if (Active.className !== className) return;
 					const distanceInv: number = 1 / Math.max(Scene._[Active.scene].Camera.now.z - Active.now.z, 1);
 					const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
-					Active.now.width = ~~(event.srcElement.clientWidth / Canvas.element.clientWidth * 100) / size;
-					Active.now.aspectRatio = event.srcElement.clientHeight / event.srcElement.clientWidth;
+					Active.now.width = ~~( (<HTMLElement>event.srcElement).clientWidth / Canvas.element.clientWidth * 100) / size;
+					Active.now.aspectRatio =  (<HTMLElement>event.srcElement).clientHeight /  (<HTMLElement>event.srcElement).clientWidth;
 				}
 			});
 		}

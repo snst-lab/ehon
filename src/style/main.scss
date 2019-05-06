@@ -45,15 +45,17 @@ header {
 	height: $header-height;
 	vertical-align: middle;
 	@include fontsize(23);
-	transition:0.3s;
-	&.header-edit{
+	transition: 0.3s;
+
+	&.header-edit {
 		color: $gray2;
 		background: white;
 		border-bottom: solid $gray4 0.5px;
 	}
-	&.header-live{
+
+	&.header-live {
 		color: white;
-		text-shadow: 0.8px 0.8px 0 $gray3,-0.8px 0.8px 0 $gray3,0.8px -0.8px 0 $gray3,-0.8px -0.8px 0 $gray3;
+		text-shadow: 0.8px 0.8px 0 $gray3, -0.8px 0.8px 0 $gray3, 0.8px -0.8px 0 $gray3, -0.8px -0.8px 0 $gray3;
 		background: transparent;
 		// background: $gray1-alpha;
 		border-bottom: none;
@@ -61,14 +63,15 @@ header {
 
 }
 
-.header{
-	&-title{
-	position:fixed;
-		margin:0 2vw;
+.header {
+	&-title {
+		position: fixed;
+		margin: 0 2vw;
 	}
-	&-page{
-	position:fixed;
-		margin:0 45vw;
+
+	&-page {
+		position: fixed;
+		margin: 0 45vw;
 	}
 }
 
@@ -93,7 +96,8 @@ main {
 		width: $canvas-edit-width;
 		height: $canvas-edit-height;
 	}
-	&.canvas-live{
+
+	&.canvas-live {
 		@include fixed(0, 0, 0, 0);
 		width: $canvas-live-width;
 		height: $canvas-live-height;
@@ -112,20 +116,40 @@ main {
 	height: 100%;
 }
 
-.volume{
+.volume {
 	@include fixed(2vh, 0, 0, 96vw);
-	color:rgba(100,100,100,0.5);
-	z-index:9999;
-	width:1.5rem;
-	height:1.5rem;
-	transform:scale(2);
+	color: rgba(100, 100, 100, 0.5);
+	z-index: 9999;
+	width: 1.5rem;
+	height: 1.5rem;
+	transform: scale(2);
+}
+
+.image {
+	position: absolute;
+	transform-origin: center;
+	backface-visibility: hidden;
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.text {
+	position: absolute;
+	transform-origin: center;
+	backface-visibility: hidden;
+	font-size: 5rem;
+	text-align: center;
+	writing-mode: vertical-rl;
+	color: white;
+	text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000;
 }
 
 // Below is edit mode unique style
 
-.header-live-edit{
-	position:fixed;
-	left:85vw;
+.header-live-edit {
+	position: fixed;
+	left: 85vw;
 }
 
 footer {
@@ -139,10 +163,12 @@ footer {
 	background-color: $black1;
 	@include fontsize(12);
 	z-index: 9999;
-	&.footer-live{
+
+	&.footer-live {
 		@include fixed($canvas-live-bottom, 0, 0, 0);
 	}
-	&.footer-edit{
+
+	&.footer-edit {
 		@include fixed($canvas-edit-bottom, 0, 0, 0);
 	}
 }
@@ -476,14 +502,15 @@ footer {
 		rgb(180, 180, 180) 50%,
 		rgb(200, 200, 200) calc(50% + 1px),
 		transparent 100%);
-	filter:opacity(0%);
+	filter: opacity(0%);
 	transition: 0.5s;
-	
+
 	&.paper-edit {
 		width: $canvas-edit-width;
 		height: $canvas-edit-height;
 	}
-	&.paper-live{
+
+	&.paper-live {
 		width: $canvas-live-width;
 		height: $canvas-live-height;
 	}
