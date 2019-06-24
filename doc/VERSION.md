@@ -54,7 +54,8 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - [x] 10. show layer table & select layer to be editable
 - [x] 11. add audio component
 - [x] 12. save story as json file
-- [ ] 13. undo/redo
+- [x] 13. replace part of processing with web assembly
+- [ ] 14. undo/redo
 
 
 >### Patch

@@ -181,11 +181,11 @@ namespace Pallet {
 				document.querySelector('.layer-component-title' + i).addEventListener(
 					'click',
 					(event: PointerEvent) => {
-						selector.activate(Components[i].className, Components[i].type);
+						selector.activate(Components[i].className, Components[i].types);
 					},
 					false
 				);
-				if (Components[i].type !== 'sound') {
+				if (Components[i].types !== 3 /**not sound*/) {
 					document.querySelector('.layer-component' + i).addEventListener(
 						'mouseenter',
 						(event: MouseEvent) => {
@@ -356,7 +356,7 @@ namespace Pallet {
 				fragment.append(`
                     <div class='keyframe-state ${i === l - 1 ? 'keyframe-state-current' : ''} keyframe-state${i}'>
 						<div class='keyframe-state-number${i} keyframe-state-number'>State: ${i}</div>
-						<div class='keyframe-state-src${i} keyframe-state-src' ${ActiveComponent.type === 'text'
+						<div class='keyframe-state-src${i} keyframe-state-src' ${ActiveComponent.types === 2 /**text*/
 					? "contenteditable='true'"
 					: ''}>${ActiveComponent.state[i].src}</div>
 						<div class='keyframe-state-duration${i} keyframe-state-duration'>
@@ -364,7 +364,7 @@ namespace Pallet {
 							<div class='keyframe-state-duration-value${i} keyframe-state-duration-value' contenteditable='true'>${ActiveComponent
 					.state[i].duration}</div>
 						</div>
-						${ActiveComponent.type === 'image' || ActiveComponent.type === 'sound'
+						${ActiveComponent.types === 1 /**image */ || ActiveComponent.types ===3 /**sound */
 							? `<input type='file' class='keyframe-state-input${i}' style='display:none;'>`
 							: ''}
 						<div class='keyframe-state-icon'>
@@ -373,11 +373,11 @@ namespace Pallet {
 								? `<i class='keyframe-state-remove${i} keyframe-state-remove material-icons' state='${i}'>delete</i>`
 								: ''}
 						</div>
-						${ActiveComponent.type !== 'camera'
+						${ActiveComponent.types !== 0 /**not camera */
 							? `<div class='keyframe-state-option-show${i} keyframe-state-option-show'><div class='plusminus${i} plusminus'><span></span><span></span></div></div>`
 							: ''}
 					</div>
-					${ActiveComponent.type !== 'camera'
+					${ActiveComponent.types !== 0 /**not camera */
 						? `<div class='keyframe-state-option${i} keyframe-state-option' contenteditable='true'>/*Optional CSS*/${CSS.removeActiveStyle(
 								ActiveComponent.state[i].option
 							)}</div>`
@@ -412,7 +412,7 @@ namespace Pallet {
 					'blur',
 					(event: Event) => {
 						event.preventDefault();
-						ActiveComponent.state[i].duration = Number(event.srcElement.textContent);
+						ActiveComponent.state[i].duration = Number((<HTMLElement>event.srcElement).textContent);
 					},
 					false
 				);
@@ -436,7 +436,7 @@ namespace Pallet {
 						false
 					);
 				}
-				if (ActiveComponent.type === 'image' || ActiveComponent.type === 'sound') {
+				if (ActiveComponent.types === 1 /**image*/|| ActiveComponent.types ===3 /**sound*/) {
 					document.querySelector('.keyframe-state-input' + i).addEventListener(
 						'change',
 						(event: Event) => {
@@ -457,18 +457,18 @@ namespace Pallet {
 						false
 					);
 				}
-				if (ActiveComponent.type === 'text') {
+				if (ActiveComponent.types === 2 /**text*/) {
 					document.querySelector('.keyframe-state-src' + i).addEventListener(
 						'blur',
 						(event: Event) => {
 							event.preventDefault();
-							ActiveComponent.state[i].src = event.srcElement.textContent;
+							ActiveComponent.state[i].src = (<HTMLElement>event.srcElement).textContent;
 							ActiveComponent.transition(ActiveComponent.state[i]);
 						},
 						false
 					);
 				}
-				if (ActiveComponent.type !== 'camera') {
+				if (ActiveComponent.types !== 0 /**not camera*/) {
 					document.querySelector('.keyframe-state-option-show' + i).addEventListener(
 						'click',
 						(event: PointerEvent) => {
@@ -490,7 +490,7 @@ namespace Pallet {
 						'blur',
 						(event: Event) => {
 							event.preventDefault();
-							ActiveComponent.state[i].option = event.srcElement.textContent.replace(
+							ActiveComponent.state[i].option = (<HTMLElement>event.srcElement).textContent.replace(
 								'/*Optional CSS*/',
 								''
 							);

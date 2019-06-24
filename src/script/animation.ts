@@ -1,10 +1,11 @@
 import { param, config } from './setting';
-import { ComponentType as Component, ComponentState as State } from './component';
-import { Scene } from './canvas';
+import { ComponentStructure as Structure, ComponentType as Component, ComponentState as State, ComponentCamera as Camera } from './component';
+import { Canvas, Scene } from './canvas';
+import { Play as WasmPlay } from '../wasm/pkg/wasm.js';
 
 export namespace Animation {
 	class Operation {
-		add(state1: State, state2: State): State {
+		static add(state1: State, state2: State): State {
 			return {
 				src: state1.src,
 				x: state1.x + state2.x,
@@ -22,7 +23,7 @@ export namespace Animation {
 				option: state1.option
 			};
 		}
-		diff(oldState: State, newState: State): State {
+		static diff(oldState: State, newState: State): State {
 			const durInv: number = newState.duration ? 1 / newState.duration * param.animation.skipFrame : 0;
 			return {
 				src: oldState.src,
@@ -72,16 +73,39 @@ export namespace Animation {
 		}
 	}
 
-	export class Play {
-		private op = new Operation();
+	export class Play{
+		private parent : Play;
 		private diff: Array<State>;
-		private stateLength: number;
+		private state_length: number;
 		private iteration: number = 0;
+		private target : Component
+		private param : any;
+		private config : any;
+		private canvas : any;
+		// private camera : Structure;
 
 		constructor(target: Component) {
+			this.target = target;
+			this.param = param;
+			// this.config = config;
+			// this.canvas = Canvas;
+			this.parent = this;
+			// this.camera = Scene._[target.scene].Camera.now;
+			// if(target.types ===0){
+			// }
+			// Scene._[target.scene].Images.forEach(e=>{
+			// 	this.images.push(e.className);
+			// })
+			// Scene._[target.scene].Texts.forEach(e=>{
+			// 	this.texts.push(e.className);
+			// })
+			// WasmPlay.init(this);
+			this.init(this.target);
+		}
+		init(target:Component){
 			if (target === null || target.running) return;
-			this.stateLength = target.state.length;
-			if (this.stateLength < 2) return;
+			this.state_length = target.state.length;
+			if (this.state_length < 2) return;
 			target.running = true;
 			target.transition(target.state[0]);
 			this.calcDiff(target);
@@ -89,15 +113,19 @@ export namespace Animation {
 		}
 		calcDiff(target: Component): void {
 			this.diff = [];
-			for (let [ i, l ]: Array<number> = [ 0, this.stateLength - 1 ]; i < l; i++) {
-				this.diff.push(this.op.diff(target.state[i], target.state[i + 1]));
+			for (let [ i, l ]: Array<number> = [ 0, this.state_length - 1 ]; i < l; i++) {
+				this.diff.push(Operation.diff(target.state[i], target.state[i + 1]));
 			}
 		}
 		delayStart(target: Component, frame: number): void {
-			if (frame < target.delay) {
-				window.requestAnimationFrame(() => (target.running ? this.delayStart(target, frame + 1) : null));
-			} else {
-				this.iterate(target);
+			if(target.running){
+				if (frame < target.delay) {
+					window.requestAnimationFrame(
+						() => this.delayStart(target, frame + 1)
+					);
+				} else {
+					this.iterate(target);
+				}
 			}
 		}
 		iterate(target: Component): void {
@@ -114,32 +142,41 @@ export namespace Animation {
 			}
 		}
 		shift(target: Component, endState: number): void {
-			if (endState < this.stateLength) {
-				window.requestAnimationFrame(() => (target.running ? this.move(target, 0, endState) : null));
+			if (endState < this.state_length) {
+				this.move(target, 0, endState);
+				// window.requestAnimationFrame(() => (target.running ? this.move(target, 0, endState) : null));
 			} else {
 				this.wait(target, 0);
 			}
 		}
 		wait(target: Component, frame: number): void {
-			if (frame < target.state[0].duration) {
-				window.requestAnimationFrame(() => (target.running ? this.wait(target, frame + 1) : null));
-			} else {
-				this.iterate(target);
+			if(target.running){
+				if (frame < target.state[0].duration) {
+					window.requestAnimationFrame(
+						() => this.wait(target, frame + 1)
+					);
+				} else {
+					this.iterate(target);
+				}
 			}
 		}
 		move(target: Component, frame: number, endState: number): void {
-			if (frame % param.animation.skipFrame === 0) {
-				if (frame < target.state[endState].duration) {
-					target.transition(this.op.add(target.now, this.diff[endState - 1]));
-					window.requestAnimationFrame(
-						() => (target.running ? this.move(target, frame + 1, endState) : null)
-					);
+			if(target.running){
+				if (frame % param.animation.skipFrame=== 0){
+					if (frame < target.state[endState].duration) {
+						target.transition(Operation.add(target.now, this.diff[endState - 1]));
+						window.requestAnimationFrame(
+							() => this.move(target, frame + 1, endState)
+						);
+					} else {
+						target.transition(target.state[endState]);
+						this.shift(target, endState + 1);
+					}
 				} else {
-					target.transition(target.state[endState]);
-					this.shift(target, endState + 1);
+					window.requestAnimationFrame(
+						() => this.move(target, frame + 1, endState)
+					);
 				}
-			} else {
-				window.requestAnimationFrame(() => (target.running ? this.move(target, frame + 1, endState) : null));
 			}
 		}
 	}

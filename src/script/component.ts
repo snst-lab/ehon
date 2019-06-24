@@ -1,14 +1,15 @@
 import { DOM } from './domController';
 import { param, config } from './setting';
-import { Scene } from './canvas';
-import { calcCSS } from './calculation';
+import { Canvas, Scene } from './canvas';
+import { CalcCSS } from '../wasm/pkg/wasm.js';
+// import { CalcCSS } from './calculation';
 
 namespace Component {
 	export type Type = Image | Text | Camera | Sound | null;
 
 	export class Structure {
 		scene: number;
-		type: string;
+		types: number;
 		className: string;
 		title: string;
 		touchable: boolean;
@@ -44,7 +45,7 @@ namespace Component {
 		constructor(given: Structure) {
 			super();
 			this.scene = given.scene;
-			this.type = 'camera';
+			this.types = 0;
 			this.className = given.className;
 			this.title = given.title;
 			this.touchable = true;
@@ -94,24 +95,11 @@ namespace Component {
 				option
 			};
 			Scene._[this.scene].dom.el.style.transform = `rotate(${rotate}deg)`;
-
-			[ ...Scene._[this.scene].Images, ...Scene._[this.scene].Texts ].forEach((e) => {
-				e.transition({
-					src: e.now.src,
-					x: e.now.x,
-					y: e.now.y,
-					z: e.now.z,
-					width: e.now.width,
-					aspectRatio: e.now.aspectRatio,
-					rotate: e.now.rotate,
-					scale: e.now.scale,
-					blur: e.now.blur,
-					opacity: e.now.opacity,
-					chroma: e.now.chroma,
-					light: e.now.light,
-					duration: param.animation.defaultDuration,
-					option: e.now.option
-				});
+			Scene._[this.scene].Images.forEach((e) => {
+				CalcCSS.image_transition_for_camera(e, Canvas, e.now, Scene._[this.scene].Camera.now, config, param);
+			});
+			Scene._[this.scene].Texts.forEach((e) => {
+				CalcCSS.text_transition_for_camera(e, Canvas, e.now, Scene._[this.scene].Camera.now, config, param);
 			});
 		}
 	}
@@ -120,7 +108,7 @@ namespace Component {
 		constructor(given: Structure, camera: State) {
 			super();
 			this.scene = given.scene;
-			this.type = 'image';
+			this.types = 1;
 			this.className = given.className || `img${uniqueString()}`;
 			this.title = given.title || this.className;
 			this.touchable = given.touchable;
@@ -129,22 +117,23 @@ namespace Component {
 			this.trigger = given.trigger || [];
 			this.iteration = given.iteration || 1;
 			this.delay = given.delay || 0;
+			this.running = false;
 			this.state = given.state;
 			this.now = given.state[0];
-			this.running = false;
 			this.createElement(this.className, given.state[0], camera);
+
 		}
 		createElement(className: string, given: State, camera: State): void {
 			this.element = <HTMLElement>new DOM(`
-			<div ${!config.live	?
-				`draggable="true" 
+			<div ${!config.live
+				? `draggable="true" 
 				 ondragstart="componentDragStart(event);"
 				 ondragend="componentDragEnd(event);"
 			     onclick="componentClick(event);"
 			     onmouseup="componentMouseUp(event);"`
 				: ''}
 			 class="${className} image" 
-			 style="${calcCSS.imageFloat(given, camera, this.pointer)}
+			 style="${this.float ? CalcCSS.image_float(Canvas, given, camera, config, param, this.pointer) : CalcCSS.image_fix(Canvas, given, camera, config, this.pointer) }
 			 "></div>
 			`).el;
 		}
@@ -180,9 +169,7 @@ namespace Component {
 				duration,
 				option
 			};
-			this.element.style.cssText = this.float
-				? calcCSS.imageFloat(this.now, Scene._[this.scene].Camera.now, this.pointer)
-				: calcCSS.imageFix(this.now, Scene._[this.scene].Camera.now, this.pointer);
+			CalcCSS.image_transition(this, Canvas, this.now, Scene._[this.scene].Camera.now, config, param);
 		}
 	}
 
@@ -190,7 +177,7 @@ namespace Component {
 		constructor(given: Structure, camera: State) {
 			super();
 			this.scene = given.scene;
-			this.type = 'text';
+			this.types = 2;
 			this.className = given.className || `txt${uniqueString()}`;
 			this.title = given.title || this.className;
 			this.touchable = given.touchable;
@@ -206,8 +193,8 @@ namespace Component {
 		}
 		createElement(className: string, given: State, camera: State): void {
 			this.element = <HTMLElement>new DOM(`
-			<div ${!config.live ?
-			   `draggable="true" contenteditable="false" 
+			<div ${!config.live
+				? `draggable="true" contenteditable="false" 
 				ondragstart="componentDragStart(event);"
 				ondragend="componentDragEnd(event);"
 				onclick="componentClick(event);"
@@ -215,7 +202,7 @@ namespace Component {
 				onmouseup="componentMouseUp(event);"`
 				: ''}
 			 class="${className} text" 
-			 style="${calcCSS.textFloat(given, camera, this.pointer)}
+			 style="${this.float ? CalcCSS.text_float(Canvas, given, camera, config, param, this.pointer) : CalcCSS.text_fix(Canvas, given, camera, config, this.pointer) }
 			 ">${given.src}</div>
 			`).el;
 		}
@@ -251,9 +238,7 @@ namespace Component {
 				duration,
 				option
 			};
-			this.element.style.cssText = this.float
-				? calcCSS.textFloat(this.now, Scene._[this.scene].Camera.now, this.pointer)
-				: calcCSS.textFix(this.now, Scene._[this.scene].Camera.now, this.pointer);
+			CalcCSS.text_transition(this, Canvas, this.now, Scene._[this.scene].Camera.now, config, param);
 		}
 	}
 
@@ -261,7 +246,7 @@ namespace Component {
 		constructor(given: Structure) {
 			super();
 			this.scene = given.scene;
-			this.type = 'sound';
+			this.types = 3;
 			this.className = given.className || `sound${uniqueString()}`;
 			this.title = given.title || this.className;
 			this.touchable = given.touchable;
@@ -311,7 +296,7 @@ namespace Component {
 				duration,
 				option
 			};
-			if(config.volumeOn){
+			if (config.volumeOn) {
 				const audio = <HTMLAudioElement>this.element;
 				audio.src = config.soundSrcPath + src;
 				audio.play().catch((error) => {

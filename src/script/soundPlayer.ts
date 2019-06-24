@@ -1,4 +1,4 @@
-import { param, config } from './setting';
+import { config } from './setting';
 import { ComponentType as Component } from './component';
 import { Scene } from './canvas';
 
@@ -10,7 +10,7 @@ export namespace SoundPlayer {
 				(event: PointerEvent) => {
 					if (!config.live) return;
 					event.preventDefault();
-					if ([].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1) {
+					if ([].indexOf.call(target.trigger, (<HTMLElement>event.srcElement).classList.item(0)) > -1) {
 						new SoundPlayer.Play(target);
 					}
 				},
@@ -22,7 +22,7 @@ export namespace SoundPlayer {
 					(event: PointerEvent) => {
 						if (config.live) return;
 						event.preventDefault();
-						if ([].indexOf.call(target.trigger, event.srcElement.classList.item(0)) > -1) {
+						if ([].indexOf.call(target.trigger, (<HTMLElement>event.srcElement).classList.item(0)) > -1) {
 							new SoundPlayer.Play(target);
 						}
 					},

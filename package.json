@@ -4,25 +4,24 @@
   "description": "",
   "author": "Tanusuke",
   "license": "Apache-2.0",
-  "main": "server.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/snst-lab/ehon.git"
-  },
+  "main": "index.js",
+  "repository": "git+https://github.com/snst-lab/ehon.git",
   "bugs": {
     "url": "https://github.com/snst-lab/ehon/issues"
   },
   "homepage": "https://github.com/snst-lab/ehon#readme",
   "devDependencies": {
     "app-root-path": "^2.1.0",
-    "browser-sync": "^2.26.3",
+    "browser-sync": "^2.26.5",
+    "child_process": "^1.0.2",
     "del": "^3.0.0",
-    "express": "^4.16.4",
-    "gulp": "^4.0.0",
+    "express": "^4.17.0",
+    "gulp": "^4.0.2",
     "gulp-plumber": "^1.2.1",
     "gulp-sass": "^4.0.2",
-    "ts-loader": "^5.3.3",
-    "typescript": "^3.3.3333",
+    "path": "^0.12.7",
+    "ts-loader": "^5.4.5",
+    "typescript": "^3.4.5",
     "webpack-stream": "^5.2.1"
   },
   "scripts": {
@@ -37,5 +36,5 @@
     "pull": "git pull git@github.com:snst-lab/ehon.git master --allow-unrelated-histories"
   },
   "dependencies": {},
-  "private": true
+  "private": false
 }

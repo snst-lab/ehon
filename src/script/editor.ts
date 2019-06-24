@@ -18,12 +18,12 @@ export let Active: Component = null;
 export namespace Editor {
 	export class CSS {
 		static setActiveStyle(c: Component): void {
-			if (c.type === 'sound') return;
+			if (c.types === 3 /*sound*/) return;
 			this.removeActiveStyle(c);
 			c.element.style.outlineColor = css.active.outlineColor;
 			c.element.style.outlineStyle = css.active.outlineStyle;
 			c.element.style.outlineWidth = css.active.outlineWidth;
-			if (c.type !== 'camera') {
+			if (c.types !== 0 /*not camera*/) {
 				c.element.style.resize = css.resize.resize;
 				c.element.style.overflow = css.resize.overflow;
 				c.element.style.cursor = css.resize.cursor;
@@ -52,7 +52,7 @@ export namespace Editor {
 			});
 		}
 		static removeActiveStyle(c: Component): void {
-			if (c.type === 'sound') return;
+			if (c.types === 3 /**sound */) return;
 			c.element.style.outlineColor = '';
 			c.element.style.outlineStyle = '';
 			c.element.style.outlineWidth = '';
@@ -72,9 +72,9 @@ export namespace Editor {
 	}
 
 	export class Selector {
-		private type: string | null;
+		private type: number | null;
 
-		activate(className: string, type: string): void {
+		activate(className: string, type: number): void {
 			if (config.live) return;
 
 			this.type = type;
@@ -84,7 +84,7 @@ export namespace Editor {
 				}
 			});
 			Active = this.select(className);
-			if (Active.type === 'text') {
+			if (Active.types === 2 /**text */) {
 				Active.element.contentEditable = 'true';
 			}
 			new Promise((resolve) => {
@@ -100,11 +100,11 @@ export namespace Editor {
 				//component style off
 				CSS.removeActiveStyle(Active);
 				//penetration
-				if (Active.type === 'image') {
+				if (Active.types === 1 /*image*/) {
 					Active.element.style.pointerEvents = 'none';
 					Active.pointer = 'none';
 				}
-				if (Active.type === 'text') {
+				if (Active.types === 2 /*text*/) {
 					Active.element.style.pointerEvents = 'none';
 					Active.pointer = 'none';
 					Active.element.contentEditable = 'false';
@@ -130,13 +130,13 @@ export namespace Editor {
 		}
 		select(className: string): Component {
 			switch (this.type) {
-				case 'image':
+				case 1://'image'
 					return Scene._[Scene.now].Images.filter((e) => e.className === className)[0];
-				case 'text':
+				case 2://'text'
 					return Scene._[Scene.now].Texts.filter((e) => e.className === className)[0];
-				case 'sound':
+				case 3://'sound'
 					return Scene._[Scene.now].Sounds.filter((e) => e.className === className)[0];
-				case 'camera':
+				case 0://'camera'
 					return Scene._[Scene.now].Camera;
 			}
 		}
@@ -144,7 +144,7 @@ export namespace Editor {
 
 	export class Transform {
 		translate(Active: Component, dx: number, dy: number, dz: number): void {
-			if (Active.type !== 'sound') {
+			if (Active.types !== 3 /*not sound */) {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x + dx,
@@ -166,7 +166,7 @@ export namespace Editor {
 		}
 
 		rotate(Active: Component, delta: number): void {
-			if (Active.type !== 'sound') {
+			if (Active.types !== 3 /*not sound */) {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -188,7 +188,7 @@ export namespace Editor {
 		}
 
 		scale(Active: Component, delta: number): void {
-			if (Active.type === 'image' || Active.type === 'text') {
+			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -210,7 +210,7 @@ export namespace Editor {
 		}
 
 		blur(Active: Component, delta: number): void {
-			if (Active.type === 'image' || Active.type === 'text') {
+			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -232,7 +232,7 @@ export namespace Editor {
 		}
 
 		opacity(Active: Component, delta: number): void {
-			if (Active.type === 'image' || Active.type === 'text') {
+			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -253,7 +253,7 @@ export namespace Editor {
 			}
 		}
 		chroma(Active: Component, delta: number): void {
-			if (Active.type === 'image' || Active.type === 'text') {
+			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -274,7 +274,7 @@ export namespace Editor {
 			}
 		}
 		light(Active: Component, delta: number): void {
-			if (Active.type === 'image' || Active.type === 'text') {
+			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
 				const state: State = {
 					src: Active.now.src,
 					x: Active.now.x,
@@ -304,20 +304,20 @@ export namespace Editor {
 				x: param.camera.initialX,
 				y: param.camera.initialY,
 				z: param.camera.initialZ,
-				width: null,
-				aspectRatio: null,
+				width: 0,
+				aspectRatio: 0,
 				rotate: 0,
-				scale: null,
-				blur: null,
-				opacity: null,
-				chroma: null,
-				light: null,
+				scale: 0,
+				blur: 0,
+				opacity: 0,
+				chroma: 0,
+				light: 0,
 				duration: param.animation.defaultDuration,
 				option: ''
 			};
 			const camera = new Camera({
 				scene: num,
-				type: 'camera',
+				types: 0, //camera
 				className: 'camera',
 				title: 'Camera',
 				touchable: true,
@@ -340,19 +340,20 @@ export namespace Editor {
 			const y: number = Y / (Canvas.element.offsetHeight + Canvas.element.offsetTop) * 100;
 
 			if (/.png|.gif|.jpg|jpeg|.PNG|.GIF|.JPG|.JPEG|.svg|.SVG$/.test(file.name)) {
-				this.CanvasDropComponent(x, y, 'image', file, null);
+				this.CanvasDropComponent(x, y, 1, file, null);
 			} else if (/.wav|.mp3|.ogg$/.test(file.name)) {
-				this.CanvasDropComponent(x, y, 'sound', file, null);
+				this.CanvasDropComponent(x, y, 3, file, null);
 			} else {
-				this.CanvasDropComponent(x, y, 'text', file, null);
+				this.CanvasDropComponent(x, y, 2, file, null);
 			}
 		}
-		CanvasDropComponent(x: number, y: number, type: string, file: File, given: Component): void {
+		CanvasDropComponent(x: number, y: number, types: number, file: File, given: Component): void {
 			let struct: Struct;
 			let state0: State;
 			let component: Component;
 			if (given === null) {
-				if (type !== 'sound') {
+				if (types !== 3 /**not sound*/) {
+					let type  =  1 ? 'image' : 'text';
 					state0 = {
 						src: file.name,
 						x:
@@ -397,7 +398,7 @@ export namespace Editor {
 				}
 				struct = {
 					scene: Scene.now,
-					type: type,
+					types: types,
 					className: null,
 					title: null,
 					touchable: true,
@@ -430,7 +431,7 @@ export namespace Editor {
 				};
 				struct = {
 					scene: given.scene,
-					type: type,
+					types: types,
 					className: null,
 					title: given.title,
 					touchable: true,
@@ -445,36 +446,46 @@ export namespace Editor {
 					element: null
 				};
 			}
-			if (type === 'image') {
+			if (types === 1/**image*/) {
 				component = new Image(struct, Scene._[Scene.now].Camera.now);
 				Scene._[Scene.now].Images.push(component);
 				Scene._[Scene.now].dom.append(component.element);
-				EditorSelector.activate(component.className, 'image');
-			} else if (type === 'text') {
+				EditorSelector.activate(component.className, 1);
+			} else if (types === 2/**text*/) {
 				component = new Text(struct, Scene._[Scene.now].Camera.now);
 				Scene._[Scene.now].Texts.push(component);
 				Scene._[Scene.now].dom.append(component.element);
-				EditorSelector.activate(component.className, 'text');
-			} else if (type === 'sound') {
+				EditorSelector.activate(component.className, 2);
+			} else if (types === 3 /**sound*/) {
 				component = new Sound(struct);
 				Scene._[Scene.now].Sounds.push(component);
 				Scene._[Scene.now].dom.append(component.element);
-				EditorSelector.activate(component.className, 'sound');
+				EditorSelector.activate(component.className, 3);
 				new SoundPlayer.Register(Active);
 			}
 			Keyframe.render();
 			Layer.render(EditorSelector);
 			Trigger.render();
 		}
-		ComponentClick(className: string, type: string): void {
-			EditorSelector.activate(className, type);
+		ComponentClick(className: string, type: String): void {
+			switch(type){
+				case 'camera' :
+					EditorSelector.activate(className, 0);
+					break;
+				case 'image' :
+					EditorSelector.activate(className, 1);
+					break;
+				case 'text' :
+					EditorSelector.activate(className, 2);
+					break;
+			}
 		}
 		CameraClick(className: string): void {
 			EditorSelector.recover();
-			EditorSelector.activate(className, 'camera');
+			EditorSelector.activate(className, 0);
 		}
 		PushStateClick(): void {
-			if (Active.type !== 'sound') {
+			if (Active.types !== 3 /*sound*/) {
 				if (Active.state.length === 1){
 					new Animation.Register(Active);
 				}
@@ -501,7 +512,7 @@ export namespace Editor {
 			}
 		}
 		PlayClick(): void {
-			if (Active.type !== 'sound') {
+			if (Active.types !== 3  /*sound*/) {
 				new Animation.Play(Active);
 			} else {
 				if (Active.running) {

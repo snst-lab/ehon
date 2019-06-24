@@ -71,23 +71,36 @@ export namespace Scene {
 	}
 	export function change(num: number): void {
 		if (Scene.now < num && num < Scene._.length) {
+			[ Scene._[Scene.now].Camera, ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((c) => {
+				c.running == false;
+			});
 			[ Scene._[num].Camera, ...Scene._[num].Images, ...Scene._[num].Texts ].forEach((c) => {
+				c.running == false;
 				c.transition(c.state[0]);
 			});
 			forwardEffect(Scene.now, num);
 			Scene.now = num;
+
 		} else if (Scene.now < num && num >= Scene._.length) {
+			[ Scene._[Scene.now].Camera, ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((c) => {
+				c.running == false;
+			});
 			[ Scene._[0].Camera, ...Scene._[0].Images, ...Scene._[0].Texts ].forEach((c) => {
 				c.transition(c.state[0]);
 			});
 			forwardEffect(Scene.now, 0);
 			Scene.now = 0;
-		} else if (0 <= num && num < Scene.now) {
+		
+		} else if (0 <= num && num < Scene.now) {	
+			[ Scene._[Scene.now].Camera, ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((c) => {
+				c.running == false;
+			});
 			[ Scene._[num].Camera, ...Scene._[num].Images, ...Scene._[num].Texts ].forEach((c) => {
 				c.transition(c.state[0]);
 			});
 			backEffect(Scene.now, num);
 			Scene.now = num;
+
 		} else if (num < 0) {
 			return;
 		}

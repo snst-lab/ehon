@@ -401,8 +401,8 @@ namespace EventListener {
 				if (Active === null) return;
 				event.preventDefault();
 				Active.float = document['active'].float.checked;
-				Active.now.x = 50 - 0.5 * Active.now.width;
-				Active.now.y = 50 - 0.5 * Active.now.width * Active.now.aspectRatio;
+				// Active.now.x =  50- 0.5 * Active.now.width;
+				// Active.now.y =  50- 0.5 * Active.now.width * Active.now.aspectRatio;
 				Active.transition(Active.now);
 			});
 		}
@@ -467,7 +467,7 @@ namespace EventListener {
 			});
 			Object.defineProperty(window, 'componentBlur', {
 				value: function(event: PointerEvent): void {
-					if (config.live || Active.type !== 'text') return;
+					if (config.live || Active.types !==2 /**not text*/) return;
 					event.preventDefault();
 					Active.now.src =  (<HTMLElement>event.srcElement).textContent;
 					Active.transition(Active.now);
@@ -500,7 +500,7 @@ namespace EventListener {
 						(event.clientY - dragStartPosition.y) * 100 / Canvas.element.offsetHeight * correctXY;
 
 					if (keyDown === 'ctrl') {
-						editor.CanvasDropComponent(Active.now.x + dx, Active.now.y + dy, Active.type, null, Active);
+						editor.CanvasDropComponent(Active.now.x + dx, Active.now.y + dy, Active.types, null, Active);
 					} else {
 						transform.translate(Active, dx, dy, 0);
 					}

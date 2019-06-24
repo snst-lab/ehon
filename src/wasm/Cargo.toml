@@ -1,0 +1,33 @@
+[package]
+name = "wasm"
+version = "0.1.0"
+authors = ["snst.lab <snst.lab@gmail.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "rlib","staticlib"]
+
+[dependencies]
+futures = "0.1.26"
+wasm-bindgen-futures = "0.3.22"
+lazy_static = "0.2.1"
+js-sys = "0.3.21"
+serde = "^1.0.59"
+serde_json = "^1.0"
+serde_derive = "^1.0.59"
+json = "^ 0.11.14"
+
+[dependencies.wasm-bindgen]
+version = "0.2.45"
+features = ["serde-serialize"]
+
+[dependencies.web-sys]
+version = "0.3.4"
+features = [
+  'Document',
+  'Element',
+  'HtmlElement',
+  'Node',
+  'Window',
+  'CssStyleDeclaration',
+]
