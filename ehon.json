@@ -38,7 +38,7 @@
 			"blur": 0.01
 		},
 		"animation": {
-			"skipFrame": 2,
+			"skipFrame": 3,
 			"defaultDuration": 30
 		}
 	},

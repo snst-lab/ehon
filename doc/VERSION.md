@@ -59,6 +59,14 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 
 
 >### Patch
+### Version 0.13.x
+<details open>
+<summary>1</summary>
+
+- improve: improve tslint.json <br>
+- refactor: code splitting of wasm files
+</details>
+
 ### Version 0.12.x
 <details open>
 <summary>1</summary>

@@ -1,4 +1,5 @@
 @import "mixin";
+@import "font";
 @import "color";
 @import "size";
 @import "component";
@@ -302,6 +303,7 @@ footer {
 			height: 1.2rem;
 			font-weight: bold;
 			margin: 0 0 0 2em;
+			white-space: nowrap;
 			overflow: hidden;
 		}
 	}
@@ -495,7 +497,7 @@ footer {
 .paper {
 	position: fixed;
 	left: 0;
-	margin: 1.2rem 0 0 0;
+	margin: 0 0 0 0;
 	background: linear-gradient(to right,
 		transparent 0%,
 		rgb(200, 200, 200) calc(50% - 1px),

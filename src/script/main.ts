@@ -1,30 +1,18 @@
 import { EventListen } from './eventListener';
 import { Render } from './renderer';
 import { readSetting } from './setting';
-import { default as init ,Console } from '../wasm/pkg/wasm.js';
+import { default as init } from '../wasm/pkg/wasm.js';
 
-namespace Main {
-	interface AttrJS{
-		x:number,
-		y:number,
-		z:number
-	}
-	class Start{
-		constructor(){
-			(async()=>{
-				await init('./src/wasm/pkg/wasm_bg.wasm');
-				await readSetting()
-				.then(() => {
-					return new Render().start();
+(async() => {
+		await init('./src/wasm/pkg/wasm_bg.wasm');
+		await readSetting()
+				.then(async() => {
+						await new Render().start().catch((error: Error) => console.log(error));
+				}).then(async() => {
+						await new EventListen().start().catch((error: Error) => console.log(error));
 				})
-				.then(() => {
-					new EventListen().start();
-				})
-				.catch((error) => {
-					console.log(error);
+				.catch((error: Error) => {
+						console.log(error);
 				});
-			})();
-		}
-	}
-	new Start();
-}
+})().catch((error: Error) => console.log(error));
+

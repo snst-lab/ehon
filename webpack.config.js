@@ -1,8 +1,8 @@
 const path = require('path');
 
 module.exports = {
-    // mode: 'production',
-    mode: 'development',
+    mode: 'production',
+    // mode: 'development',
     entry: './src/script/main.ts',
     output: {
       path: path.resolve(__dirname, "build/script"),

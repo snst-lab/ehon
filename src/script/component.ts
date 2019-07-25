@@ -1,47 +1,53 @@
-import { DOM } from './domController';
+import { DOM, DOMType } from './domController';
 import { param, config } from './setting';
 import { Canvas, Scene } from './canvas';
 import { CalcCSS } from '../wasm/pkg/wasm.js';
 // import { CalcCSS } from './calculation';
 
-namespace Component {
-	export type Type = Image | Text | Camera | Sound | null;
-
+export namespace Component {
+	export type Type = Image | Text | Camera | Sound;
+	/**
+	 * ### Component.Structure
+	 *  Common structure of Camera, Image, Text, Sound objects
+	 */
 	export class Structure {
-		scene: number;
-		types: number;
-		className: string;
-		title: string;
-		touchable: boolean;
-		pointer: string;
-		float: boolean;
-		trigger: Array<string>;
-		delay: number;
-		iteration: number;
-		state: Array<State>;
-		now: State;
-		running: boolean;
-		element: HTMLElement | HTMLAudioElement;
+		public scene: number;
+		public types: number;
+		public className: string;
+		public title: string;
+		public touchable: boolean;
+		public pointer: string;
+		public float: boolean;
+		public trigger: string[];
+		public delay: number;
+		public iteration: number;
+		public state: State[];
+		public now: State;
+		public running: boolean;
+		public element: HTMLElement | HTMLAudioElement | null;
 	}
 
 	export interface State {
-		src: string | null;
-		x: number | null;
-		y: number | null;
-		z: number | null;
-		width: number | null;
-		aspectRatio: number | null;
-		rotate: number | null;
-		scale: number | null;
-		blur: number | null;
-		opacity: number | null;
-		chroma: number | null;
-		light: number | null;
-		duration: number | null;
-		option: string | null;
+		src: string;
+		x: number;
+		y: number;
+		z: number;
+		width: number;
+		aspectRatio: number;
+		rotate: number;
+		scale: number;
+		blur: number;
+		opacity: number;
+		chroma: number;
+		light: number;
+		duration: number;
+		option: string;
 	}
-
-	export class Camera extends Component.Structure {
+	/**
+	 * ### Component.Camera
+	 *  Definition of Camera component (1 camera per scene)
+	 */
+	export class Camera extends Structure {
 		constructor(given: Structure) {
 			super();
 			this.scene = given.scene;
@@ -55,14 +61,14 @@ namespace Component {
 			this.touchable = true;
 			this.float = true;
 			this.trigger = given.trigger || [];
-			this.iteration = given.iteration || 1;
+			this.iteration = given.iteration;
 			this.delay = given.delay || 0;
 			this.state = given.state;
 			this.now = given.state[0];
 			this.running = false;
 			this.element = document.querySelector('.camera');
 		}
-		transition({
+		public transition({
 			src,
 			x,
 			y,
@@ -94,17 +100,21 @@ namespace Component {
 				duration,
 				option
 			};
-			Scene._[this.scene].dom.el.style.transform = `rotate(${rotate}deg)`;
-			Scene._[this.scene].Images.forEach((e) => {
-				CalcCSS.image_transition_for_camera(e, Canvas, e.now, Scene._[this.scene].Camera.now, config, param);
+			((Scene._[this.scene].dom as DOMType).el as HTMLElement).style.transform = `rotate(${rotate}deg)`;
+			Scene._[this.scene].Images.forEach((e: Type) => {
+				CalcCSS.image_transition_for_camera(e, Canvas, e.now, Scene._[this.scene].Camera.now, param);
 			});
-			Scene._[this.scene].Texts.forEach((e) => {
-				CalcCSS.text_transition_for_camera(e, Canvas, e.now, Scene._[this.scene].Camera.now, config, param);
+			Scene._[this.scene].Texts.forEach((e: Type) => {
+				CalcCSS.text_transition_for_camera(e, Canvas, e.now, Scene._[this.scene].Camera.now, param);
 			});
 		}
 	}
-
-	export class Image extends Component.Structure {
+	/**
+	 * ### Component.Image
+	 *  Definition of Image component include HTMLElement
+	 * The constructor generates a new image
+	 */
+	export class Image extends Structure {
 		constructor(given: Structure, camera: State) {
 			super();
 			this.scene = given.scene;
@@ -115,7 +125,7 @@ namespace Component {
 			this.pointer = this.touchable ? 'auto' : 'none';
 			this.float = given.float;
 			this.trigger = given.trigger || [];
-			this.iteration = given.iteration || 1;
+			this.iteration = given.iteration;
 			this.delay = given.delay || 0;
 			this.running = false;
 			this.state = given.state;
@@ -123,21 +133,21 @@ namespace Component {
 			this.createElement(this.className, given.state[0], camera);
 
 		}
-		createElement(className: string, given: State, camera: State): void {
-			this.element = <HTMLElement>new DOM(`
+		public createElement(className: string, given: State, camera: State): void {
+			this.element = new DOM(`
 			<div ${!config.live
-				? `draggable="true" 
+					? `draggable="true"
 				 ondragstart="componentDragStart(event);"
 				 ondragend="componentDragEnd(event);"
 			     onclick="componentClick(event);"
 			     onmouseup="componentMouseUp(event);"`
-				: ''}
-			 class="${className} image" 
-			 style="${this.float ? CalcCSS.image_float(Canvas, given, camera, config, param, this.pointer) : CalcCSS.image_fix(Canvas, given, camera, config, this.pointer) }
+					: ''}
+			 class="${className} image"
+			 style="${this.float ? CalcCSS.image_float(Canvas, given, camera, config, param, this.pointer) : CalcCSS.image_fix(Canvas, given, camera, config, this.pointer)}
 			 "></div>
-			`).el;
+			`).el as HTMLElement;
 		}
-		transition({
+		public transition({
 			src,
 			x,
 			y,
@@ -172,8 +182,12 @@ namespace Component {
 			CalcCSS.image_transition(this, Canvas, this.now, Scene._[this.scene].Camera.now, config, param);
 		}
 	}
-
-	export class Text extends Component.Structure {
+	/**
+	 * ### Component.Text
+	 *  Definition of Text component include HTMLElement
+	 * The constructor generates a new text
+	 */
+	export class Text extends Structure {
 		constructor(given: Structure, camera: State) {
 			super();
 			this.scene = given.scene;
@@ -184,29 +198,30 @@ namespace Component {
 			this.pointer = this.touchable ? 'auto' : 'none';
 			this.float = given.float;
 			this.trigger = given.trigger || [];
-			this.iteration = given.iteration || 1;
+			this.iteration = given.iteration;
 			this.delay = given.delay || 0;
 			this.state = given.state;
 			this.now = given.state[0];
 			this.running = false;
 			this.createElement(this.className, given.state[0], camera);
 		}
-		createElement(className: string, given: State, camera: State): void {
-			this.element = <HTMLElement>new DOM(`
+		public createElement(className: string, given: State, camera: State): void {
+			this.element = new DOM(`
 			<div ${!config.live
-				? `draggable="true" contenteditable="false" 
+					? `draggable="true" contenteditable="false"
 				ondragstart="componentDragStart(event);"
 				ondragend="componentDragEnd(event);"
 				onclick="componentClick(event);"
 				onblur="componentBlur(event);"
-				onmouseup="componentMouseUp(event);"`
-				: ''}
-			 class="${className} text" 
-			 style="${this.float ? CalcCSS.text_float(Canvas, given, camera, config, param, this.pointer) : CalcCSS.text_fix(Canvas, given, camera, config, this.pointer) }
+				onmouseup="componentMouseUp(event);"
+				onresize="componentResize(event);"`
+					: ''}
+			 class="${className} text"
+			 style="${this.float ? CalcCSS.text_float(Canvas, given, camera, param, this.pointer) : CalcCSS.text_fix(Canvas, given, camera, this.pointer)}
 			 ">${given.src}</div>
-			`).el;
+			`).el as HTMLElement;
 		}
-		transition({
+		public transition({
 			src,
 			x,
 			y,
@@ -238,11 +253,15 @@ namespace Component {
 				duration,
 				option
 			};
-			CalcCSS.text_transition(this, Canvas, this.now, Scene._[this.scene].Camera.now, config, param);
+			CalcCSS.text_transition(this, Canvas, this.now, Scene._[this.scene].Camera.now, param);
 		}
 	}
-
-	export class Sound extends Component.Structure {
+	/**
+	 * ### Component.Sound
+	 *  Definition of Sound component include HTMLAudioElement
+	 * The constructor generates a new sound
+	 */
+	export class Sound extends Structure {
 		constructor(given: Structure) {
 			super();
 			this.scene = given.scene;
@@ -253,18 +272,18 @@ namespace Component {
 			this.pointer = 'auto';
 			this.float = given.float;
 			this.trigger = given.trigger || [];
-			this.iteration = given.iteration || 1;
+			this.iteration = given.iteration;
 			this.delay = given.delay || 0;
 			this.state = given.state;
 			this.now = given.state[0];
 			this.running = false;
 			this.createElement(this.className);
 		}
-		createElement(className: string): void {
-			this.element = new Audio(config.soundSrcPath + this.state[0].src);
+		public createElement(className: string): void {
+			this.element = new Audio(config.soundSrcPath as string + this.state[0].src);
 			this.element.className = className;
 		}
-		transition({
+		public transition({
 			src,
 			x,
 			y,
@@ -297,21 +316,26 @@ namespace Component {
 				option
 			};
 			if (config.volumeOn) {
-				const audio = <HTMLAudioElement>this.element;
-				audio.src = config.soundSrcPath + src;
-				audio.play().catch((error) => {
+				const audio: HTMLAudioElement = this.element as HTMLAudioElement;
+				audio.src = config.soundSrcPath as string + src;
+				audio.play().catch((error: Error) => {
 					console.log(error);
 				});
 			}
 		}
 	}
-	const uniqueString = (): string =>
-		new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
+	const uniqueString: () => string = (): string =>
+		// tslint:disable-next-line: restrict-plus-operands
+		new Date().getTime().toString(16) + ~~(Math.random() * 1000).toString(16);
 }
 export type ComponentType = Component.Type;
 export type ComponentState = Component.State;
 export type ComponentStructure = Component.Structure;
+// tslint:disable-next-line:typedef
 export const ComponentCamera = Component.Camera;
+// tslint:disable-next-line:typedef
 export const ComponentImage = Component.Image;
+// tslint:disable-next-line:typedef
 export const ComponentText = Component.Text;
+// tslint:disable-next-line:typedef
 export const ComponentSound = Component.Sound;

@@ -1,4 +1,29 @@
 @charset "UTF-8";
+@font-face {
+  font-family: "あずきフォント";
+  src: url("../../assets/font/azukifont.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "あずきフォントP";
+  src: url("../../assets/font/azukifontP.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "あずきフォントB";
+  src: url("../../assets/font/azukifontB.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "うずらフォント";
+  src: url("../../assets/font/uzurafont.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "かわいいフォント";
+  src: url("../../assets/font/kawaiifont.woff2") format("woff2");
+}
+
 section {
   position: relative;
   box-sizing: border-box;
@@ -567,6 +592,7 @@ footer.footer-edit {
   height: 1.2rem;
   font-weight: bold;
   margin: 0 0 0 2em;
+  white-space: nowrap;
   overflow: hidden;
 }
 
@@ -738,7 +764,7 @@ footer.footer-edit {
 .paper {
   position: fixed;
   left: 0;
-  margin: 1.2rem 0 0 0;
+  margin: 0 0 0 0;
   background: linear-gradient(to right, transparent 0%, #c8c8c8 calc(50% - 1px), #b4b4b4 50%, #c8c8c8 calc(50% + 1px), transparent 100%);
   filter: opacity(0%);
   transition: 0.5s;

@@ -1,70 +1,77 @@
-import { param, config } from './setting';
-import { ComponentStructure as Structure, ComponentType as Component, ComponentState as State, ComponentCamera as Camera } from './component';
-import { Canvas, Scene } from './canvas';
-import { Play as WasmPlay } from '../wasm/pkg/wasm.js';
+import { config, param } from './setting';
+import { ComponentType as Component, ComponentState as State } from './component';
+import { Scene } from './canvas';
+import { DOMType } from './domController';
+// import { Play as WasmPlay } from '../wasm/pkg/wasm.js';
 
 export namespace Animation {
+	/** ### Animation.Operation
+	 *   Define numerical operations of State Type
+	 */
 	class Operation {
-		static add(state1: State, state2: State): State {
+		public static add(state1: State, state2: State): State {
 			return {
-				src: state1.src,
-				x: state1.x + state2.x,
-				y: state1.y + state2.y,
-				z: state1.z + state2.z,
-				width: state1.width + state2.width,
-				aspectRatio: state1.aspectRatio + state2.aspectRatio,
-				rotate: state1.rotate + state2.rotate,
-				scale: state1.scale + state2.scale,
-				blur: state1.blur + state2.blur,
-				opacity: state1.opacity + state2.opacity,
-				chroma: state1.chroma + state2.chroma,
-				light: state1.light + state2.light,
-				duration: state1.duration,
-				option: state1.option
+				'src': state1.src,
+				'x': state1.x + state2.x,
+				'y': state1.y + state2.y,
+				'z': state1.z + state2.z,
+				'width': state1.width + state2.width,
+				'aspectRatio': state1.aspectRatio + state2.aspectRatio,
+				'rotate': state1.rotate + state2.rotate,
+				'scale': state1.scale + state2.scale,
+				'blur': state1.blur + state2.blur,
+				'opacity': state1.opacity + state2.opacity,
+				'chroma': state1.chroma + state2.chroma,
+				'light': state1.light + state2.light,
+				'duration': state1.duration,
+				'option': state1.option
 			};
 		}
-		static diff(oldState: State, newState: State): State {
-			const durInv: number = newState.duration ? 1 / newState.duration * param.animation.skipFrame : 0;
+		public static diff(oldState: State, newState: State): State {
+			const durInv: number = newState.duration > 0 ? 1 / newState.duration * param.animation.skipFrame : 0;
+
 			return {
-				src: oldState.src,
-				x: (newState.x - oldState.x) * durInv,
-				y: (newState.y - oldState.y) * durInv,
-				z: (newState.z - oldState.z) * durInv,
-				width: (newState.width - oldState.width) * durInv,
-				aspectRatio: (newState.aspectRatio - oldState.aspectRatio) * durInv,
-				rotate: (newState.rotate - oldState.rotate) * durInv,
-				scale: (newState.scale - oldState.scale) * durInv,
-				blur: (newState.blur - oldState.blur) * durInv,
-				opacity: (newState.opacity - oldState.opacity) * durInv,
-				chroma: (newState.chroma - oldState.chroma) * durInv,
-				light: (newState.light - oldState.light) * durInv,
-				duration: oldState.duration,
-				option: oldState.option
+				'src': oldState.src,
+				'x': (newState.x - oldState.x) * durInv,
+				'y': (newState.y - oldState.y) * durInv,
+				'z': (newState.z - oldState.z) * durInv,
+				'width': (newState.width - oldState.width) * durInv,
+				'aspectRatio': (newState.aspectRatio - oldState.aspectRatio) * durInv,
+				'rotate': (newState.rotate - oldState.rotate) * durInv,
+				'scale': (newState.scale - oldState.scale) * durInv,
+				'blur': (newState.blur - oldState.blur) * durInv,
+				'opacity': (newState.opacity - oldState.opacity) * durInv,
+				'chroma': (newState.chroma - oldState.chroma) * durInv,
+				'light': (newState.light - oldState.light) * durInv,
+				'duration': oldState.duration,
+				'option': oldState.option
 			};
 		}
 	}
-
+	/** ### Animation.Register
+	 *   Register animation to HTML elements
+	 */
 	export class Register {
 		constructor(target: Component) {
-			Scene._[target.scene].dom.el.addEventListener(
+			(Scene._[target.scene].dom as DOMType).el.addEventListener(
 				'touchend',
 				(event: PointerEvent) => {
-					if (!config.live) return;
+					if (!(config.live as boolean)) return;
 					event.preventDefault();
-					if ([].indexOf.call(target.trigger, (<HTMLElement>event.srcElement).classList.item(0)) > -1) {
-						new Animation.Play(target);
+					if ([].indexOf.call(target.trigger, (event.srcElement as HTMLElement).classList.item(0)) as number > -1) {
+						new Play(target);
 					}
 				},
 				false
 			);
-			if (!config.live) {
-				Scene._[target.scene].dom.el.addEventListener(
+			if (!(config.live as boolean)) {
+				(Scene._[target.scene].dom as DOMType).el.addEventListener(
 					'contextmenu',
 					(event: PointerEvent) => {
-						if (config.live) return;
+						if (config.live as boolean) return;
 						event.preventDefault();
-						if ([].indexOf.call(target.trigger, (<HTMLElement>event.srcElement).classList.item(0)) > -1) {
-							new Animation.Play(target);
+						if ([].indexOf.call(target.trigger, (event.srcElement as HTMLElement).classList.item(0)) as number > -1) {
+							new Play(target);
 						}
 					},
 					false
@@ -72,114 +79,109 @@ export namespace Animation {
 			}
 		}
 	}
-
-	export class Play{
-		private parent : Play;
-		private diff: Array<State>;
+	/** ### Animation.Play
+	 *   Play animation of HTML Elements using requestAnimationFrame
+	 */
+	export class Play {
+		// private parent: Play;
+		private diff: State[];
 		private state_length: number;
 		private iteration: number = 0;
-		private target : Component
-		private param : any;
-		private config : any;
-		private canvas : any;
-		// private camera : Structure;
+		private target: Component;
+		private param: { [key: string]: { [key: string]: number } };
 
 		constructor(target: Component) {
 			this.target = target;
 			this.param = param;
-			// this.config = config;
-			// this.canvas = Canvas;
-			this.parent = this;
-			// this.camera = Scene._[target.scene].Camera.now;
-			// if(target.types ===0){
-			// }
-			// Scene._[target.scene].Images.forEach(e=>{
-			// 	this.images.push(e.className);
-			// })
-			// Scene._[target.scene].Texts.forEach(e=>{
-			// 	this.texts.push(e.className);
-			// })
-			// WasmPlay.init(this);
-			this.init(this.target);
+			// this.parent = this; WasmPlay.init(this);
+			this.init();
 		}
-		init(target:Component){
-			if (target === null || target.running) return;
-			this.state_length = target.state.length;
+		private init(): void {
+			if (this.target.running) return;
+			this.state_length = this.target.state.length;
 			if (this.state_length < 2) return;
-			target.running = true;
-			target.transition(target.state[0]);
-			this.calcDiff(target);
-			this.delayStart(target, 0);
+			this.target.running = true;
+			this.target.transition(this.target.state[0]);
+			this.calcDiff();
+			this.delayStart(0);
 		}
-		calcDiff(target: Component): void {
+		private calcDiff(): void {
 			this.diff = [];
-			for (let [ i, l ]: Array<number> = [ 0, this.state_length - 1 ]; i < l; i++) {
-				this.diff.push(Operation.diff(target.state[i], target.state[i + 1]));
+			for (let [i, l]: number[] = [0, this.state_length - 1]; i < l; i++) {
+				this.diff.push(Operation.diff(this.target.state[i], this.target.state[i + 1]));
 			}
 		}
-		delayStart(target: Component, frame: number): void {
-			if(target.running){
-				if (frame < target.delay) {
+		private delayStart(frame: number): void {
+			if (this.target.running) {
+				if (frame < this.target.delay) {
 					window.requestAnimationFrame(
-						() => this.delayStart(target, frame + 1)
+						() => this.delayStart(frame + 1)
 					);
 				} else {
-					this.iterate(target);
+					this.iterate();
 				}
 			}
 		}
-		iterate(target: Component): void {
-			if (this.iteration === 0) {
-				this.iteration += 1;
-				this.shift(target, 1);
-			} else if (this.iteration > 0 && this.iteration < target.iteration) {
-				target.transition(target.state[0]);
-				this.iteration += 1;
-				this.shift(target, 1);
+		private iterate(): void {
+			if (this.target.iteration === 0) {
+				this.target.transition(this.target.state[0]);
+				this.shift(1);
 			} else {
-				this.iteration = 0;
-				target.running = false;
+				if (this.iteration === 0) {
+					this.iteration += 1;
+					this.shift(1);
+
+				} else if (this.iteration > 0 && this.iteration < this.target.iteration) {
+					this.target.transition(this.target.state[0]);
+					this.iteration += 1;
+					this.shift(1);
+
+				} else {
+					this.iteration = 0;
+					this.target.running = false;
+				}
 			}
 		}
-		shift(target: Component, endState: number): void {
+		private shift(endState: number): void {
 			if (endState < this.state_length) {
-				this.move(target, 0, endState);
-				// window.requestAnimationFrame(() => (target.running ? this.move(target, 0, endState) : null));
+				this.move(0, endState);
 			} else {
-				this.wait(target, 0);
+				this.wait(0);
 			}
 		}
-		wait(target: Component, frame: number): void {
-			if(target.running){
-				if (frame < target.state[0].duration) {
+		private wait(frame: number): void {
+			if (this.target.running) {
+				if (frame < this.target.state[0].duration) {
 					window.requestAnimationFrame(
-						() => this.wait(target, frame + 1)
+						() => this.wait(frame + 1)
 					);
 				} else {
-					this.iterate(target);
+					this.iterate();
 				}
 			}
 		}
-		move(target: Component, frame: number, endState: number): void {
-			if(target.running){
-				if (frame % param.animation.skipFrame=== 0){
-					if (frame < target.state[endState].duration) {
-						target.transition(Operation.add(target.now, this.diff[endState - 1]));
+		private move(frame: number, endState: number): void {
+			if (this.target.running) {
+				if (frame % this.param.animation.skipFrame === 0) {
+					if (frame < this.target.state[endState].duration) {
+						this.target.transition(Operation.add(this.target.now, this.diff[endState - 1]));
 						window.requestAnimationFrame(
-							() => this.move(target, frame + 1, endState)
+							() => this.move(frame + 1, endState)
 						);
 					} else {
-						target.transition(target.state[endState]);
-						this.shift(target, endState + 1);
+						this.target.transition(this.target.state[endState]);
+						this.shift(endState + 1);
 					}
 				} else {
 					window.requestAnimationFrame(
-						() => this.move(target, frame + 1, endState)
+						() => this.move(frame + 1, endState)
 					);
 				}
 			}
 		}
 	}
 }
+// tslint:disable-next-line:typedef
 export const AnimationRegister = Animation.Register;
+// tslint:disable-next-line:typedef
 export const AnimationPlay = Animation.Play;

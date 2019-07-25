@@ -1,34 +1,45 @@
 import { config } from './setting';
-import { DOM, DOMX } from './domController';
+import { DOM, DOMX, DOMType, DOMExt } from './domController';
+import { ComponentType } from './component';
 
 export namespace Canvas {
 	export const className: string = 'canvas';
-	export const dom = new DOMX('.' + className);
-	export const element: HTMLElement = <HTMLElement>dom.el;
+	export const dom: DOMExt = new DOMX('.' + className);
+	export const element: HTMLElement = dom.el as HTMLElement;
 	export const z: number = Number(element.style.zIndex);
 	export let aspectRatio: number = element.offsetHeight / element.offsetWidth;
-	export const paper: HTMLElement = <HTMLElement>document.querySelector('.paper');
-	export const paperSound: HTMLAudioElement = <HTMLAudioElement>document.querySelector('.paper-sound');
+	export const paper: HTMLElement = document.querySelector('.paper');
+	export const paperSound: HTMLAudioElement = document.querySelector('.paper-sound');
+}
+
+export interface CanvasType {
+	className: string;
+	dom: DOMType;
+	element: HTMLElement;
+	z: number;
+	aspectRatio: number;
+	paper: HTMLElement;
+	paperSound: HTMLAudioElement;
 }
 
 export namespace Frame {
-	export const header: HTMLElement = <HTMLElement>document.querySelector('header');
-	export const headerTitle: HTMLElement = <HTMLElement>document.querySelector('.header-title');
-	export const headerPage: HTMLElement = <HTMLElement>document.querySelector('.header-page');
-	export const footer: HTMLElement = <HTMLElement>document.querySelector('footer');
-	export const volume: HTMLElement = <HTMLElement>document.querySelector('.volume');
+	export const header: HTMLElement = document.querySelector('header');
+	export const headerTitle: HTMLElement = document.querySelector('.header-title');
+	export const headerPage: HTMLElement = document.querySelector('.header-page');
+	export const footer: HTMLElement = document.querySelector('footer');
+	export const volume: HTMLElement = document.querySelector('.volume');
 
-	export function show() {
+	export function show(): void {
 		header.style.top = '0';
 	}
-	export function hide() {
+	export function hide(): void {
 		if (!config.live) return;
 		(function update(frame: number): void {
 			switch (frame) {
 				case 120:
 					if (!config.live) return;
 					header.style.top = '-5vh';
-					return;
+				// tslint:disable-next-line: no-switch-case-fall-through
 				default:
 					break;
 			}
@@ -36,89 +47,95 @@ export namespace Frame {
 		})(0);
 	}
 
-	export function volumeOn() {
+	export function volumeOn(): void {
 		config.volumeOn = true;
 		volume.textContent = 'volume_up';
 	}
-	export function volumeOff() {
+	export function volumeOff(): void {
 		config.volumeOn = false;
 		volume.textContent = 'volume_off';
+		for (let i: number = 0; i < Scene._.length; i++) {
+			Scene._[i].Sounds.forEach((e: ComponentType) => (e.element as HTMLAudioElement).pause());
+		}
 	}
 }
 
 export namespace Scene {
 	export interface Structure {
 		className: string;
+		// tslint:disable-next-line:no-any
 		dom: any;
-		Camera: any;
-		Images: Array<any>;
-		Texts: Array<any>;
-		Sounds: Array<any>;
+		Camera: ComponentType;
+		Images: ComponentType[];
+		Texts: ComponentType[];
+		Sounds: ComponentType[];
 	}
 	export const className: string = 'scene';
 	export let now: number = 0;
-	export let _: Array<Structure> = [];
+	export let _: Structure[] = [];
 
 	export function init(): void {
-		_.forEach((scene, i) => {
-			if (i === 0) scene.dom.el.style.display = '';
-			else scene.dom.el.style.display = 'none';
+		_.forEach((scene: Structure, i: number) => {
+			// tslint:disable-next-line:prefer-conditional-expression
+			if (i === 0) ((scene.dom as DOMType).el as HTMLElement).style.display = '';
+			else ((scene.dom as DOMType).el as HTMLElement).style.display = 'none';
 		});
-		Scene.now = 0;
-		const event = document.createEvent('HTMLEvents');
+		now = 0;
+		const event: Event = document.createEvent('HTMLEvents');
 		event.initEvent('sceneChange', true, false);
 		document.dispatchEvent(event);
 	}
 	export function change(num: number): void {
-		if (Scene.now < num && num < Scene._.length) {
-			[ Scene._[Scene.now].Camera, ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((c) => {
-				c.running == false;
+		if (now < num && num < _.length) {
+			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: ComponentType) => {
+				c.running = false;
 			});
-			[ Scene._[num].Camera, ...Scene._[num].Images, ...Scene._[num].Texts ].forEach((c) => {
-				c.running == false;
+			[_[num].Camera, ..._[num].Images, ..._[num].Texts].forEach((c: ComponentType) => {
+				c.running = false;
 				c.transition(c.state[0]);
 			});
-			forwardEffect(Scene.now, num);
-			Scene.now = num;
+			forwardEffect(now, num);
+			now = num;
 
-		} else if (Scene.now < num && num >= Scene._.length) {
-			[ Scene._[Scene.now].Camera, ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((c) => {
-				c.running == false;
+		} else if (now < num && num >= _.length) {
+			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: ComponentType) => {
+				c.running = false;
 			});
-			[ Scene._[0].Camera, ...Scene._[0].Images, ...Scene._[0].Texts ].forEach((c) => {
+			[_[0].Camera, ..._[0].Images, ..._[0].Texts].forEach((c: ComponentType) => {
 				c.transition(c.state[0]);
 			});
-			forwardEffect(Scene.now, 0);
-			Scene.now = 0;
-		
-		} else if (0 <= num && num < Scene.now) {	
-			[ Scene._[Scene.now].Camera, ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ].forEach((c) => {
-				c.running == false;
+			forwardEffect(now, 0);
+			now = 0;
+
+		} else if (num >= 0 && num < now) {
+			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: ComponentType) => {
+				c.running = false;
 			});
-			[ Scene._[num].Camera, ...Scene._[num].Images, ...Scene._[num].Texts ].forEach((c) => {
+			[_[num].Camera, ..._[num].Images, ..._[num].Texts].forEach((c: ComponentType) => {
 				c.transition(c.state[0]);
 			});
-			backEffect(Scene.now, num);
-			Scene.now = num;
+			backEffect(now, num);
+			now = num;
 
 		} else if (num < 0) {
 			return;
 		}
-		Frame.headerPage.textContent = Scene.now + '　ページ';
+		// tslint:disable-next-line:no-irregular-whitespace
+		Frame.headerPage.textContent = now as unknown as string + '　ページ';
 		Frame.show();
 		Frame.hide();
 	}
-	export function add(camera: any, images: any, texts: any, sounds: any): void {
-		const num = _.length;
-		Scene._.push({
-			className: Scene.className + '' + num,
-			dom: new DOM(
-				`<div class='${Scene.className}${num} ${Scene.className}'><div class='base-layer' style='z-index:${Canvas.z}' onclick='baseLayerClick(event);'></div></div>`
+	export function add(camera: ComponentType, images: ComponentType[], texts: ComponentType[], sounds: ComponentType[]): void {
+		const num: number = _.length;
+		_.push({
+			'className': className + (num as unknown as string),
+			'dom': new DOM(
+				`<div class='${className}${num} ${className}'><div class='base-layer' style='z-index:${Canvas.z}' onclick='baseLayerClick(event);'></div></div>`
 			),
-			Camera: camera,
-			Images: images,
-			Texts: texts,
-			Sounds: sounds
+			'Camera': camera,
+			'Images': images,
+			'Texts': texts,
+			'Sounds': sounds
 		});
 	}
 
@@ -130,24 +147,24 @@ export namespace Scene {
 			else change(num + 1);
 		}
 
-		_[num].dom.el.remove();
+		((_[num].dom as DOMType).el as HTMLElement).remove();
 		_.splice(num, 1);
-		_.forEach((scene, i) => {
+		_.forEach((scene: Structure, i: number) => {
 			if (i >= num) {
-				[ scene.Camera, ...scene.Images, ...scene.Texts ].forEach((e) => (e.scene = e.scene - 1));
-				scene.dom.el.classList.remove('scene' + (i + 1));
-				scene.dom.el.classList.add('scene' + i);
+				[scene.Camera, ...scene.Images, ...scene.Texts].forEach((e: ComponentType) => (e.scene = e.scene - 1));
+				((scene.dom as DOMType).el as HTMLElement).classList.remove('scene' + ((i + 1) as unknown as string));
+				((scene.dom as DOMType).el as HTMLElement).classList.add('scene' + (i as unknown as string));
 			}
 		});
 	}
 
-	function forwardEffect(changeFrom: number, changeTo: number) {
-		const now: HTMLElement = Scene._[changeFrom].dom.el;
-		const next: HTMLElement = Scene._[changeTo].dom.el;
-		const nowLeft: HTMLElement = <HTMLElement>now.cloneNode(true);
-		const nowRight: HTMLElement = <HTMLElement>now.cloneNode(true);
-		const nextLeft: HTMLElement = <HTMLElement>next.cloneNode(true);
-		const nextRight: HTMLElement = <HTMLElement>next.cloneNode(true);
+	function forwardEffect(changeFrom: number, changeTo: number): void {
+		const now: HTMLElement = (_[changeFrom].dom as DOMType).el as HTMLElement;
+		const next: HTMLElement = (_[changeTo].dom as DOMType).el as HTMLElement;
+		const nowLeft: HTMLElement = now.cloneNode(true) as HTMLElement;
+		const nowRight: HTMLElement = now.cloneNode(true) as HTMLElement;
+		const nextLeft: HTMLElement = next.cloneNode(true) as HTMLElement;
+		const nextRight: HTMLElement = next.cloneNode(true) as HTMLElement;
 
 		nowLeft.style.cssText = 'backface-visibility:hidden;clip-path: polygon(0 0%, 50% 0, 50% 100%, 0 100%);';
 		nowRight.style.cssText =
@@ -161,14 +178,14 @@ export namespace Scene {
 		Canvas.dom.el.appendChild(nextRight);
 		Canvas.dom.el.appendChild(nowLeft);
 		Canvas.dom.el.appendChild(nowRight);
-		if (config.volumeOn) Canvas.paperSound.play();
+		if (config.volumeOn) Canvas.paperSound.play().catch((e: Error) => console.log(e));
 		now.style.display = 'none';
 		next.style.display = 'none';
 
 		(function update(frame: number): void {
 			switch (frame) {
 				case 10:
-					Canvas.paper.style.cssText = 'filter:opacity(100%);z-index:' + (Canvas.z + 1);
+					Canvas.paper.style.cssText = `filter:opacity(100%);z-index:${Canvas.z + 1}`;
 					nowRight.style.cssText =
 						'transition: 0.8s ease;backface-visibility:hidden;clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);transform-origin:0% 50%; transform: perspective(1000px) rotateY(-180deg);border-right: solid 5px rgb(200,200,200);';
 					nextLeft.style.cssText =
@@ -184,9 +201,9 @@ export namespace Scene {
 					nextRight.remove();
 					nextLeft.remove();
 					next.style.display = 'block';
-					Canvas.paper.style.cssText = 'filter:opacity(0%);z-index:' + (Canvas.z - 1);
+					Canvas.paper.style.cssText = `filter:opacity(0%);z-index:${Canvas.z + 1}`;
 
-					const event = document.createEvent('HTMLEvents');
+					const event: Event = document.createEvent('HTMLEvents');
 					event.initEvent('sceneChange', true, false);
 					document.dispatchEvent(event);
 					return;
@@ -197,13 +214,13 @@ export namespace Scene {
 		})(0);
 	}
 
-	function backEffect(changeFrom: number, changeTo: number) {
-		const now: HTMLElement = Scene._[changeFrom].dom.el;
-		const next: HTMLElement = Scene._[changeTo].dom.el;
-		const nowLeft: HTMLElement = <HTMLElement>now.cloneNode(true);
-		const nowRight: HTMLElement = <HTMLElement>now.cloneNode(true);
-		const nextLeft: HTMLElement = <HTMLElement>next.cloneNode(true);
-		const nextRight: HTMLElement = <HTMLElement>next.cloneNode(true);
+	function backEffect(changeFrom: number, changeTo: number): void {
+		const now: HTMLElement = (_[changeFrom].dom as DOMType).el as HTMLElement;
+		const next: HTMLElement = (_[changeTo].dom as DOMType).el as HTMLElement;
+		const nowLeft: HTMLElement = now.cloneNode(true) as HTMLElement;
+		const nowRight: HTMLElement = now.cloneNode(true) as HTMLElement;
+		const nextLeft: HTMLElement = next.cloneNode(true) as HTMLElement;
+		const nextRight: HTMLElement = next.cloneNode(true) as HTMLElement;
 
 		nowRight.style.cssText = 'backface-visibility:hidden;clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);';
 		nowLeft.style.cssText =
@@ -216,14 +233,14 @@ export namespace Scene {
 		Canvas.dom.el.appendChild(nextRight);
 		Canvas.dom.el.appendChild(nowLeft);
 		Canvas.dom.el.appendChild(nowRight);
-		if (config.volumeOn) Canvas.paperSound.play();
+		if (config.volumeOn) Canvas.paperSound.play().catch((e: Error) => console.log(e));
 		now.style.display = 'none';
 		next.style.display = 'none';
 
 		(function update(frame: number): void {
 			switch (frame) {
 				case 10:
-					Canvas.paper.style.cssText = 'filter:opacity(100%);z-index:' + (Canvas.z + 1);
+					Canvas.paper.style.cssText = `filter:opacity(100%);z-index:${Canvas.z - 1}`;
 					nowLeft.style.cssText =
 						'transition: 0.8s ease;backface-visibility:hidden;clip-path: polygon(0 0%, 50% 0, 50% 100%, 0 100%);transform-origin:0% 50%; transform: perspective(1000px) rotateY(180deg);border-left: solid 5px rgb(200,200,200);';
 					nextRight.style.cssText =
@@ -239,9 +256,9 @@ export namespace Scene {
 					nextRight.remove();
 					nextLeft.remove();
 					next.style.display = 'block';
-					Canvas.paper.style.cssText = 'filter:opacity(0%);z-index:' + (Canvas.z - 1);
+					Canvas.paper.style.cssText = `filter:opacity(0%);z-index:${Canvas.z - 1}`;
 
-					const event = document.createEvent('HTMLEvents');
+					const event: Event = document.createEvent('HTMLEvents');
 					event.initEvent('sceneChange', true, false);
 					document.dispatchEvent(event);
 					return;

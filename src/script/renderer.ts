@@ -1,27 +1,33 @@
-import { DOM } from './domController';
 import { fileReader } from './fileManager';
 import { config } from './setting';
 import { Canvas, Scene, Frame } from './canvas';
 import {
-	ComponentStructure as Struct,
+	ComponentType as Type,
 	ComponentCamera as Camera,
 	ComponentImage as Image,
 	ComponentText as Text,
 	ComponentSound as Sound
 } from './component';
 import { EditorEventHandler as editor } from './editor';
+import { DOMExt } from './domController';
 
 namespace Renderer {
-	export class Render {
-		private scene: Array<Scene.Structure> = [];
-		constructor() {}
-
-		start(): Promise<void> {
-			return new Promise((resolve) => {
+	/**
+	 *  ### Renderer.Main
+	 *   render all components in main view
+	 */
+	export class Main {
+		private scene: Scene.Structure[] = [];
+		constructor() {
+			this.start().catch((e: Error) => console.log(e));
+		}
+		public async start(): Promise<string> {
+			return new Promise((
+				resolve: (value?: string | PromiseLike<string> | undefined) => void) => {
 				this.clearCanvas();
-				this.loadFile(config.storyPath)
+				this.loadFile(config.storyPath as string)
 					.then(() => {
-						for (let [ i, l ]: Array<number> = [ 0, this.scene.length ]; i < l; i++) {
+						for (let [i, l]: number[] = [0, this.scene.length]; i < l; i++) {
 							this.setScene(i);
 							this.renderScene(i);
 						}
@@ -34,13 +40,18 @@ namespace Renderer {
 					});
 			});
 		}
-		private loadFile(storyPath: string): Promise<void> {
-			return new Promise((resolve, reject) => {
-				fileReader({ url: storyPath, type: 'GET', async: true })
+		private async loadFile(storyPath: string): Promise<string> {
+			return new Promise((
+				resolve: (value?: string | PromiseLike<string> | undefined) => void,
+				reject: (value?: string | PromiseLike<string> | undefined) => void) => {
+				fileReader({ 'url': storyPath, 'type': 'GET', 'async': true, 'data': '' })
 					.then((data: XMLHttpRequest) => {
-						const json = JSON.parse(data.responseText); 
-						Frame.headerTitle.textContent = json['title'];
-						this.scene = json['scenes'];
+						// tslint:disable-next-line:no-any
+						const json: any = JSON.parse(data.responseText);
+						// tslint:disable-next-line: no-unsafe-any
+						Frame.headerTitle.textContent = json.title;
+						// tslint:disable-next-line: no-unsafe-any
+						this.scene = json.scenes;
 						if (this.scene.length > 0) resolve();
 						else reject();
 					})
@@ -54,36 +65,38 @@ namespace Renderer {
 			Canvas.dom.rewrite('');
 		}
 		private setScene(num: number): void {
-			let camera: Struct = new Camera(this.scene[num].Camera);
-			let images: Array<Struct> = [];
-			this.scene[num].Images.forEach((e) => {
+			const camera: Type = new Camera(this.scene[num].Camera);
+			const images: Type[] = [];
+			this.scene[num].Images.forEach((e: Type) => {
 				images.push(new Image(e, camera.state[0]));
 			});
-			let texts: Array<Struct> = [];
-			this.scene[num].Texts.forEach((e) => {
+			const texts: Type[] = [];
+			this.scene[num].Texts.forEach((e: Type) => {
 				texts.push(new Text(e, camera.state[0]));
 			});
-			let sounds: Array<Struct> = [];
-			this.scene[num].Sounds.forEach((e) => {
+			const sounds: Type[] = [];
+			this.scene[num].Sounds.forEach((e: Type) => {
 				sounds.push(new Sound(e));
 			});
 			Scene.add(camera, images, texts, sounds);
 		}
-		private renderScene(num: number) {
-			Canvas.dom.append(Scene._[num].dom.el);
 
-			const flag = document.createDocumentFragment();
-			Scene._[num].Images.forEach((e) => {
+		private renderScene(num: number): void {
+			Canvas.dom.append((Scene._[num].dom as DOMExt).el as HTMLElement);
+
+			const flag: DocumentFragment = document.createDocumentFragment();
+			Scene._[num].Images.forEach((e: Type) => {
 				flag.appendChild(e.element);
 			});
-			Scene._[num].Texts.forEach((e) => {
+			Scene._[num].Texts.forEach((e: Type) => {
 				flag.appendChild(e.element);
 			});
-			Scene._[num].Sounds.forEach((e) => {
+			Scene._[num].Sounds.forEach((e: Type) => {
 				flag.appendChild(e.element);
 			});
-			Scene._[num].dom.append(flag);
+			(Scene._[num].dom as DOMExt).append(flag);
 		}
 	}
 }
-export const Render = Renderer.Render;
+// tslint:disable-next-line:typedef
+export const Render = Renderer.Main;
