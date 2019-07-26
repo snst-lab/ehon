@@ -1,8 +1,8 @@
 import { DOM, DOMType } from './domController';
 import { param, config } from './setting';
 import { Canvas, Scene } from './canvas';
-import { CalcCSS } from '../wasm/pkg/wasm.js';
-// import { CalcCSS } from './calculation';
+// import { CalcCSS } from '../wasm/pkg/wasm.js';
+import { CalcCSS } from './calculation';
 
 export namespace Component {
 	export type Type = Image | Text | Camera | Sound;

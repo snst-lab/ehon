@@ -22,7 +22,7 @@
 		"camera": {
 			"initialX": 50,
 			"initialY": 50,
-			"initialZ": 500,
+			"initialZ": 300,
 			"depthOfField": 50,
 			"vanishingX": 50,
 			"vanishingY": 50

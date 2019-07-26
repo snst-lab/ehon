@@ -40,10 +40,11 @@ namespace Calculation {
 		public image_float(Canvas: CanvasType, Image: State, Camera: State, config: { [key: string]: number | string | boolean }, param: { [key: string]: { [key: string]: number } }, pointer: string): string {
 			const distanceInv: number = 1 / Math.max(Camera.z - Image.z, 1);
 			const size: number = (param.camera.initialZ - param.image.initialZ) * distanceInv;
+
 			return `background-image:url(${config.imageSrcUrl}${Image.src});
 				left:${(Image.x - Camera.x - param.camera.vanishingX) * Image.z * distanceInv + param.camera.vanishingX}%;
 				top:${(Image.y - Camera.y - param.camera.vanishingY) * Image.z * distanceInv + param.camera.vanishingY}%;
-				z-index:${~~Image.z + Canvas.z};
+				z-index:${Image.z + Canvas.z};
 				width:${Image.width * size}%;
 				height:${Image.width * Image.aspectRatio / Canvas.aspectRatio * size}%;
 				transform: rotate(${Image.rotate}deg) scale(${Image.scale});
@@ -57,7 +58,7 @@ namespace Calculation {
 			return `background-image:url(${config.imageSrcUrl}${Image.src});
 				left:${Image.x}%;
 				top:${Image.y}%;
-				z-index:${~~Camera.z};
+				z-index:${Camera.z};
 				width:${Image.width}%;
 				height:${Image.width * Image.aspectRatio / Canvas.aspectRatio}%;
 				transform: rotate(${Image.rotate}deg) scale(${Image.scale});
@@ -82,7 +83,6 @@ namespace Calculation {
 			Canvas: CanvasType,
 			Text: State,
 			Camera: State,
-			// _config: { [key: string]: number | string | boolean },
 			param: { [key: string]: { [key: string]: number } }
 		): void {
 			if (Target.float) {
@@ -106,7 +106,7 @@ namespace Calculation {
 			return `
 				left:${(Text.x - Camera.x - param.camera.vanishingX) * Text.z * distanceInv + param.camera.vanishingX}%;
 				top:${(Text.y - Camera.y - param.camera.vanishingY) * Text.z * distanceInv + param.camera.vanishingY}%;
-				z-index:${~~Text.z + Canvas.z};
+				z-index:${Text.z + Canvas.z};
 				width:${Text.width * size}%;
 				height:${Text.width * Text.aspectRatio / Canvas.aspectRatio * size}%;
 				transform: rotate(${Text.rotate}deg) scale(${Text.scale});
@@ -122,7 +122,7 @@ namespace Calculation {
 			return `
 				left:${Text.x}%;
 				top:${Text.y}%;
-				z-index:${~~Camera.z + 1};
+				z-index:${Camera.z + 1};
 				width:${Text.width}%;
 				height:${Text.width * Text.aspectRatio / Canvas.aspectRatio}%;
 				transform: rotate(${Text.rotate}deg) scale(${Text.scale});

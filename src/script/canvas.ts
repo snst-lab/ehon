@@ -86,7 +86,7 @@ export namespace Scene {
 		document.dispatchEvent(event);
 	}
 	export function change(num: number): void {
-		if (now < num && num < _.length) {
+		if (now < num && num < _.length - 2) {
 			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: ComponentType) => {
 				c.running = false;
 			});
@@ -97,7 +97,7 @@ export namespace Scene {
 			forwardEffect(now, num);
 			now = num;
 
-		} else if (now < num && num >= _.length) {
+		} else if (now < num && num >= _.length - 2) {
 			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: ComponentType) => {
 				c.running = false;
 			});

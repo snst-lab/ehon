@@ -66,6 +66,13 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - improve: improve tslint.json <br>
 - refactor: code splitting of wasm files
 </details>
+<details open>
+<summary>2</summary>
+
+- bugfix: fix the bug of duplicate of scene <br>
+- doc: edit README.md
+</details>
+
 
 ### Version 0.12.x
 <details open>

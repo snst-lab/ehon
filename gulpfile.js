@@ -24,7 +24,7 @@ gulp.task('compile:wasm', function(done) {
 //Compiling Typescript
 gulp.task('compile:ts', function(done) {
 	gulp
-		.src([ 'src/script/**.ts' ], {
+		.src(['src/script/**.ts' ], {
 			base: 'src/script'
 		})
 		.pipe(plumber())

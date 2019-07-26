@@ -1,4 +1,3 @@
-
 namespace FileManager {
 	export async function read(option: { type: string; url: string; async: boolean; data: string }): Promise<XMLHttpRequest> {
 		const xhr: XMLHttpRequest = new XMLHttpRequest();

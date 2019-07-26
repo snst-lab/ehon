@@ -15,24 +15,26 @@
   "homepage": "https://github.com/snst-lab/ehon#readme",
   "postinstall": "./bin/node-prune.exe",
   "devDependencies": {
-    "@types/app-root-path": "",
-    "@types/express": "",
-    "@types/node": "",
-    "@types/redis": "",
-    "browser-sync": "",
-    "del": "",
-    "gulp": "",
-    "gulp-plumber": "",
-    "gulp-sass": "",
-    "path": "",
-    "ts-loader": "",
-    "tslint": "",
-    "tslint-loader": "",
-    "typescript": "",
-    "webpack": "4.17.1",
-    "webpack-cli": "",
-    "webpack-node-externals": "",
-    "webpack-stream": "^5.2.1"
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/preset-env": "^7.5.5",
+    "babel-loader": "^8.0.6",
+    "browser-sync": "^2.26.7",
+    "del": "^5.0.0",
+    "gulp": "^4.0.2",
+    "gulp-plumber": "^1.2.1",
+    "gulp-sass": "^4.0.2",
+    "node-sass": "^4.12.0",
+    "path": "^0.12.7",
+    "ts-loader": "^6.0.4",
+    "tslint": "^5.18.0",
+    "tslint-loader": "^3.5.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.17.0",
+    "webpack-cli": "^3.1.2",
+    "webpack-node-externals": "^1.7.2",
+    "webpack-stream": "^5.0.0"
   },
   "scripts": {
     "start": "node build/server.js",
@@ -48,9 +50,8 @@
     "docker:login": "docker exec -it"
   },
   "dependencies": {
-    "app-root-path": "",
-    "express": "",
-    "redis": ""
+    "app-root-path": "^2.2.1",
+    "express": "^4.17.1"
   },
   "private": true
 }

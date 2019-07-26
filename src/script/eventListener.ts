@@ -371,8 +371,8 @@ namespace EventListener {
 		// }
 		private CanvasDrop(): void {
 			Canvas.dom.on('drop', (event: DragEvent) => {
+				event.preventDefault();
 				if (!config.live) {
-					event.preventDefault();
 					if (event.dataTransfer !== undefined) {
 						// Use DataTransferItemList interface to access the file(s)
 						for (let i: number = 0; i < event.dataTransfer.items.length; i++) {

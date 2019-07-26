@@ -170,6 +170,7 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
+				console.log({ 'x': Active.now.x, 'y': Active.now.y, 'z': Active.now.z});
 			}
 		}
 
@@ -192,6 +193,7 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
+				console.log({ 'rotate': Active.now.rotate});
 			}
 		}
 
@@ -214,6 +216,7 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
+				console.log({ 'scale': Active.now.scale});
 			}
 		}
 
@@ -236,6 +239,7 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
+				console.log({ 'blur': Active.now.blur});
 			}
 		}
 
@@ -259,6 +263,7 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
+				console.log({ 'opacity': Active.now.opacity});
 			}
 		}
 
@@ -281,6 +286,7 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
+				console.log({ 'chroma': Active.now.chroma});
 			}
 		}
 
@@ -303,6 +309,7 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
+				console.log({ 'light': Active.now.light});
 			}
 		}
 	}
