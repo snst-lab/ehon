@@ -3,7 +3,7 @@
 ehon
 =============
 
-> It is a web application for creating picture books.
+> This is a web application for creating picture books.
 >
 > By placing the image element and registering the animation and trigger with the mouse operation, you can create a moving picture book that responds to touch events.
 
