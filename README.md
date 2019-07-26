@@ -3,14 +3,14 @@
 ehon
 =============
 
-> It is a web application for creating picture books.  
+> It is a web application for creating picture books.
 >
 > By placing the image element and registering the animation and trigger with the mouse operation, you can create a moving picture book that responds to touch events.
 
 <br>
 
 ## Screenshot
-[![Description](https://snst-lab.github.io/ehon/doc/img/sceenshot)]()
+<img src="doc/img/screenshot.gif">
 
 <br>
 

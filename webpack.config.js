@@ -1,8 +1,8 @@
 const path = require("path");
 
 module.exports = {
-  // mode: 'production',
-  mode: "development",
+  mode: 'production',
+  // mode: "development",
   entry: ['./src/script/main.ts'],
   // entry: ["@babel/polyfill", "./src/script/main.ts"],
   output: {
@@ -19,7 +19,7 @@ module.exports = {
       {
         // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
         test: /\.ts$/,
-        // exclude: /(node_modules)/,
+        exclude: /(node_modules)/,
         use: [
           // {
           //   loader: "babel-loader",
