@@ -58,5 +58,5 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 
 <br>
 
-## Author
+## Developer
 [TANUSUKE](https://pragma-curry.com/)  
