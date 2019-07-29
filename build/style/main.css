@@ -272,82 +272,6 @@ input:checked + .slider:before {
   animation-fill-mode: both;
 }
 
-html,
-body {
-  box-sizing: border-box;
-  padding: 0;
-  border: 0;
-  margin: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-body {
-  font-family: "游ゴシック体", YuGothic, "游ゴシック", "Yu Gothic", "メイリオ", sans-serif;
-  font-weight: 500;
-  background: #f5f5fa;
-}
-
-.material-icons {
-  color: #7d7d91;
-  transition: .2s;
-  -webkit-user-select: none;
-  /* Chrome all / Safari all */
-  -moz-user-select: none;
-  /* Firefox all */
-  -ms-user-select: none;
-  /* IE 10+ */
-  user-select: none;
-}
-
-.material-icons:hover {
-  color: #00c8b4;
-}
-
-header {
-  position: fixed;
-  z-index: 5;
-  width: 100%;
-  line-height: 7vh;
-  height: 7vh;
-  vertical-align: middle;
-  font-size: 23px;
-  font-size: 1.4375rem;
-  transition: 0.3s;
-}
-
-header.header-edit {
-  color: #7d7d91;
-  background: white;
-  border-bottom: solid #afafc3 0.5px;
-}
-
-header.header-live {
-  color: white;
-  text-shadow: 0.8px 0.8px 0 #9696aa, -0.8px 0.8px 0 #9696aa, 0.8px -0.8px 0 #9696aa, -0.8px -0.8px 0 #9696aa;
-  background: transparent;
-  border-bottom: none;
-}
-
-.header-title {
-  position: fixed;
-  margin: 0 2vw;
-}
-
-.header-page {
-  position: fixed;
-  margin: 0 45vw;
-}
-
-main {
-  position: relative;
-  top: 7vh;
-  background: #1e1e32;
-  overflow: hidden;
-  font-size: 12px;
-  font-size: 0.75rem;
-}
-
 .canvas {
   background: white;
   margin: 0;
@@ -778,4 +702,80 @@ footer.footer-edit {
 .paper.paper-live {
   width: 100vw;
   height: 56.25vw;
+}
+
+html,
+body {
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+body {
+  font-family: "游ゴシック体", YuGothic, "游ゴシック", "Yu Gothic", "メイリオ", sans-serif;
+  font-weight: 500;
+  background: #f5f5fa;
+}
+
+.material-icons {
+  color: #7d7d91;
+  transition: .2s;
+  -webkit-user-select: none;
+  /* Chrome all / Safari all */
+  -moz-user-select: none;
+  /* Firefox all */
+  -ms-user-select: none;
+  /* IE 10+ */
+  user-select: none;
+}
+
+.material-icons:hover {
+  color: #00c8b4;
+}
+
+header {
+  position: fixed;
+  z-index: 5;
+  width: 100%;
+  line-height: 7vh;
+  height: 7vh;
+  vertical-align: middle;
+  font-size: 23px;
+  font-size: 1.4375rem;
+  transition: 0.3s;
+}
+
+header.header-edit {
+  color: #7d7d91;
+  background: white;
+  border-bottom: solid #afafc3 0.5px;
+}
+
+header.header-live {
+  color: white;
+  text-shadow: 0.8px 0.8px 0 #9696aa, -0.8px 0.8px 0 #9696aa, 0.8px -0.8px 0 #9696aa, -0.8px -0.8px 0 #9696aa;
+  background: transparent;
+  border-bottom: none;
+}
+
+.header-title {
+  position: fixed;
+  margin: 0 2vw;
+}
+
+.header-page {
+  position: fixed;
+  margin: 0 45vw;
+}
+
+main {
+  position: relative;
+  top: 7vh;
+  background: #1e1e32;
+  overflow: hidden;
+  font-size: 12px;
+  font-size: 0.75rem;
 }

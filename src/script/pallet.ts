@@ -1,11 +1,11 @@
 import { DOM, DOMType } from './domController';
 import { css } from './setting';
-import { ComponentType as Component } from './component';
+import { Component } from './component';
 import { Scene } from './canvas';
 import { Active as ActiveComponent } from './editor';
 import MyDocument from '../@types/MyDocument';
 
-namespace Pallet {
+export namespace Pallet {
 	export const dom: HTMLElement = document.querySelector('.pallet');
 
 	interface Functions {
@@ -206,7 +206,7 @@ namespace Pallet {
 					false
 				);
 			}
-			const Components: Component[] = [
+			const Components: Component.Type[] = [
 				Scene._[Scene.now].Camera,
 				...Scene._[Scene.now].Images,
 				...Scene._[Scene.now].Texts,
@@ -268,7 +268,7 @@ namespace Pallet {
 		}
 
 		public static render(): void {
-			const Components: Component[] = [ ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ];
+			const Components: Component.Type[] = [ ...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts ];
 			const fragment: DOMType = new DOM();
 			fragment.append('<div class="trigger-index">Animation Trigger</div>');
 			fragment.append(`
@@ -303,7 +303,7 @@ namespace Pallet {
 			Trigger.dom.rewrite('');
 		}
 
-		public static eventListener(Components: Component[]): void {
+		public static eventListener(Components: Component.Type[]): void {
 			(document.querySelector('.trigger-component0')).addEventListener(
 				'click',
 				(_event: PointerEvent) => {
@@ -388,7 +388,7 @@ namespace Pallet {
 		public static cssOptionOpened: boolean = false;
 
 		public static render(): void {
-			PalletActive.title.dom.el.textContent = (ActiveComponent).title;
+			Active.title.dom.el.textContent = (ActiveComponent).title;
 			Keyframe.delay.dom.el.textContent = (ActiveComponent).delay as unknown as string;
 			Keyframe.iteration.dom.el.textContent = (ActiveComponent).iteration as unknown as string;
 			// tslint:disable-next-line: no-unsafe-any
@@ -581,22 +581,3 @@ namespace Pallet {
 		}
 	}
 }
-
-// tslint:disable-next-line:typedef
-export const PalletDom = Pallet.dom;
-// tslint:disable-next-line:typedef
-export const PalletLiveEditToggle = Pallet.LiveEditToggle;
-// tslint:disable-next-line:typedef
-export const PalletSceneChanger = Pallet.SceneChanger;
-// tslint:disable-next-line:typedef
-export const PalletSave = Pallet.Save;
-// tslint:disable-next-line:typedef
-export const PalletCamera = Pallet.Camera;
-// tslint:disable-next-line:typedef
-export const PalletActive = Pallet.Active;
-// tslint:disable-next-line:typedef
-export const PalletKeyframe = Pallet.Keyframe;
-// tslint:disable-next-line:typedef
-export const PalletTrigger = Pallet.Trigger;
-// tslint:disable-next-line:typedef
-export const PalletLayer = Pallet.Layer;

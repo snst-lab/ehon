@@ -72,6 +72,13 @@ The versioning scheme we refer is [Semantic Versioning](https://semver.org/)
 - bugfix: fix the bug of duplicate of scene <br>
 - doc: edit README.md
 </details>
+<details open>
+<summary>3</summary>
+
+- bugfix: inserting \t\n characters to css option <br>
+- bugfix: z-index rounding error<br>
+- refactor: sass
+</details>
 
 
 ### Version 0.12.x

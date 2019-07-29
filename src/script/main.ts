@@ -1,6 +1,6 @@
 // import '@babel/polyfill';
-import { EventListen } from './eventListener';
-import { Render } from './renderer';
+import { EventListener } from './eventListener';
+import { Renderer } from './renderer';
 import { readSetting } from './setting';
 import { default as init } from '../wasm/pkg/wasm.js';
 
@@ -8,9 +8,9 @@ import { default as init } from '../wasm/pkg/wasm.js';
 	await init('./src/wasm/pkg/wasm_bg.wasm');
 	await readSetting()
 		.then(async() => {
-			await new Render().start().catch((error: Error) => console.log(error));
+			await new Renderer.Main().start().catch((error: Error) => console.log(error));
 		}).then(async() => {
-			await new EventListen().start().catch((error: Error) => console.log(error));
+			await new EventListener.Main().start().catch((error: Error) => console.log(error));
 		})
 		.catch((error: Error) => {
 			console.log(error);

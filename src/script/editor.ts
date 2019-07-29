@@ -1,20 +1,12 @@
 import { config, param, css } from './setting';
 import { Canvas, Scene } from './canvas';
-import { PalletActive, PalletKeyframe as Keyframe, PalletLayer as Layer, PalletTrigger as Trigger } from './pallet';
-import {
-	ComponentType as Component,
-	ComponentStructure as Struct,
-	ComponentState as State,
-	ComponentCamera as Camera,
-	ComponentImage as Image,
-	ComponentText as Text,
-	ComponentSound as Sound
-} from './component';
+import { Pallet } from './pallet';
+import { Component  } from './component';
 import { Animation } from './animation';
 import { SoundPlayer } from './soundPlayer';
 import { DOMType } from './domController';
 
-export let Active: Component | undefined;
+export let Active: Component.Type | undefined;
 
 export namespace Editor {
 	/**
@@ -22,7 +14,7 @@ export namespace Editor {
 	 * define active component style for edit mode
 	 */
 	export class CSS {
-		public static setActiveStyle(c: Component): void {
+		public static setActiveStyle(c: Component.Type): void {
 			if (c.types === 3 /*sound*/) return;
 			this.removeActiveStyle(c);
 			c.element.style.outlineColor = css.active.outlineColor;
@@ -33,20 +25,12 @@ export namespace Editor {
 				c.element.style.overflow = css.resize.overflow;
 				c.element.style.cursor = css.resize.cursor;
 			}
-			[c.now, ...c.state].forEach((e: State) => {
+			[c.now, ...c.state].forEach((e: Component.State) => {
 				e.option =
-					`
-					${e.option};
-					outline-color:${css.active.outlineColor};
-					outline-style:${css.active.outlineStyle};
-					outline-width:${css.active.outlineWidth};
-					resize:${css.resize.resize};
-					overflow:${css.resize.overflow};
-					cursor:${css.resize.cursor};
-					`;
+					`outline-color:${css.active.outlineColor};outline-style:${css.active.outlineStyle};outline-width:${css.active.outlineWidth};resize:${css.resize.resize};overflow:${css.resize.overflow};cursor:${css.resize.cursor};${e.option}`;
 			});
 		}
-		public static removeActiveStyle(c: Struct): void {
+		public static removeActiveStyle(c: Component.Structure): void {
 			if (c.types === 3 /**sound */) return;
 			c.element.style.outlineColor = '';
 			c.element.style.outlineStyle = '';
@@ -54,7 +38,7 @@ export namespace Editor {
 			c.element.style.resize = '';
 			c.element.style.overflow = '';
 			c.element.style.cursor = '';
-			[c.now, ...c.state].forEach((e: State) => {
+			[c.now, ...c.state].forEach((e: Component.State) => {
 				e.option = e.option
 					.replace(`outline-color:${css.active.outlineColor};`, '')
 					.replace(`outline-style:${css.active.outlineStyle};`, '')
@@ -76,7 +60,7 @@ export namespace Editor {
 			if (config.live) return;
 
 			this.type = type;
-			[...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts, Scene._[Scene.now].Camera].forEach((e: Component) => {
+			[...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts, Scene._[Scene.now].Camera].forEach((e: Component.Type) => {
 				if (e.className !== className) {
 					CSS.removeActiveStyle(e);
 				}
@@ -87,8 +71,8 @@ export namespace Editor {
 				(Active).element.contentEditable = 'true';
 			}
 			new Promise((resolve: (value?: string | PromiseLike<string> | undefined) => void) => {
-				Keyframe.render();
-				Trigger.render();
+				Pallet.Keyframe.render();
+				Pallet.Trigger.render();
 				resolve();
 			}).then(() => {
 				if (Active !== undefined) {
@@ -112,33 +96,33 @@ export namespace Editor {
 					Active.element.contentEditable = 'false';
 				}
 				// pallet style off
-				PalletActive.title.dom.el.textContent = '';
-				Keyframe.delay.dom.el.textContent = '';
-				Keyframe.iteration.dom.el.textContent = '';
+				Pallet.Active.title.dom.el.textContent = '';
+				Pallet.Keyframe.delay.dom.el.textContent = '';
+				Pallet.Keyframe.iteration.dom.el.textContent = '';
 
 				Active = undefined;
-				Keyframe.clear();
-				Trigger.hide();
-				Trigger.clear();
+				Pallet.Keyframe.clear();
+				Pallet.Trigger.hide();
+				Pallet.Trigger.clear();
 			}
 		}
 
 		public recover(): void {
-			[...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts, Scene._[Scene.now].Camera].forEach((e: Component) => {
+			[...Scene._[Scene.now].Images, ...Scene._[Scene.now].Texts, Scene._[Scene.now].Camera].forEach((e: Component.Type) => {
 				if (e.touchable) {
 					e.element.style.pointerEvents = 'auto';
 					e.pointer = 'auto';
 				}
 			});
 		}
-		public select(className: string): Component | undefined {
+		public select(className: string): Component.Type | undefined {
 			switch (this.type) {
 				case 1: // 'image'
-					return Scene._[Scene.now].Images.filter((e: Component) => e.className === className)[0];
+					return Scene._[Scene.now].Images.filter((e: Component.Type) => e.className === className)[0];
 				case 2: // 'text'
-					return Scene._[Scene.now].Texts.filter((e: Component) => e.className === className)[0];
+					return Scene._[Scene.now].Texts.filter((e: Component.Type) => e.className === className)[0];
 				case 3: // 'sound'
-					return Scene._[Scene.now].Sounds.filter((e: Component) => e.className === className)[0];
+					return Scene._[Scene.now].Sounds.filter((e: Component.Type) => e.className === className)[0];
 				case 0: // 'camera'
 					return Scene._[Scene.now].Camera;
 				default:
@@ -151,9 +135,9 @@ export namespace Editor {
 	 *  transform each CSS properties such as translate, rotate, blur, etc. in edit mode
 	 */
 	export class Transform {
-		public translate(Active: Component, dx: number, dy: number, dz: number): void {
+		public translate(Active: Component.Type, dx: number, dy: number, dz: number): void {
 			if (Active.types !== 3 /*not sound */) {
-				const state: State = {
+				const state: Component.State = {
 					'src': Active.now.src,
 					'x': Active.now.x + dx,
 					'y': Active.now.y + dy,
@@ -170,13 +154,13 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
-				console.log({ 'x': Active.now.x, 'y': Active.now.y, 'z': Active.now.z});
+				console.log({ 'x': Active.now.x, 'y': Active.now.y, 'z': Active.now.z });
 			}
 		}
 
-		public rotate(Active: Component, delta: number): void {
+		public rotate(Active: Component.Type, delta: number): void {
 			if (Active.types !== 3 /*not sound */) {
-				const state: State = {
+				const state: Component.State = {
 					'src': Active.now.src,
 					'x': Active.now.x,
 					'y': Active.now.y,
@@ -193,13 +177,13 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
-				console.log({ 'rotate': Active.now.rotate});
+				console.log({ 'rotate': Active.now.rotate });
 			}
 		}
 
-		public scale(Active: Component, delta: number): void {
+		public scale(Active: Component.Type, delta: number): void {
 			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
-				const state: State = {
+				const state: Component.State = {
 					'src': Active.now.src,
 					'x': Active.now.x,
 					'y': Active.now.y,
@@ -216,13 +200,13 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
-				console.log({ 'scale': Active.now.scale});
+				console.log({ 'scale': Active.now.scale });
 			}
 		}
 
-		public blur(Active: Component, delta: number): void {
+		public blur(Active: Component.Type, delta: number): void {
 			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
-				const state: State = {
+				const state: Component.State = {
 					'src': Active.now.src,
 					'x': Active.now.x,
 					'y': Active.now.y,
@@ -239,14 +223,14 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
-				console.log({ 'blur': Active.now.blur});
+				console.log({ 'blur': Active.now.blur });
 			}
 		}
 
 
-		public opacity(Active: Component, delta: number): void {
+		public opacity(Active: Component.Type, delta: number): void {
 			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
-				const state: State = {
+				const state: Component.State = {
 					'src': Active.now.src,
 					'x': Active.now.x,
 					'y': Active.now.y,
@@ -263,13 +247,13 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
-				console.log({ 'opacity': Active.now.opacity});
+				console.log({ 'opacity': Active.now.opacity });
 			}
 		}
 
-		public chroma(Active: Component, delta: number): void {
+		public chroma(Active: Component.Type, delta: number): void {
 			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
-				const state: State = {
+				const state: Component.State = {
 					'src': Active.now.src,
 					'x': Active.now.x,
 					'y': Active.now.y,
@@ -286,13 +270,13 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
-				console.log({ 'chroma': Active.now.chroma});
+				console.log({ 'chroma': Active.now.chroma });
 			}
 		}
 
-		public light(Active: Component, delta: number): void {
+		public light(Active: Component.Type, delta: number): void {
 			if (Active.types === 1 /*image*/ || Active.types === 2 /*image*/) {
-				const state: State = {
+				const state: Component.State = {
 					'src': Active.now.src,
 					'x': Active.now.x,
 					'y': Active.now.y,
@@ -309,7 +293,7 @@ export namespace Editor {
 					'option': Active.now.option
 				};
 				Active.transition(state);
-				console.log({ 'light': Active.now.light});
+				console.log({ 'light': Active.now.light });
 			}
 		}
 	}
@@ -320,7 +304,7 @@ export namespace Editor {
 	export class EventHandler {
 		public addNewScene(): void {
 			const num: number = Scene._.length;
-			const camera0: State = {
+			const camera0: Component.State = {
 				'src': '',
 				'x': param.camera.initialX,
 				'y': param.camera.initialY,
@@ -336,7 +320,7 @@ export namespace Editor {
 				'duration': param.animation.defaultDuration,
 				'option': ''
 			};
-			const camera: Component = new Camera({
+			const camera: Component.Type = new Component.Camera({
 				'scene': num,
 				'types': 0, // camera
 				'className': 'camera',
@@ -369,10 +353,10 @@ export namespace Editor {
 				}
 			}
 		}
-		public CanvasDropComponent(x: number, y: number, types: number, file: File | null, given: Component | null): void {
-			let struct: Struct;
-			let state0: State;
-			let component: Component;
+		public CanvasDropComponent(x: number, y: number, types: number, file: File | null, given: Component.Type | null): void {
+			let struct: Component.Structure;
+			let state0: Component.State;
+			let component: Component.Type;
 			if (given === null && file !== null) {
 				switch (types) {
 					case 1: // image
@@ -493,25 +477,25 @@ export namespace Editor {
 			}
 			// tslint:disable-next-line:prefer-switch
 			if (types === 1 /**image*/) {
-				component = new Image(struct, Scene._[Scene.now].Camera.now);
+				component = new Component.Image(struct, Scene._[Scene.now].Camera.now);
 				Scene._[Scene.now].Images.push(component);
 				(Scene._[Scene.now].dom as HTMLElement).append(component.element);
 				EditorSelector.activate(component.className, 1);
 			} else if (types === 2 /**text*/) {
-				component = new Text(struct, Scene._[Scene.now].Camera.now);
+				component = new Component.Text(struct, Scene._[Scene.now].Camera.now);
 				Scene._[Scene.now].Texts.push(component);
 				(Scene._[Scene.now].dom as HTMLElement).append(component.element);
 				EditorSelector.activate(component.className, 2);
 			} else if (types === 3 /**sound*/) {
-				component = new Sound(struct);
+				component = new Component.Sound(struct);
 				Scene._[Scene.now].Sounds.push(component);
 				(Scene._[Scene.now].dom as HTMLElement).append(component.element);
 				EditorSelector.activate(component.className, 3);
 				new SoundPlayer.Register(Active);
 			}
-			Keyframe.render();
-			Layer.render(EditorSelector);
-			Trigger.render();
+			Pallet.Keyframe.render();
+			Pallet.Layer.render(EditorSelector);
+			Pallet.Trigger.render();
 		}
 
 		public ComponentClick(className: string, type: string): void | undefined {
@@ -545,24 +529,24 @@ export namespace Editor {
 			}
 			CSS.removeActiveStyle((Active));
 			(Active).state.push((Active).now);
-			Keyframe.render();
+			Pallet.Keyframe.render();
 			CSS.setActiveStyle((Active));
 		}
 
 		public ShowLayerClick(): void {
-			if (!Layer.opened) {
-				Layer.render(EditorSelector);
-				Layer.show();
+			if (!Pallet.Layer.opened) {
+				Pallet.Layer.render(EditorSelector);
+				Pallet.Layer.show();
 			} else {
-				Layer.hide();
+				Pallet.Layer.hide();
 			}
 		}
 
 		public ShowTriggerClick(): void {
-			if (!Trigger.opened) {
-				Trigger.show();
+			if (!Pallet.Trigger.opened) {
+				Pallet.Trigger.show();
 			} else {
-				Trigger.hide();
+				Pallet.Trigger.hide();
 			}
 		}
 
@@ -586,11 +570,6 @@ export namespace Editor {
 		}
 	}
 }
-// tslint:disable-next-line:typedef
-export const EditorCSS = Editor.CSS;
-// tslint:disable-next-line:typedef
-export const EditorSelector = new Editor.Selector();
-// tslint:disable-next-line:typedef
-export const EditorTransform = new Editor.Transform();
-// tslint:disable-next-line:typedef
-export const EditorEventHandler = new Editor.EventHandler();
+export const EditorSelector: Editor.Selector = new Editor.Selector();
+export const EditorTransform: Editor.Transform = new Editor.Transform();
+export const EditorEventHandler: Editor.EventHandler = new Editor.EventHandler();

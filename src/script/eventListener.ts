@@ -1,32 +1,20 @@
 import { param, config } from './setting';
 import { Frame, Canvas, Scene } from './canvas';
+import { Pallet } from './pallet';
 import {
-	PalletDom,
-	PalletLiveEditToggle as LiveEditToggle,
-	PalletSceneChanger as SceneChanger,
-	PalletActive,
-	PalletLayer as Layer,
-	PalletTrigger as Trigger,
-	PalletKeyframe as Keyframe,
-	PalletSave as Save,
-	PalletCamera as CameraIcon,
-	PalletLayer
-} from './pallet';
-import {
-	Active,
-	EditorCSS as CSS,
+	Active, Editor,
 	EditorSelector as selector,
 	EditorTransform as transform,
 	EditorEventHandler as editor
 } from './editor';
 import { Animation } from './animation';
 import { SoundPlayer } from './soundPlayer';
-import { ComponentType } from './component';
+import { Component } from './component';
 import MyDocument from '../@types/MyDocument';
 
 export let keyDown: string | null = null;
 
-namespace EventListener {
+export namespace EventListener {
 	interface PointerPosition {
 		x: number;
 		y: number;
@@ -51,9 +39,6 @@ namespace EventListener {
 	 * Register EventListener to each Components & Canvas
 	 */
 	export class Main {
-		// tslint:disable-next-line: no-empty
-		constructor() {}
-
 		public async start(): Promise<string> {
 			return new Promise((
 				resolve: (value?: string | PromiseLike<string> | undefined) => void) => {
@@ -67,7 +52,7 @@ namespace EventListener {
 		private commonSetting(): void {
 			this.CanvasTouch();
 			this.SceneChange();
-			this.SceneChanger();
+			this.PalletSceneChanger();
 			this.AnimationRegister();
 			this.CanvasSwipe();
 			this.HoverHeader();
@@ -95,13 +80,13 @@ namespace EventListener {
 		}
 
 		private liveEditToggle(): void {
-			LiveEditToggle.dom.on('change', (event: Event) => {
+			Pallet.LiveEditToggle.dom.on('change', (event: Event) => {
 				event.preventDefault();
 				// tslint:disable-next-line: no-unsafe-any
 				config.live = (document as MyDocument)['live-edit'].toggle.checked;
 				if (config.live) {
 					selector.release();
-					PalletDom.style.display = 'none';
+					Pallet.dom.style.display = 'none';
 					Canvas.element.classList.remove('canvas-edit');
 					Canvas.element.classList.add('canvas-live');
 					Canvas.paper.classList.remove('paper-edit');
@@ -113,7 +98,7 @@ namespace EventListener {
 					Frame.headerTitle.contentEditable = 'false';
 					Frame.show();
 				} else {
-					PalletDom.style.display = '';
+					Pallet.dom.style.display = '';
 					Canvas.element.classList.remove('canvas-live');
 					Canvas.element.classList.add('canvas-edit');
 					Canvas.paper.classList.remove('paper-live');
@@ -191,12 +176,12 @@ namespace EventListener {
 						Scene._[Scene.now].Camera,
 						...Scene._[Scene.now].Images,
 						...Scene._[Scene.now].Texts
-					].forEach((c: ComponentType) => {
+					].forEach((c: Component.Type) => {
 						if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') as number > -1) {
 							new Animation.Play(c);
 						}
 					});
-					Scene._[Scene.now].Sounds.forEach((c: ComponentType) => {
+					Scene._[Scene.now].Sounds.forEach((c: Component.Type) => {
 						if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') as number > -1) {
 							new SoundPlayer.Play(c);
 						}
@@ -211,12 +196,12 @@ namespace EventListener {
 							Scene._[Scene.now].Camera,
 							...Scene._[Scene.now].Images,
 							...Scene._[Scene.now].Texts
-						].forEach((c: ComponentType) => {
+						].forEach((c: Component.Type) => {
 							if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') as number > -1) {
 								new Animation.Play(c);
 							}
 						});
-						Scene._[Scene.now].Sounds.forEach((c: ComponentType) => {
+						Scene._[Scene.now].Sounds.forEach((c: Component.Type) => {
 							if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'canvas') as number > -1) {
 								new SoundPlayer.Play(c);
 							}
@@ -227,12 +212,12 @@ namespace EventListener {
 		}
 		private AnimationRegister(): void {
 			for (let [i, l]: number[] = [0, Scene._.length]; i < l; i++) {
-				[Scene._[i].Camera, ...Scene._[i].Images, ...Scene._[i].Texts].forEach((c: ComponentType) => {
+				[Scene._[i].Camera, ...Scene._[i].Images, ...Scene._[i].Texts].forEach((c: Component.Type) => {
 					if (c.state.length > 0) {
 						new Animation.Register(c);
 					}
 				});
-				Scene._[i].Sounds.forEach((c: ComponentType) => {
+				Scene._[i].Sounds.forEach((c: Component.Type) => {
 					new SoundPlayer.Register(c);
 				});
 			}
@@ -269,7 +254,7 @@ namespace EventListener {
 		private SceneChange(): void {
 			document.addEventListener('sceneChange', () => {
 				for (let [i, l]: number[] = [0, Scene._.length]; i < l; i++) {
-					[Scene._[i].Camera, ...Scene._[i].Images, ...Scene._[i].Texts].forEach((c: ComponentType) => {
+					[Scene._[i].Camera, ...Scene._[i].Images, ...Scene._[i].Texts].forEach((c: Component.Type) => {
 						if (c.scene === Scene.now && [].indexOf.call(c.trigger, 'scenechange') as number > -1) {
 							new Animation.Play(c);
 						} else if (i !== Scene.now) {
@@ -277,11 +262,11 @@ namespace EventListener {
 						}
 					});
 				}
-				Scene._[Scene.now].Sounds.forEach((c: ComponentType) => {
+				Scene._[Scene.now].Sounds.forEach((c: Component.Type) => {
 					if ([].indexOf.call(c.trigger, 'scenechange') as number > -1) {
 						for (let [i, l]: number[] = [0, Scene._.length]; i < l; i++) {
 							if (i !== Scene.now) {
-								Scene._[i].Sounds.forEach((d: ComponentType) => {
+								Scene._[i].Sounds.forEach((d: Component.Type) => {
 									(d.element as HTMLAudioElement).pause();
 								});
 							}
@@ -291,50 +276,50 @@ namespace EventListener {
 				});
 			});
 		}
-		private SceneChanger(): void {
-			SceneChanger.forward.on('click', (event: PointerEvent) => {
+		private PalletSceneChanger(): void {
+			Pallet.SceneChanger.forward.on('click', (event: PointerEvent) => {
 				event.preventDefault();
 				Scene.change(Scene.now + 1);
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				Pallet.SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
 				selector.release();
-				PalletLayer.hide();
+				Pallet.Layer.hide();
 			});
-			SceneChanger.back.on('click', (event: PointerEvent) => {
+			Pallet.SceneChanger.back.on('click', (event: PointerEvent) => {
 				event.preventDefault();
 				Scene.change(Scene.now - 1);
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				Pallet.SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
 				selector.release();
-				PalletLayer.hide();
+				Pallet.Layer.hide();
 			});
-			SceneChanger.remove.on('click', (event: PointerEvent) => {
+			Pallet.SceneChanger.remove.on('click', (event: PointerEvent) => {
 				event.preventDefault();
 				Scene.remove(Scene.now);
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				Pallet.SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
 				selector.release();
-				PalletLayer.hide();
+				Pallet.Layer.hide();
 			});
-			SceneChanger.add.on('click', (event: PointerEvent) => {
+			Pallet.SceneChanger.add.on('click', (event: PointerEvent) => {
 				event.preventDefault();
 				editor.addNewScene();
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				Pallet.SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
 				selector.release();
-				PalletLayer.hide();
+				Pallet.Layer.hide();
 			});
 		}
 		private CanvasSwipe(): void {
 			Canvas.dom.swipe('left', (event: TouchEvent) => {
 				event.preventDefault();
 				Scene.change(Scene.now + 1);
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				Pallet.SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
 				selector.release();
-				PalletLayer.hide();
+				Pallet.Layer.hide();
 			});
 			Canvas.dom.swipe('right', (event: TouchEvent) => {
 				event.preventDefault();
 				Scene.change(Scene.now - 1);
-				SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
+				Pallet.SceneChanger.current.el.textContent = `Scene:${Scene.now}`;
 				selector.release();
-				PalletLayer.hide();
+				Pallet.Layer.hide();
 			});
 		}
 		private CanvasDoubleClick(): void {
@@ -386,17 +371,17 @@ namespace EventListener {
 			});
 		}
 		private CameraClick(): void {
-			CameraIcon.dom.on('click', (event: PointerEvent) => {
+			Pallet.Camera.dom.on('click', (event: PointerEvent) => {
 				event.preventDefault();
-				editor.CameraClick(CameraIcon.className);
+				editor.CameraClick(Pallet.Camera.className);
 			});
 		}
 		private SaveClick(): void {
-			Save.dom.append('<a id="save" href="" download="story.json" style="display:none;"></a>');
+			Pallet.Save.dom.append('<a id="save" href="" download="story.json" style="display:none;"></a>');
 
 			const anchor: HTMLAnchorElement = document.querySelector('#save');
-			Save.dom.on('click', () => {
-				if (Active !== undefined) CSS.removeActiveStyle(Active);
+			Pallet.Save.dom.on('click', () => {
+				if (Active !== undefined) Editor.CSS.removeActiveStyle(Active);
 
 				const json: string = JSON.stringify({
 					'title': Frame.headerTitle.textContent,
@@ -405,18 +390,19 @@ namespace EventListener {
 				const blob: Blob = new Blob([json], { 'type': 'application/json' });
 				anchor.href = window.URL.createObjectURL(blob);
 				anchor.click();
+				console.log(Scene._);
 			});
 		}
 		private TitleChange(): void {
-			PalletActive.title.dom.on('blur', (event: Event) => {
+			Pallet.Active.title.dom.on('blur', (event: Event) => {
 				if (Active !== undefined) {
 					event.preventDefault();
-					Active.title = PalletActive.title.dom.el.textContent;
+					Active.title = Pallet.Active.title.dom.el.textContent;
 				}
 			});
 		}
 		private SwitchTouch(): void {
-			PalletActive.touch.dom.on('change', (event: Event) => {
+			Pallet.Active.touch.dom.on('change', (event: Event) => {
 				if (Active !== undefined) {
 					event.preventDefault();
 					// tslint:disable-next-line: no-unsafe-any
@@ -427,7 +413,7 @@ namespace EventListener {
 			});
 		}
 		private SwitchFloat(): void {
-			PalletActive.float.dom.on('change', (event: Event) => {
+			Pallet.Active.float.dom.on('change', (event: Event) => {
 				if (Active !== undefined) {
 					event.preventDefault();
 					// tslint:disable-next-line: no-unsafe-any
@@ -439,23 +425,23 @@ namespace EventListener {
 			});
 		}
 		private DelayChange(): void {
-			Keyframe.delay.dom.on('blur', (event: Event) => {
+			Pallet.Keyframe.delay.dom.on('blur', (event: Event) => {
 				if (Active !== undefined) {
 					event.preventDefault();
-					Active.delay = Number(Keyframe.delay.dom.el.textContent);
+					Active.delay = Number(Pallet.Keyframe.delay.dom.el.textContent);
 				}
 			});
 		}
 		private IterationChange(): void {
-			Keyframe.iteration.dom.on('blur', (event: Event) => {
+			Pallet.Keyframe.iteration.dom.on('blur', (event: Event) => {
 				if (Active !== undefined) {
 					event.preventDefault();
-					Active.iteration = Number(Keyframe.iteration.dom.el.textContent);
+					Active.iteration = Number(Pallet.Keyframe.iteration.dom.el.textContent);
 				}
 			});
 		}
 		private ShowTriggerClick(): void {
-			Trigger.button.on('click', (event: PointerEvent) => {
+			Pallet.Trigger.button.on('click', (event: PointerEvent) => {
 				if (Active !== undefined) {
 					event.preventDefault();
 					editor.ShowTriggerClick();
@@ -463,7 +449,7 @@ namespace EventListener {
 			});
 		}
 		private PlayClick(): void {
-			Keyframe.play.dom.on('click', (event: PointerEvent) => {
+			Pallet.Keyframe.play.dom.on('click', (event: PointerEvent) => {
 				if (Active !== undefined) {
 					event.preventDefault();
 					editor.PlayClick();
@@ -471,7 +457,7 @@ namespace EventListener {
 			});
 		}
 		private PushStateClick(): void {
-			Keyframe.pushState.dom.on('click', (event: PointerEvent) => {
+			Pallet.Keyframe.pushState.dom.on('click', (event: PointerEvent) => {
 				if (Active !== undefined) {
 					event.preventDefault();
 					editor.PushStateClick();
@@ -479,7 +465,7 @@ namespace EventListener {
 			});
 		}
 		private ShowLayerClick(): void {
-			Layer.button.on('click', (event: PointerEvent) => {
+			Pallet.Layer.button.on('click', (event: PointerEvent) => {
 				event.preventDefault();
 				editor.ShowLayerClick();
 			});
@@ -576,5 +562,3 @@ namespace EventListener {
 		}
 	}
 }
-// tslint:disable-next-line: typedef
-export const EventListen = EventListener.Main;

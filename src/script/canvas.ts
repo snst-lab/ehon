@@ -1,6 +1,6 @@
 import { config } from './setting';
 import { DOM, DOMX, DOMType, DOMExt } from './domController';
-import { ComponentType } from './component';
+import { Component } from './component';
 
 export namespace Canvas {
 	export const className: string = 'canvas';
@@ -10,16 +10,16 @@ export namespace Canvas {
 	export let aspectRatio: number = element.offsetHeight / element.offsetWidth;
 	export const paper: HTMLElement = document.querySelector('.paper');
 	export const paperSound: HTMLAudioElement = document.querySelector('.paper-sound');
-}
 
-export interface CanvasType {
-	className: string;
-	dom: DOMType;
-	element: HTMLElement;
-	z: number;
-	aspectRatio: number;
-	paper: HTMLElement;
-	paperSound: HTMLAudioElement;
+	export interface Type {
+		className: string;
+		dom: DOMType;
+		element: HTMLElement;
+		z: number;
+		aspectRatio: number;
+		paper: HTMLElement;
+		paperSound: HTMLAudioElement;
+	}
 }
 
 export namespace Frame {
@@ -55,7 +55,7 @@ export namespace Frame {
 		config.volumeOn = false;
 		volume.textContent = 'volume_off';
 		for (let i: number = 0; i < Scene._.length; i++) {
-			Scene._[i].Sounds.forEach((e: ComponentType) => (e.element as HTMLAudioElement).pause());
+			Scene._[i].Sounds.forEach((e: Component.Type) => (e.element as HTMLAudioElement).pause());
 		}
 	}
 }
@@ -65,10 +65,10 @@ export namespace Scene {
 		className: string;
 		// tslint:disable-next-line:no-any
 		dom: any;
-		Camera: ComponentType;
-		Images: ComponentType[];
-		Texts: ComponentType[];
-		Sounds: ComponentType[];
+		Camera: Component.Type;
+		Images: Component.Type[];
+		Texts: Component.Type[];
+		Sounds: Component.Type[];
 	}
 	export const className: string = 'scene';
 	export let now: number = 0;
@@ -86,32 +86,32 @@ export namespace Scene {
 		document.dispatchEvent(event);
 	}
 	export function change(num: number): void {
-		if (now < num && num < _.length - 2) {
-			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: ComponentType) => {
+		if (now < num && num < _.length) {
+			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: Component.Type) => {
 				c.running = false;
 			});
-			[_[num].Camera, ..._[num].Images, ..._[num].Texts].forEach((c: ComponentType) => {
+			[_[num].Camera, ..._[num].Images, ..._[num].Texts].forEach((c: Component.Type) => {
 				c.running = false;
 				c.transition(c.state[0]);
 			});
 			forwardEffect(now, num);
 			now = num;
 
-		} else if (now < num && num >= _.length - 2) {
-			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: ComponentType) => {
+		} else if (now < num && num >= _.length) {
+			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: Component.Type) => {
 				c.running = false;
 			});
-			[_[0].Camera, ..._[0].Images, ..._[0].Texts].forEach((c: ComponentType) => {
+			[_[0].Camera, ..._[0].Images, ..._[0].Texts].forEach((c: Component.Type) => {
 				c.transition(c.state[0]);
 			});
 			forwardEffect(now, 0);
 			now = 0;
 
 		} else if (num >= 0 && num < now) {
-			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: ComponentType) => {
+			[_[now].Camera, ..._[now].Images, ..._[now].Texts].forEach((c: Component.Type) => {
 				c.running = false;
 			});
-			[_[num].Camera, ..._[num].Images, ..._[num].Texts].forEach((c: ComponentType) => {
+			[_[num].Camera, ..._[num].Images, ..._[num].Texts].forEach((c: Component.Type) => {
 				c.transition(c.state[0]);
 			});
 			backEffect(now, num);
@@ -125,7 +125,7 @@ export namespace Scene {
 		Frame.show();
 		Frame.hide();
 	}
-	export function add(camera: ComponentType, images: ComponentType[], texts: ComponentType[], sounds: ComponentType[]): void {
+	export function add(camera: Component.Type, images: Component.Type[], texts: Component.Type[], sounds: Component.Type[]): void {
 		const num: number = _.length;
 		_.push({
 			'className': className + (num as unknown as string),
@@ -151,7 +151,7 @@ export namespace Scene {
 		_.splice(num, 1);
 		_.forEach((scene: Structure, i: number) => {
 			if (i >= num) {
-				[scene.Camera, ...scene.Images, ...scene.Texts].forEach((e: ComponentType) => (e.scene = e.scene - 1));
+				[scene.Camera, ...scene.Images, ...scene.Texts].forEach((e: Component.Type) => (e.scene = e.scene - 1));
 				((scene.dom as DOMType).el as HTMLElement).classList.remove('scene' + ((i + 1) as unknown as string));
 				((scene.dom as DOMType).el as HTMLElement).classList.add('scene' + (i as unknown as string));
 			}
@@ -201,7 +201,7 @@ export namespace Scene {
 					nextRight.remove();
 					nextLeft.remove();
 					next.style.display = 'block';
-					Canvas.paper.style.cssText = `filter:opacity(0%);z-index:${Canvas.z + 1}`;
+					Canvas.paper.style.cssText = `filter:opacity(0%);z-index:${Canvas.z - 1}`;
 
 					const event: Event = document.createEvent('HTMLEvents');
 					event.initEvent('sceneChange', true, false);
@@ -240,7 +240,7 @@ export namespace Scene {
 		(function update(frame: number): void {
 			switch (frame) {
 				case 10:
-					Canvas.paper.style.cssText = `filter:opacity(100%);z-index:${Canvas.z - 1}`;
+					Canvas.paper.style.cssText = `filter:opacity(100%);z-index:${Canvas.z + 1}`;
 					nowLeft.style.cssText =
 						'transition: 0.8s ease;backface-visibility:hidden;clip-path: polygon(0 0%, 50% 0, 50% 100%, 0 100%);transform-origin:0% 50%; transform: perspective(1000px) rotateY(180deg);border-left: solid 5px rgb(200,200,200);';
 					nextRight.style.cssText =

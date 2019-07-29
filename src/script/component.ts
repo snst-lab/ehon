@@ -328,14 +328,3 @@ export namespace Component {
 		// tslint:disable-next-line: restrict-plus-operands
 		new Date().getTime().toString(16) + ~~(Math.random() * 1000).toString(16);
 }
-export type ComponentType = Component.Type;
-export type ComponentState = Component.State;
-export type ComponentStructure = Component.Structure;
-// tslint:disable-next-line:typedef
-export const ComponentCamera = Component.Camera;
-// tslint:disable-next-line:typedef
-export const ComponentImage = Component.Image;
-// tslint:disable-next-line:typedef
-export const ComponentText = Component.Text;
-// tslint:disable-next-line:typedef
-export const ComponentSound = Component.Sound;

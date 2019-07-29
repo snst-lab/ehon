@@ -1,5 +1,5 @@
 import { config, param } from './setting';
-import { ComponentType as Component, ComponentState as State } from './component';
+import { Component } from './component';
 import { Scene } from './canvas';
 import { DOMType } from './domController';
 // import { Play as WasmPlay } from '../wasm/pkg/wasm.js';
@@ -9,7 +9,7 @@ export namespace Animation {
 	 *   Define numerical operations of State Type
 	 */
 	class Operation {
-		public static add(state1: State, state2: State): State {
+		public static add(state1: Component.State, state2: Component.State): Component.State {
 			return {
 				'src': state1.src,
 				'x': state1.x + state2.x,
@@ -27,7 +27,7 @@ export namespace Animation {
 				'option': state1.option
 			};
 		}
-		public static diff(oldState: State, newState: State): State {
+		public static diff(oldState: Component.State, newState: Component.State): Component.State {
 			const durInv: number = newState.duration > 0 ? 1 / newState.duration * param.animation.skipFrame : 0;
 
 			return {
@@ -52,7 +52,7 @@ export namespace Animation {
 	 *   Register animation to HTML elements
 	 */
 	export class Register {
-		constructor(target: Component) {
+		constructor(target: Component.Type) {
 			(Scene._[target.scene].dom as DOMType).el.addEventListener(
 				'touchend',
 				(event: PointerEvent) => {
@@ -84,13 +84,13 @@ export namespace Animation {
 	 */
 	export class Play {
 		// private parent: Play;
-		private diff: State[];
+		private diff: Component.State[];
 		private state_length: number;
 		private iteration: number = 0;
-		private target: Component;
+		private target: Component.Type;
 		private param: { [key: string]: { [key: string]: number } };
 
-		constructor(target: Component) {
+		constructor(target: Component.Type) {
 			this.target = target;
 			this.param = param;
 			// this.parent = this; WasmPlay.init(this);
@@ -101,7 +101,7 @@ export namespace Animation {
 			this.state_length = this.target.state.length;
 			if (this.state_length < 2) return;
 			this.target.running = true;
-			this.target.transition(this.target.state[0]);
+			this.target.element.style.willChange = 'left, top, width, height, transform, filter';
 			this.calcDiff();
 			this.delayStart(0);
 		}
@@ -124,7 +124,7 @@ export namespace Animation {
 		}
 		private iterate(): void {
 			if (this.target.iteration === 0) {
-				this.target.transition(this.target.state[0]);
+				// this.target.transition(this.target.state[0]);
 				this.shift(1);
 			} else {
 				if (this.iteration === 0) {
@@ -137,8 +137,9 @@ export namespace Animation {
 					this.shift(1);
 
 				} else {
-					this.iteration = 0;
+					this.target.element.style.willChange = 'auto';
 					this.target.running = false;
+					this.iteration = 0;
 				}
 			}
 		}
